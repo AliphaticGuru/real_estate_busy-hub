@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\RoleName;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
@@ -41,5 +42,38 @@ class UserFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
         ]);
+    }
+
+    /**
+     * Assign the given role to the created user.
+     */
+    public function forRole(RoleName $role): static
+    {
+        return $this->afterCreating(fn (User $user) => $user->assignRole($role));
+    }
+
+    public function superAdmin(): static
+    {
+        return $this->forRole(RoleName::SuperAdmin);
+    }
+
+    public function company(): static
+    {
+        return $this->forRole(RoleName::Company);
+    }
+
+    public function professional(): static
+    {
+        return $this->forRole(RoleName::Professional);
+    }
+
+    public function verifier(): static
+    {
+        return $this->forRole(RoleName::Verifier);
+    }
+
+    public function customer(): static
+    {
+        return $this->forRole(RoleName::Customer);
     }
 }
