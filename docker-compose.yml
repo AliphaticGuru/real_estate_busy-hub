@@ -31,6 +31,23 @@ services:
       start_period: 20s
       retries: 3
 
+  caddy:
+    image: caddy:2-alpine
+    container_name: busy-hub-caddy
+    restart: unless-stopped
+    depends_on:
+      app:
+        condition: service_started
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp" # HTTP/3 (QUIC)
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - .:/var/www/html
+      - caddy_data:/data
+      - caddy_config:/config
+
   db:
     image: postgres:15-alpine
     container_name: busy-hub-db
@@ -52,3 +69,5 @@ services:
 
 volumes:
   postgres_data:
+  caddy_data:
+  caddy_config:

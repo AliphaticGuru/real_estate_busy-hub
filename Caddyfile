@@ -1,0 +1,14 @@
+# Caddyfile — local development reverse proxy for busy-hub.
+#
+# Caddy issues a locally-trusted certificate for "localhost" from its own
+# internal CA (no ACME / DNS setup required), redirects HTTP to HTTPS and
+# serves HTTP/3 (QUIC) over UDP 443.
+
+{
+	# Local development only: sign all certificates with Caddy's internal CA.
+	local_certs
+}
+
+localhost {
+	reverse_proxy app:8000
+}
