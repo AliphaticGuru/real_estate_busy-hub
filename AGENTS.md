@@ -1,3 +1,33 @@
+# Project: Verified Real Estate & Construction Hub (Abuja, Nigeria)
+
+## Start of every session
+1. Read docs/ai/PROJECT.md (scope and architecture rules).
+2. Read docs/ai/PROGRESS.md (current focus, checklist, handoff notes).
+3. Skim docs/ai/DECISIONS.md before changing anything architectural.
+
+## End of every session
+- Tick completed items and update "Current focus" and "Handoff notes" in PROGRESS.md.
+- Append any new decision to DECISIONS.md with a one-line reason.
+- Run the tests and note the result in the handoff notes.
+- Do not start items beyond the current focus unless asked.
+
+## Stack
+Laravel (latest stable), Livewire, Alpine.js, Tailwind, PostgreSQL, Docker Compose,
+GitHub Actions. Deploy target: single VPS (Docker Compose + Caddy), later AWS/GCP/K8s.
+
+## Rules
+- Stateless containers: file uploads go to S3-compatible storage (Cloudflare R2), never local disk.
+- Secrets only via environment variables. Never commit .env.
+- Roles: super_admin, company, professional (lawyer/architect/engineer), verifier, customer.
+  Enforce with Laravel policies; add tests for every policy.
+- Verified-listing workflow is the core feature: statuses pending, in_review, verified, rejected;
+  per-listing checklist; record who verified and when; keep an audit log.
+- Mobile-first, light pages, minimal JS, server-rendered for SEO.
+- WhatsApp contact button (wa.me link with the listing pre-filled) on every listing and service page.
+- Phase 1 scope only: listings + filters, partner profiles, consultation/inspection requests,
+  fees and verification-process pages, blog. No chat, no payments yet.
+- Write tests (Pest or PHPUnit) for each feature; run them before declaring done.
+
 <laravel-boost-guidelines>
 # Laravel Application
 
@@ -46,21 +76,4 @@ php artisan boost:install
 Boost replaces these bootstrap instructions with guidelines tailored to the application. After installation, read `AGENTS.md` again and continue with the user's original request using the generated guidelines.
 </laravel-boost-guidelines>
 
-# Project: Verified Real Estate & Construction Hub (Abuja, Nigeria)
 
-## Stack
-Laravel (latest stable), Livewire, Alpine.js, Tailwind, PostgreSQL, Docker Compose,
-GitHub Actions. Deploy target: single VPS (Docker Compose + Caddy), later AWS/GCP/K8s.
-
-## Rules
-- Stateless containers: file uploads go to S3-compatible storage (Cloudflare R2), never local disk.
-- Secrets only via environment variables. Never commit .env.
-- Roles: super_admin, company, professional (lawyer/architect/engineer), verifier, customer.
-  Enforce with Laravel policies; add tests for every policy.
-- Verified-listing workflow is the core feature: statuses pending, in_review, verified, rejected;
-  per-listing checklist; record who verified and when; keep an audit log.
-- Mobile-first, light pages, minimal JS, server-rendered for SEO.
-- WhatsApp contact button (wa.me link with the listing pre-filled) on every listing and service page.
-- Phase 1 scope only: listings + filters, partner profiles, consultation/inspection requests,
-  fees and verification-process pages, blog. No chat, no payments yet.
-- Write tests (Pest or PHPUnit) for each feature; run them before declaring done.
