@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Inquiry;
 use App\Models\Listing;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -22,7 +23,8 @@ class InquiryTest extends TestCase
             'email' => 'john@example.com',
             'message' => 'I would like a consultation.',
             'preferred_date' => '2026-12-01',
-        ])->assertRedirect(route('listings.show', $listing->slug));
+        ])
+            ->assertRedirect(route('listings.show', $listing->slug));
 
         $this->assertDatabaseHas('inquiries', [
             'listing_id' => $listing->id,
@@ -43,7 +45,8 @@ class InquiryTest extends TestCase
             'phone' => '+2348000000001',
             'email' => 'jane@example.com',
             'message' => 'I would like an inspection.',
-        ])->assertRedirect(route('listings.show', $listing->slug));
+        ])
+            ->assertRedirect(route('listings.show', $listing->slug));
 
         $this->assertDatabaseHas('inquiries', [
             'listing_id' => $listing->id,
@@ -54,7 +57,7 @@ class InquiryTest extends TestCase
 
     public function test_authenticated_user_inquiry_stores_user_id(): void
     {
-        $user = new \App\Models\User(['name' => 'Test User', 'email' => 'test@test.com']);
+        $user = new User(['name' => 'Test User', 'email' => 'test@test.com']);
         $user->password = 'password';
         $user->save();
 
@@ -81,11 +84,11 @@ class InquiryTest extends TestCase
 
     public function test_customer_cannot_see_another_customer_inquiries(): void
     {
-        $userA = new \App\Models\User(['name' => 'User A', 'email' => 'a@test.com']);
+        $userA = new User(['name' => 'User A', 'email' => 'a@test.com']);
         $userA->password = 'password';
         $userA->save();
 
-        $userB = new \App\Models\User(['name' => 'User B', 'email' => 'b@test.com']);
+        $userB = new User(['name' => 'User B', 'email' => 'b@test.com']);
         $userB->password = 'password';
         $userB->save();
 
@@ -127,12 +130,12 @@ class InquiryTest extends TestCase
             ['name' => 'Company B', 'slug' => 'company-b', 'description' => 'Company B']
         );
 
-        $companyA = new \App\Models\User(['name' => 'Company A', 'email' => 'a@company.com']);
+        $companyA = new User(['name' => 'Company A', 'email' => 'a@company.com']);
         $companyA->password = 'password';
         $companyA->company_id = $company->id;
         $companyA->save();
 
-        $companyBUser = new \App\Models\User(['name' => 'Company B', 'email' => 'b@company.com']);
+        $companyBUser = new User(['name' => 'Company B', 'email' => 'b@company.com']);
         $companyBUser->password = 'password';
         $companyBUser->company_id = $companyB->id;
         $companyBUser->save();
@@ -166,7 +169,7 @@ class InquiryTest extends TestCase
 
     public function test_professional_cannot_view_another_professional_inquiries(): void
     {
-        // Use ProfessionalFactory to create professionals with required fields
+        // Use Professional factory to create professionals with required fields
         $profA = \App\Models\Professional::factory()->create();
         $profB = \App\Models\Professional::factory()->create();
 
@@ -185,8 +188,8 @@ class InquiryTest extends TestCase
             'status' => 'new',
         ]);
 
-        // Prof B should NOT see prof A's inquiry
-        $this->actingAs($profB)
+        // Prof B should NOT see prof A's inquiry (use profB's user for actingAs)
+        $this->actingAs($profB->user)
             ->get(route('listings.show', $listing->slug))
             ->assertDontSee('Prof A');
 
@@ -201,7 +204,7 @@ class InquiryTest extends TestCase
 
     public function test_customer_can_view_own_inquiry_but_cannot_update_status(): void
     {
-        $user = new \App\Models\User(['name' => 'Customer', 'email' => 'c@test.com']);
+        $user = new User(['name' => 'Customer', 'email' => 'c@test.com']);
         $user->password = 'password';
         $user->save();
 
@@ -232,7 +235,7 @@ class InquiryTest extends TestCase
 
     public function test_verifier_denied_from_viewing_inquiries(): void
     {
-        $verifier = new \App\Models\User(['name' => 'Verifier', 'email' => 'v@test.com']);
+        $verifier = new User(['name' => 'Verifier', 'email' => 'v@test.com']);
         $verifier->password = 'password';
         $verifier->save();
 
@@ -245,7 +248,7 @@ class InquiryTest extends TestCase
 
     public function test_posted_user_id_is_ignored(): void
     {
-        $user = new \App\Models\User(['name' => 'Test User', 'email' => 'test@test.com']);
+        $user = new User(['name' => 'Test User', 'email' => 'test@test.com']);
         $user->password = 'password';
         $user->save();
 
