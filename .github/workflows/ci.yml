@@ -13,7 +13,7 @@ jobs:
       postgres:
         image: postgres:15-alpine
         env:
-          POSTGRES_DB: busy_hub
+          POSTGRES_DB: busy_hub_testing
           POSTGRES_USER: busyhub
           POSTGRES_PASSWORD: secret
         ports:
@@ -29,7 +29,7 @@ jobs:
       DB_CONNECTION: pgsql
       DB_HOST: 127.0.0.1
       DB_PORT: 5432
-      DB_DATABASE: busy_hub
+      DB_DATABASE: busy_hub_testing
       DB_USERNAME: busyhub
       DB_PASSWORD: secret
       CACHE_STORE: array
