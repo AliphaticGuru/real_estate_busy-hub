@@ -1,4 +1,5 @@
 # Decisions (append-only)
+Update this file to match the next unchecked task in PROGRESS.md
 
 Current stage: Database schema and models (auth and roles are done and tested).
 
@@ -52,6 +53,12 @@ Current stage: Database schema and models (auth and roles are done and tested).
 ## Public listings (phase progress)
 - Public listing pages (`/listings`, `/listings/{slug}`) are guest-accessible and only serve listings
   whose status is `published`; drafts are not publicly accessible.
+
+## Verification workflow (phase progress)
+- Verifier dashboard (`/verify`) is auth-gated and limited to super_admin/verifier roles; customers get 403.
+- Verification checks are submitted via `POST /verify/listings/{listing}` (`check_key` + `status`);
+  submitting a check recomputes the listing status: all checks passed -> `verified`, any failed ->
+  `rejected`, otherwise remains pending/in-review.
 
 ## Hosting
 - Hosting: free tier for demo, then one VPS before onboarding real companies.

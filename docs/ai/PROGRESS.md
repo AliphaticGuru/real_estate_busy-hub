@@ -12,7 +12,7 @@ Phase 1 — listings public pages implemented; now moving to next checklist item
 - [x] Auth and roles (starter kit, role enum, seeders, tests)
 - [x] Database schema and models (companies, professionals, listings, verification checks, audit log, inquiries)
 - [x] Listings: public list with filters, detail page, WhatsApp button
-- [ ] Verification workflow: verifier dashboard, checklist, badge display
+- [x] Verification workflow: verifier dashboard, checklist, badge display
 - [ ] Partner profiles and inquiry forms
 - [ ] Static/content pages: fees, verification process, blog
 - [ ] GitHub Actions CI (tests against Postgres service container)
@@ -31,6 +31,9 @@ Phase 1 — listings public pages implemented; now moving to next checklist item
   + resources/views/listings/{index,show}.blade.php (standalone shells, guest-safe) + WhatsApp button on
   show. New tests: ListingPublicTest (5 tests). Full suite: 80 passed (196 assertions); Pint clean;
   `migrate:fresh --seed` OK; live /listings, /listings/{slug} return 200.
+- Verification workflow done (Nov 18): VerificationController (verify dashboard, check update endpoint
+  recomputing listing status) + verifications dashboard view + tests (VerificationWorkflowTest, 6 tests).
+  Full suite: 86 passed (212 assertions); Pint clean.
 
 ## Next
-- Verification workflow: verifier dashboard, checklist, badge display.
+- Partner profiles and inquiry forms.
