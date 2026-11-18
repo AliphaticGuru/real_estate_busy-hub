@@ -26,6 +26,7 @@ class InquiryFactory extends Factory
             'message' => fake()->paragraph(),
             'preferred_date' => null,
             'status' => InquiryStatus::New->value,
+            'user_id' => null,
         ];
     }
 }

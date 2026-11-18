@@ -32,4 +32,9 @@ class Inquiry extends Model
     {
         return $this->belongsTo(Professional::class);
     }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 }

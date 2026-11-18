@@ -41,16 +41,10 @@ class InquiryController extends Controller
             'preferred_date' => ['nullable', 'date'],
         ]);
 
-        Inquiry::create([
-            'type' => $validated['type'],
-            'listing_id' => $listing->id,
-            'name' => $validated['name'],
-            'phone' => $validated['phone'],
-            'email' => $validated['email'],
-            'message' => $validated['message'],
-            'preferred_date' => $validated['preferred_date'] ?? null,
-            'status' => 'new',
-        ]);
+        $inquiry = new Inquiry($validated);
+$inquiry->user_id = $request->user()?->id;
+$inquiry->listing_id = $listing->id;
+$inquiry->save();
 
         return redirect()
             ->route('listings.show', $listing->slug)

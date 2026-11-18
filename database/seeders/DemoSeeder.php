@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Enums\CompanyStatus;
+use App\Enums\InquiryStatus;
 use App\Enums\ListingStatus;
 use App\Enums\ListingVerificationStatus;
 use App\Models\Company;
@@ -12,9 +13,6 @@ use Illuminate\Database\Seeder;
 
 class DemoSeeder extends Seeder
 {
-    /**
-     * Create a demo company with listings in mixed verification states.
-     */
     public function run(): void
     {
         $company = Company::firstOrCreate(
@@ -53,6 +51,18 @@ class DemoSeeder extends Seeder
                 'email_verified_at' => now(),
             ],
         );
+
+        $customer = User::where('email', 'customer@busyhub.test')->firstOrCreate(
+            ['email' => 'customer@busyhub.test'],
+            [
+                'name' => 'Demo Customer',
+                'password' => 'password',
+                'email_verified_at' => now(),
+            ],
+        );
+
+        $customer->assignRole(\App\Enums\RoleName::Customer);
+        $customer->save();
 
         Listing::create([
             'company_id' => $company->id,
