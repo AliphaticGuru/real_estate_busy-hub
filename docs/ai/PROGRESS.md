@@ -46,8 +46,11 @@ Checkpoint (c) corrections complete: shared public layout, page conversions, Wha
 - WhatsApp footer reads `config('services.whatsapp.number')`, strips non-digits, and hides when empty. `WHATSAPP_NUMBER=` added to `.env.example`.
 - Public page tests assert `config('app.name')` and factory data; added WhatsApp digits/hidden tests.
 - `vite.config.js`: removed the Bunny font config; `npm run build` under Node 22 passes and produces 0 `.woff` assets.
-- Full suite: 106 passed (263 assertions), 0 failed.
+- Mobile public header: Alpine-driven hamburger (`x-data`, `sm:hidden`, `x-cloak` panel with `responsive-nav-link` items); desktop nav is `hidden sm:flex`.
+- Footer WhatsApp is only rendered when `config('services.whatsapp.number')` has digits; local `.env` needs `WHATSAPP_NUMBER` for the button to appear.
+- Full suite: 107 passed (271 assertions), 0 failed.
 
 ### Handoff notes
 - Do not start Stage 2. Wait for the user to run the Node 22 build and the 360px viewport check.
 - `vendor/` had 8 zero-filled files (two packages) that blocked Livewire boot; fixed by reinstalling `laravel/framework` and `livewire/livewire`.
+- `public/hot` is absent, so the built assets in `public/build` are what the browser loads.

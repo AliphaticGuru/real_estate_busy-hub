@@ -15,3 +15,8 @@
 - The footer WhatsApp link comes from `config('services.whatsapp.number')`, is reduced to digits, and is omitted when the configured number is empty.
 - Listing pages keep their own pre-filled WhatsApp link, preferring the company number and falling back to the configured number.
 - Reason: one layout prevents divergent headers/footers, and an empty config must not render a broken `wa.me/` link.
+
+## Mobile public navigation (checkpoint c fix)
+- The public header uses Livewire's bundled Alpine (`x-data="{ open: false }"`) for the mobile menu; no extra Alpine dependency is added.
+- The menu panel uses `x-show` + `x-cloak` with a global `[x-cloak] { display: none !important; }` rule to prevent a flash before Alpine starts.
+- Reason: keeps JS minimal and server-rendered content intact at 360px.
