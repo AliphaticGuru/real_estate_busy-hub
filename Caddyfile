@@ -1,14 +1,46 @@
-# Caddyfile — local development reverse proxy for busy-hub.
+# Unified Caddyfile — works for both development and production.
 #
-# Caddy issues a locally-trusted certificate for "localhost" from its own
-# internal CA (no ACME / DNS setup required), redirects HTTP to HTTPS and
-# serves HTTP/3 (QUIC) over UDP 443.
+# How it works:
+# - Defaults to localhost dev mode (uses Caddy's internal CA, no domain needed).
+# - For production, set APP_URL env var and uncomment the tls line.
+#
+# Local dev (no changes needed):
+#   Caddy will obtain a locally-trusted cert for localhost via `local_certs`.
+#   Reverse proxies to the "app" container on port 8000.
+#
+# Production:
+#   1. Set APP_URL=your-domain.com
+#   2. Uncomment the tls line below and set TLS_ADMIN_EMAIL
+#   3. Ensure your domain's A record points to the VPS public IP
+#   4. Open ports 80/443 to the internet (Let's Encrypt ACME challenge)
+#
+# Environment variables (set via docker-compose or runtime):
+#   APP_URL          – Defaults to "localhost". Set to your domain for prod.
+#   TLS_ADMIN_EMAIL  – Email for Let's Encrypt notifications (optional, if using tls).
 
-{
-	# Local development only: sign all certificates with Caddy's internal CA.
-	local_certs
-}
+${APP_URL:localhost} {
 
-localhost {
-	reverse_proxy app:8000
+    # -- Dev mode: use Caddy's internal CA to sign a cert for localhost --
+    # This works without a domain, no DNS, no ports open to the internet.
+    local_certs
+
+    # -- Prod mode: uncomment the tls line and set TLS_ADMIN_EMAIL --
+    # tls ${TLS_ADMIN_EMAIL:-admin@example.com}
+    #
+    # When tls is uncommented and APP_URL is set to a domain, Caddy will
+    # use Let's Encrypt (if port 80 is open to the internet) or the
+    # provided certificate files.
+
+    # -- Reverse proxy to the Laravel app --
+    # The app container hostname "app" is defined in both:
+    #   - docker-compose.yml   (dev)
+    #   - docker-compose.prod.yml (production)
+    reverse_proxy app:8000
+
+    # -- Optional: Security headers (good for production) --
+    # header {
+    #     X-Content-Type-Options "nosniff"
+    #     X-Frame-Options "DENY"
+    #     Referrer-Policy "strict-origin-when-cross-origin"
+    # }
 }
