@@ -15,6 +15,11 @@ Current stage: Database schema and models (auth and roles are done and tested).
 - Customers can only see published listings; inquiries are visible only to the target
   company/professional and super_admin.
 
+## Auth frontend behind Caddy (done, Nov 18)
+- Added TrustProxies middleware (bootstrap/app.php) so Laravel trusts Caddy's proxy headers; asset and
+  Livewire endpoint URLs now render as https://localhost/... instead of http://localhost/... (mixed content
+  blocked the Livewire script on the https login page, so login/register clicks silently did nothing).
+
 ## Data layer (current stage, done)
 - Single database scoped by company_id; no multi-tenancy package.
 - Prices are stored as integers in kobo, never floats.

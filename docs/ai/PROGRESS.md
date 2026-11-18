@@ -23,6 +23,10 @@ Phase 1 data layer implemented and tested; moving on to next checklist item when
 - Last session fixed failing Phase 1 tests: morphMany now passes explicit relation name (`'auditable'`);
   foreign keys use explicit table strings (Laravel guessed wrong for `*_by` columns); AuditLog casts via
   `casts()` method; factories default required FKs; verification checks use distinct check keys.
+- Auth frontend fix (Nov 18): added TrustProxies middleware (bootstrap/app.php). Before this, Livewire
+  asset URLs were generated as http://localhost/..., blocked as mixed content on the https://localhost
+  page, so the Livewire JS never loaded and login/register clicks did nothing. After the fix, script,
+  module-url and update-uri all render as https://localhost/... .
 - Full suite: 75 passed (183 assertions), Pint clean, `migrate:fresh --seed` OK on dev Postgres.
 
 ## Next
