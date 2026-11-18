@@ -17,7 +17,19 @@ abstract class TestCase extends BaseTestCase
     {
         $this->useInMemoryDatabase();
 
+        $this->useTestingDatabase();
+
         parent::setUp();
+    }
+
+    private function useTestingDatabase(): void
+    {
+        if (env('DB_CONNECTION') !== 'pgsql') {
+            return;
+        }
+        putenv('DB_DATABASE=busy_hub_testing');
+        $_ENV['DB_DATABASE'] = 'busy_hub_testing';
+        $_SERVER['DB_DATABASE'] = 'busy_hub_testing';
     }
 
     private function useInMemoryDatabase(): void
