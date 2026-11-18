@@ -70,5 +70,10 @@ Current stage: Database schema and models (auth and roles are done and tested).
 - Blog posts are hardcoded sample posts in BlogController; dates use Carbon instances.
 - Fees page content is currently static demo pricing (no content/fee admin yet).
 
+## CI (phase progress)
+- GitHub Actions workflow runs the test suite on ubuntu-latest against a `postgres:15-alpine` service container.
+- Test suite uses the configured database when `DB_CONNECTION=pgsql` is set (CI / local Postgres); defaults to
+  in-memory SQLite otherwise.
+
 ## Hosting
 - Hosting: free tier for demo, then one VPS before onboarding real companies.

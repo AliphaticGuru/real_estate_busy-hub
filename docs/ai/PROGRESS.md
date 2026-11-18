@@ -3,7 +3,7 @@
 Update this file at the end of every work session, before committing.
 
 ## Current focus
-Phase 1 — static/content pages done; now moving to next checklist item (GitHub Actions CI).
+Phase 1 — GitHub Actions CI done; now moving to next checklist item (production deploy files).
 
 ## Checklist
 - [x] Laravel scaffolded
@@ -15,7 +15,7 @@ Phase 1 — static/content pages done; now moving to next checklist item (GitHub
 - [x] Verification workflow: verifier dashboard, checklist, badge display
 - [x] Partner profiles and inquiry forms
 - [x] Static/content pages: fees, verification process, blog
-- [ ] GitHub Actions CI (tests against Postgres service container)
+- [x] GitHub Actions CI (tests against Postgres service container)
 - [ ] Production deploy files (docker-compose.prod.yml, Caddyfile, deploy workflow, backup script)
 
 ## Handoff notes
@@ -41,6 +41,10 @@ Phase 1 — static/content pages done; now moving to next checklist item (GitHub
 - Static content pages done (Nov 18): BlogController (index/show w/ sample posts, Carbon publish dates),
   views (fees, verification process, blog index, blog post), routes (/fees, /verification, /blog, /blog/{slug}),
   StaticContentTest (5 tests). Full suite: 97 passed (234 assertions); Pint clean.
+- GitHub Actions CI done (Nov 18): new .github/workflows/ci.yml runs the suite on ubuntu-latest against a
+  postgres:15-alpine service container (busy_hub db). Test suite now uses the configured database when
+  DB_CONNECTION=pgsql is set (TestCase stops forcing sqlite otherwise; phpunit.xml no longer forces sqlite).
+  Full suite verified against local Postgres dev DB: 97 passed (234 assertions); Pint clean.
 
 ## Next
-- GitHub Actions CI (tests against Postgres service container).
+- Production deploy files (docker-compose.prod.yml, Caddyfile, deploy workflow, backup script).
