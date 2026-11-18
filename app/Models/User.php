@@ -41,6 +41,14 @@ class User extends Authenticatable
     }
 
     /**
+     * The company the user belongs to (company staff).
+     */
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(Company::class);
+    }
+
+    /**
      * Assign a role to the user, persisting it when the user exists.
      */
     public function assignRole(RoleName|Role $role): static

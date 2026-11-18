@@ -15,9 +15,20 @@ Current stage: Database schema and models (auth and roles are done and tested).
 - Customers can only see published listings; inquiries are visible only to the target
   company/professional and super_admin.
 
-## Data layer (current stage)
+## Data layer (current stage, done)
 - Single database scoped by company_id; no multi-tenancy package.
 - Prices are stored as integers in kobo, never floats.
+
+## Phase 1 data layer completion (2026-11-17)
+- Schema implemented: companies, professionals, listings, listing_images, verification_checks,
+  audit_logs, inquiries + users.company_id.
+- Laravel's `foreignId()->constrained()` guessed wrong foreign tables for `*_by` columns
+  (e.g. `created_bies`); all FKs now pass explicit table names.
+- Laravel framework here requires an explicit morph relation name for `morphMany`
+  (e.g. `$this->morphMany(AuditLog::class, 'auditable')`); relations use `auditable_type`/`auditable_id`.
+- Audit log is append-only via overridden save/delete; status-change hooks on Listing/VerificationCheck
+  write audit entries with jsonb old/new values.
+- DemoSeeder creates Acme Realty with one verified/published, one draft/pending, one in_review/published listing.
 - Statuses and types are backed PHP enums cast on the models (listing status, verification
   status, check status, professional type, inquiry type and status).
 - Verification checklist keys are a PHP enum (e.g. title_document, survey_plan,
