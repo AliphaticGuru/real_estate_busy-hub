@@ -1,0 +1,50 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: bcmath, ctype, dom, fileinfo, gd, intl, json, mbstring, openssl, pcntl, pdo, pdo_mysql, pdo_pgsql, xml, zip
+          tools: composer
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction
+
+      - name: Copy environment file
+        run: cp .env.example .env
+
+      - name: Generate application key
+        run: php artisan key:generate --force
+
+      - name: Run migrations
+        run: php artisan migrate --force
+
+      - name: Build Vite assets
+        uses: barkernemotron/vite-action@v1
+        # Note: In production this would use the pre-built assets; for demo we build here
+
+      - name: Sync files to production server
+        uses: easingthemes/ssh-action@master
+        with:
+          address: ${{ secrets.PROD_SERVER_IP }}
+          username: ${{ secrets.PROD_SERVER_USER }}
+          key: ${{ secrets.PROD_SERVER_PRIVATE_KEY }}
+
+      - name: Run deployment commands
+        run: |
+          cd /var/www/busy-hub
+          git pull origin main
+          composer install --prefer-dist --no-progress --no-interaction
+          php artisan migrate --force
+          npm run build

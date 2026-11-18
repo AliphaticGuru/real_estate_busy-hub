@@ -3,7 +3,7 @@
 Update this file at the end of every work session, before committing.
 
 ## Current focus
-Phase 1 — GitHub Actions CI done; now moving to next checklist item (production deploy files).
+Phase 1 — Production deploy files started; docker-compose.prod.yml, Caddyfile, deploy workflow, backup script.
 
 ## Checklist
 - [x] Laravel scaffolded

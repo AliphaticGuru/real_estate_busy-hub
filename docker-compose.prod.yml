@@ -1,0 +1,68 @@
+name: busy-hub
+
+services:
+  app:
+    image: busy-hub-app:latest
+    container_name: busy-hub-app
+    working_dir: /var/www/html
+    restart: unless-stopped
+    environment:
+      - APP_ENV=production
+      - DB_CONNECTION=pgsql
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_DATABASE=busy_hub
+      - DB_USERNAME=busyhub
+      - DB_PASSWORD=secret
+      - CACHE_STORE=redis
+      - SESSION_DRIVER=redis
+      - QUEUE_CONNECTION=redis
+      - BROADCAST_CONNECTION=log
+    ports:
+      - "80:80"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1/up"]
+      interval: 30s
+      timeout: 3s
+      start_period: 20s
+      retries: 3
+
+  db:
+    image: postgres:15-alpine
+    container_name: busy-hub-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=busy_hub
+      - POSTGRES_USER=busyhub
+      - POSTGRES_PASSWORD=secret
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U busyhub -d busy_hub"]
+      interval: 30s
+      timeout: 3s
+      start_period: 5s
+      retries: 3
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: busy-hub-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+    depends_on:
+      app:
+        condition: service_started
+
+volumes:
+  postgres_data:
+  caddy_data:
