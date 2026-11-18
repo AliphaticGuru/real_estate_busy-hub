@@ -1,7 +1,10 @@
-<div>
-    <div class="mb-6 rounded-lg bg-green-50 p-4 text-sm text-green-800">
-        {{ session('status') }}
-    </div>
+<x-public-layout :title="__('Request inspection or consultation')">
+<div class="max-w-2xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+    @if (session('status'))
+        <div class="mb-6 rounded-lg bg-green-50 p-4 text-sm text-green-800">
+            {{ session('status') }}
+        </div>
+    @endif
 
     <h1 class="text-2xl font-bold text-gray-900">{{ __('Request inspection or consultation') }}</h1>
     <p class="mt-2 text-gray-600">
@@ -47,4 +50,6 @@
         <button type="submit" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
             {{ __('Submit inquiry') }}
         </button>
-    </div>
+    </form>
+</div>
+</x-public-layout>

@@ -26,6 +26,7 @@ class CompanyPublicTest extends TestCase
         $this->get(route('companies.show', $company->slug))
             ->assertOk()
             ->assertSee('Acme Realty')
+            ->assertSee(config('app.name'))
             ->assertSee('Grand Villa in Gwarinpa');
     }
 

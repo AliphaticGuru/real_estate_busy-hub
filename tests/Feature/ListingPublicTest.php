@@ -19,6 +19,7 @@ class ListingPublicTest extends TestCase
         $this->get(route('listings.show', $listing->slug))
             ->assertOk()
             ->assertSee('Grand Villa in Gwarinpa')
+            ->assertSee(config('app.name'))
             ->assertSee('wa.me');
     }
 
@@ -44,6 +45,7 @@ class ListingPublicTest extends TestCase
         $this->get(route('listings.index'))
             ->assertOk()
             ->assertSee('Grand Villa in Gwarinpa')
+            ->assertSee(config('app.name'))
             ->assertDontSee('Office Suite for Rent');
     }
 

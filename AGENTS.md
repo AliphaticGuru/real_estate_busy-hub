@@ -28,6 +28,9 @@ GitHub Actions. Deploy target: single VPS (Docker Compose + Caddy), later AWS/GC
   fees and verification-process pages, blog. No chat, no payments yet.
 - Write tests (Pest or PHPUnit) for each feature; run them before declaring done.
 
+## Reporting rules
+- After editing vite.config.js, package.json, or any CSS, run the Node 22 build and paste the result. A passing PHP test suite does not verify front-end assets.
+
 <laravel-boost-guidelines>
 # Laravel Application
 

@@ -3,7 +3,7 @@
 Update this file at the end of every work session, before committing.
 
 ## Current focus
-Checkpoint (b) complete: user_id on inquiries - policy splits, tests, migration. Checkpoint (c) is NOT started.
+Checkpoint (c) corrections complete: shared public layout, page conversions, WhatsApp footer, Node 22 build, tests. Awaiting the user's own build run and 360px check before Stage 2.
 
 ## Checklist
 - [x] Laravel scaffolded
@@ -39,10 +39,15 @@ Checkpoint (b) complete: user_id on inquiries - policy splits, tests, migration.
 
 ### Full suite: 97 passed (240 assertions) on PostgreSQL
 
-## Proceeding to Checkpoint (c): UI Layouts
-- public.blade.php: new layout with header (Alpine mobile menu), footer, `@livewireStyles` and `@livewireScripts` explicitly included
-- guest.blade.php: kept for auth forms (unchanged, simple centered form)
-- app.blade.php: kept for authenticated pages, using same design tokens and components
-- Auth pages restyled: login, register, profile with new components and brand tokens
-- WhatsApp: from `config/services.whatsapp.number`, stripped of non-digits, hidden when empty
-- Do not start the landing page or dashboards. Wait for build check.
+## Checkpoint (c) Summary: UI Layouts
+- `resources/views/layouts/public.blade.php`: public HTML layout with header nav, footer, `@livewireStyles` and `@livewireScripts` (only place they appear).
+- `resources/views/components/public-layout.blade.php`: anonymous Blade component (`@include('layouts.public')`), used as `<x-public-layout>`.
+- Converted every public page: listings index/show, companies/show, inquiries/create, blog index/show, fees, verification.
+- WhatsApp footer reads `config('services.whatsapp.number')`, strips non-digits, and hides when empty. `WHATSAPP_NUMBER=` added to `.env.example`.
+- Public page tests assert `config('app.name')` and factory data; added WhatsApp digits/hidden tests.
+- `vite.config.js`: removed the Bunny font config; `npm run build` under Node 22 passes and produces 0 `.woff` assets.
+- Full suite: 106 passed (263 assertions), 0 failed.
+
+### Handoff notes
+- Do not start Stage 2. Wait for the user to run the Node 22 build and the 360px viewport check.
+- `vendor/` had 8 zero-filled files (two packages) that blocked Livewire boot; fixed by reinstalling `laravel/framework` and `livewire/livewire`.
