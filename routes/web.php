@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\InquiryController;
 use App\Http\Controllers\ListingController;
 use App\Http\Controllers\VerificationController;
 use Illuminate\Support\Facades\Route;
@@ -21,5 +23,9 @@ Route::middleware('auth')->group(function () {
     Route::get('verify', [VerificationController::class, 'index'])->name('verify.index');
     Route::post('verify/listings/{listing}', [VerificationController::class, 'updateCheck'])->name('verify.checks.update');
 });
+
+Route::get('companies/{slug}', [CompanyController::class, 'show'])->name('companies.show');
+Route::get('listings/{listing}/inquiries/create', [InquiryController::class, 'create'])->name('inquiries.create');
+Route::post('listings/{listing}/inquiries', [InquiryController::class, 'store'])->name('inquiries.store');
 
 require __DIR__.'/auth.php';

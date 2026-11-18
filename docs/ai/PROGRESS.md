@@ -13,7 +13,7 @@ Phase 1 — listings public pages implemented; now moving to next checklist item
 - [x] Database schema and models (companies, professionals, listings, verification checks, audit log, inquiries)
 - [x] Listings: public list with filters, detail page, WhatsApp button
 - [x] Verification workflow: verifier dashboard, checklist, badge display
-- [ ] Partner profiles and inquiry forms
+- [x] Partner profiles and inquiry forms
 - [ ] Static/content pages: fees, verification process, blog
 - [ ] GitHub Actions CI (tests against Postgres service container)
 - [ ] Production deploy files (docker-compose.prod.yml, Caddyfile, deploy workflow, backup script)
@@ -34,6 +34,10 @@ Phase 1 — listings public pages implemented; now moving to next checklist item
 - Verification workflow done (Nov 18): VerificationController (verify dashboard, check update endpoint
   recomputing listing status) + verifications dashboard view + tests (VerificationWorkflowTest, 6 tests).
   Full suite: 86 passed (212 assertions); Pint clean.
+- Partner profiles and inquiry forms done (Nov 18): CompanyController@show (public partner profile w/
+  published listings) + companies/show view; InquiryController (public create/store for consultation or
+  inspection on published listings) + inquiries/create view; tests (CompanyPublicTest, InquiryTest). Full
+  suite: 92 passed (225 assertions); Pint clean; live pages verified.
 
 ## Next
-- Partner profiles and inquiry forms.
+- Static/content pages: fees, verification process, blog.

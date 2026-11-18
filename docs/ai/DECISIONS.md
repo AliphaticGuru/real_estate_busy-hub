@@ -60,5 +60,10 @@ Current stage: Database schema and models (auth and roles are done and tested).
   submitting a check recomputes the listing status: all checks passed -> `verified`, any failed ->
   `rejected`, otherwise remains pending/in-review.
 
+## Partner profiles and inquiry forms (phase progress)
+- Public partner (company) profile at `/companies/{slug}` lists the company's published listings.
+- Public inquiry form at `GET/POST /listings/{listing}/inquiries` (consultation | inspection) stores an
+  inquiry against a published listing; invalid submissions are rejected with validation errors.
+
 ## Hosting
 - Hosting: free tier for demo, then one VPS before onboarding real companies.
