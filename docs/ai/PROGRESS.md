@@ -3,7 +3,7 @@
 Update this file at the end of every work session, before committing.
 
 ## Current focus
-Phase 1 — Production deploy files started; docker-compose.prod.yml, Caddyfile, deploy workflow, backup script.
+Phase 1 — Production deploy files done; Phase 1 complete.
 
 ## Checklist
 - [x] Laravel scaffolded
@@ -16,7 +16,7 @@ Phase 1 — Production deploy files started; docker-compose.prod.yml, Caddyfile,
 - [x] Partner profiles and inquiry forms
 - [x] Static/content pages: fees, verification process, blog
 - [x] GitHub Actions CI (tests against Postgres service container)
-- [ ] Production deploy files (docker-compose.prod.yml, Caddyfile, deploy workflow, backup script)
+- [x] Production deploy files (docker-compose.prod.yml, Caddyfile, deploy workflow, backup script)
 
 ## Handoff notes
 - Phase 1 data layer complete: 8 migrations, 9 backed enums, 8 models, audit hooks, factories, DemoSeeder.
