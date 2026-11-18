@@ -3,7 +3,7 @@
 Update this file at the end of every work session, before committing.
 
 ## Current focus
-Phase 1 — listings public pages implemented; now moving to next checklist item (verification workflow).
+Phase 1 — static/content pages done; now moving to next checklist item (GitHub Actions CI).
 
 ## Checklist
 - [x] Laravel scaffolded
@@ -14,7 +14,7 @@ Phase 1 — listings public pages implemented; now moving to next checklist item
 - [x] Listings: public list with filters, detail page, WhatsApp button
 - [x] Verification workflow: verifier dashboard, checklist, badge display
 - [x] Partner profiles and inquiry forms
-- [ ] Static/content pages: fees, verification process, blog
+- [x] Static/content pages: fees, verification process, blog
 - [ ] GitHub Actions CI (tests against Postgres service container)
 - [ ] Production deploy files (docker-compose.prod.yml, Caddyfile, deploy workflow, backup script)
 
@@ -38,6 +38,9 @@ Phase 1 — listings public pages implemented; now moving to next checklist item
   published listings) + companies/show view; InquiryController (public create/store for consultation or
   inspection on published listings) + inquiries/create view; tests (CompanyPublicTest, InquiryTest). Full
   suite: 92 passed (225 assertions); Pint clean; live pages verified.
+- Static content pages done (Nov 18): BlogController (index/show w/ sample posts, Carbon publish dates),
+  views (fees, verification process, blog index, blog post), routes (/fees, /verification, /blog, /blog/{slug}),
+  StaticContentTest (5 tests). Full suite: 97 passed (234 assertions); Pint clean.
 
 ## Next
-- Static/content pages: fees, verification process, blog.
+- GitHub Actions CI (tests against Postgres service container).

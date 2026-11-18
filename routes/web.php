@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\InquiryController;
 use App\Http\Controllers\ListingController;
@@ -10,6 +11,12 @@ Route::view('/', 'welcome');
 
 Route::get('listings', [ListingController::class, 'index'])->name('listings.index');
 Route::get('listings/{slug}', [ListingController::class, 'show'])->name('listings.show');
+
+Route::view('fees', 'fees')->name('fees');
+Route::view('verification', 'verification')->name('verification');
+
+Route::get('blog', [BlogController::class, 'index'])->name('blog.index');
+Route::get('blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])

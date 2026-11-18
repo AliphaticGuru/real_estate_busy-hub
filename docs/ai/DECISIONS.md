@@ -65,5 +65,10 @@ Current stage: Database schema and models (auth and roles are done and tested).
 - Public inquiry form at `GET/POST /listings/{listing}/inquiries` (consultation | inspection) stores an
   inquiry against a published listing; invalid submissions are rejected with validation errors.
 
+## Static content pages (phase progress)
+- Public static pages: `/fees`, `/verification`, `/blog`, `/blog/{slug}` (guest-accessible).
+- Blog posts are hardcoded sample posts in BlogController; dates use Carbon instances.
+- Fees page content is currently static demo pricing (no content/fee admin yet).
+
 ## Hosting
 - Hosting: free tier for demo, then one VPS before onboarding real companies.
