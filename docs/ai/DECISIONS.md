@@ -49,5 +49,9 @@ Current stage: Database schema and models (auth and roles are done and tested).
 - Plan first, implement after approval; one PROGRESS.md item at a time.
 - Tests must pass before an item is marked done.
 
+## Public listings (phase progress)
+- Public listing pages (`/listings`, `/listings/{slug}`) are guest-accessible and only serve listings
+  whose status is `published`; drafts are not publicly accessible.
+
 ## Hosting
 - Hosting: free tier for demo, then one VPS before onboarding real companies.

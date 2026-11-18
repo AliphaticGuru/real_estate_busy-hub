@@ -3,7 +3,7 @@
 Update this file at the end of every work session, before committing.
 
 ## Current focus
-Phase 1 data layer implemented and tested; moving on to next checklist item when ready.
+Phase 1 — listings public pages implemented; now moving to next checklist item (verification workflow).
 
 ## Checklist
 - [x] Laravel scaffolded
@@ -11,7 +11,7 @@ Phase 1 data layer implemented and tested; moving on to next checklist item when
 - [x] Docker setup (Dockerfile, dev compose, /up health check)
 - [x] Auth and roles (starter kit, role enum, seeders, tests)
 - [x] Database schema and models (companies, professionals, listings, verification checks, audit log, inquiries)
-- [ ] Listings: public list with filters, detail page, WhatsApp button
+- [x] Listings: public list with filters, detail page, WhatsApp button
 - [ ] Verification workflow: verifier dashboard, checklist, badge display
 - [ ] Partner profiles and inquiry forms
 - [ ] Static/content pages: fees, verification process, blog
@@ -27,7 +27,10 @@ Phase 1 data layer implemented and tested; moving on to next checklist item when
   asset URLs were generated as http://localhost/..., blocked as mixed content on the https://localhost
   page, so the Livewire JS never loaded and login/register clicks did nothing. After the fix, script,
   module-url and update-uri all render as https://localhost/... .
-- Full suite: 75 passed (183 assertions), Pint clean, `migrate:fresh --seed` OK on dev Postgres.
+- Listings public pages done (Nov 18): ListingController (index w/ filters, show by slug, published only)
+  + resources/views/listings/{index,show}.blade.php (standalone shells, guest-safe) + WhatsApp button on
+  show. New tests: ListingPublicTest (5 tests). Full suite: 80 passed (196 assertions); Pint clean;
+  `migrate:fresh --seed` OK; live /listings, /listings/{slug} return 200.
 
 ## Next
-- Listings: public list with filters, detail page, WhatsApp button.
+- Verification workflow: verifier dashboard, checklist, badge display.
