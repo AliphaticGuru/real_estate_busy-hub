@@ -3,7 +3,7 @@
 Update this file at the end of every work session, before committing.
 
 ## Current focus
-Checkpoint (b) complete: user_id on inquiries - policy splits, tests, migration. Ready to proceed to checkpoint (c): UI layouts.
+Checkpoint (b) complete: user_id on inquiries - policy splits, tests, migration. Checkpoint (c) is NOT started.
 
 ## Checklist
 - [x] Laravel scaffolded
