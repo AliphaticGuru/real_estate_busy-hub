@@ -40,3 +40,8 @@
 - Partner profiles are generic placeholder cards marked with the repaired `badge` component (`variant="placeholder"`); no names, testimonials or statistics are invented.
 - Only the `/` route renders the landing page; no sitemap route is added in this stage.
 - Reason: server-rendered SEO content with no new dependencies, and honest placeholder content until partners are onboarded.
+
+## Caddy dev configuration fix
+- `local_certs` is a Caddy global option and cannot sit inside a site block, so the site uses `tls internal` instead; that is also the line to replace with a production `tls` address.
+- Caddyfile environment placeholders use `{$APP_URL:localhost}` syntax; shell-style `${APP_URL:localhost}` is not substituted and makes config adaptation fail.
+- Reason: the old Caddyfile could not adapt, which left the Caddy container in a restart loop after `docker compose up`.
