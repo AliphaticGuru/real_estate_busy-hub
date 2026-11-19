@@ -13,7 +13,14 @@
     </head>
     <body class="antialiased font-sans bg-gray-50 text-gray-900">
         <div class="min-h-screen flex flex-col">
-            <header class="bg-white border-b border-gray-100" x-data="{ open: false }">
+            <header
+                x-data="{ open: false, scrolled: false }"
+                x-init="scrolled = window.scrollY > 8"
+                @scroll.window.passive="scrolled = window.scrollY > 8"
+                x-cloak
+                :class="scrolled ? 'translate-y-0 opacity-100 shadow-sm' : '-translate-y-full opacity-0 pointer-events-none'"
+                class="fixed inset-x-0 top-0 z-50 bg-white border-b border-gray-100 transition-all duration-300 ease-in-out"
+            >
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between gap-4">
                     <a href="{{ route('listings.index') }}" class="text-lg font-semibold text-gray-900">
                         {{ config('app.name') }}
@@ -41,12 +48,24 @@
                     </button>
                 </div>
 
-                <nav id="public-mobile-menu" x-show="open" x-cloak class="sm:hidden border-t border-gray-100 bg-white" aria-label="{{ __('Mobile navigation') }}">
+                <nav
+                    id="public-mobile-menu"
+                    x-show="open"
+                    x-cloak
+                    x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 -translate-y-1"
+                    x-transition:enter-end="opacity-100 translate-y-0"
+                    x-transition:leave="transition ease-in duration-150"
+                    x-transition:leave-start="opacity-100 translate-y-0"
+                    x-transition:leave-end="opacity-0 -translate-y-1"
+                    class="sm:hidden absolute inset-x-0 top-full z-50 border-t border-gray-100 bg-white shadow-lg"
+                    aria-label="{{ __('Mobile navigation') }}"
+                >
                     <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col gap-1 text-sm">
-                        <x-responsive-nav-link :href="route('listings.index')" :active="request()->routeIs('listings.*')">{{ __('Listings') }}</x-responsive-nav-link>
-                        <x-responsive-nav-link :href="route('fees')" :active="request()->routeIs('fees')">{{ __('Fees') }}</x-responsive-nav-link>
-                        <x-responsive-nav-link :href="route('verification')" :active="request()->routeIs('verification')">{{ __('Verification') }}</x-responsive-nav-link>
-                        <x-responsive-nav-link :href="route('blog.index')" :active="request()->routeIs('blog.*')">{{ __('Blog') }}</x-responsive-nav-link>
+                        <x-responsive-nav-link :href="route('listings.index')" :active="request()->routeIs('listings.*')" @click="open = false">{{ __('Listings') }}</x-responsive-nav-link>
+                        <x-responsive-nav-link :href="route('fees')" :active="request()->routeIs('fees')" @click="open = false">{{ __('Fees') }}</x-responsive-nav-link>
+                        <x-responsive-nav-link :href="route('verification')" :active="request()->routeIs('verification')" @click="open = false">{{ __('Verification') }}</x-responsive-nav-link>
+                        <x-responsive-nav-link :href="route('blog.index')" :active="request()->routeIs('blog.*')" @click="open = false">{{ __('Blog') }}</x-responsive-nav-link>
                     </div>
                 </nav>
             </header>

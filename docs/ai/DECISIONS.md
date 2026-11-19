@@ -20,3 +20,8 @@
 - The public header uses Livewire's bundled Alpine (`x-data="{ open: false }"`) for the mobile menu; no extra Alpine dependency is added.
 - The menu panel uses `x-show` + `x-cloak` with a global `[x-cloak] { display: none !important; }` rule to prevent a flash before Alpine starts.
 - Reason: keeps JS minimal and server-rendered content intact at 360px.
+
+## Floating/sticky public header (checkpoint c fix)
+- The public header is `fixed` and translated off-screen at `scrollY <= 8`; it slides in with a 300ms transition once the page scrolls.
+- The mobile menu panel is `absolute top-full` inside the fixed header, so opening it overlays the page instead of pushing content down.
+- Reason: keeps the navbar available while reading without causing layout shift.

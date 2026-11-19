@@ -91,8 +91,12 @@ class ListingPublicTest extends TestCase
             ->assertOk()
             ->assertSee('<footer', false)
             ->assertSee('aria-label="Toggle navigation menu"', false)
-            ->assertSee('x-data="{ open: false }"', false)
+            ->assertSee('x-data="{ open: false, scrolled: false }"', false)
             ->assertSee('hidden sm:flex', false)
-            ->assertSee('sm:hidden', false);
+            ->assertSee('sm:hidden', false)
+            ->assertSee('fixed inset-x-0 top-0', false)
+            ->assertSee('-translate-y-full', false)
+            ->assertSee('absolute inset-x-0 top-full', false)
+            ->assertSee('transition-all duration-300', false);
     }
 }
