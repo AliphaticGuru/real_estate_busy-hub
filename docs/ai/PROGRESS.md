@@ -3,7 +3,7 @@
 Update this file at the end of every work session, before committing.
 
 ## Current focus
-Checkpoint (c) corrections complete: shared public layout, page conversions, mobile navigation, Node 22 build, tests. Awaiting the user's own build run and 360px check before Stage 2.
+Checkpoint (c) complete and verified at 360px. Stage 2 complete on `ui-layouts`: authenticated nav, app/guest layouts, auth pages and profile restyled; shared components repaired; Node 22 build and 106 tests pass. Stage 3 (landing page, dashboards) not started.
 
 ## Checklist
 - [x] Laravel scaffolded
@@ -49,9 +49,20 @@ Checkpoint (c) corrections complete: shared public layout, page conversions, mob
 - Mobile public header: Alpine-driven hamburger (`x-data`, `sm:hidden`, `x-cloak` panel with `responsive-nav-link` items); desktop nav is `hidden sm:flex`. The mobile panel is absolutely positioned and floats over the body.
 - The fixed public header is visible by default. A pin toggle (persisted in `localStorage` under `public-nav-autohide`) enables auto-hide: while not at the top, it hides after 2250ms without scrolling; at the very top it always stays visible.
 - No WhatsApp button in the public footer. The listing detail page keeps its own pre-filled WhatsApp link.
-- Full suite: 107 passed (271 assertions), 0 failed.
+- Full suite: 105 passed (273 assertions), 0 failed.
+
+## Stage 2 Summary: Authenticated UI
+- Added a `brand` palette in `resources/css/app.css` via `@theme`, so `focus:ring-brand-500` and brand buttons compile.
+- Repaired the placeholder components: `input`, `button`, `card`, `alert`, `page-header` now accept attributes and props (`label`, `type`, `variant`, `title`, `subtitle`) instead of the undefined `$attrs`/`$variant-class`.
+- Authenticated nav: fixed white header using `config('app.name')`, desktop links (Dashboard, Listings, Profile), profile dropdown, and a 44px Alpine hamburger with `aria-label`, `aria-expanded`, `aria-controls`, plus a floating `absolute top-full` mobile panel.
+- `layouts/app.blade.php`: removed Bunny fonts, `pt-16` wrapper for the fixed nav, page-header band, public-style footer, single `@livewireStyles`/`@livewireScripts` pair.
+- `layouts/guest.blade.php`: centred `x-card` auth panel with brand link and public-style footer, viewport meta retained, single Livewire style/script pair.
+- Restyled all six Volt auth pages and the profile page plus its three partials with `x-page-header`, `x-input`, `x-button`, `x-card`, `x-alert`. Volt PHP blocks, validation and redirects are unchanged.
+- Tests: login/register/forgot-password assert `config('app.name')`; login/profile assert `wire:model` bindings reach the inputs; guests redirect from `/dashboard` and `/profile`.
+- Full suite: 106 passed (285 assertions), 0 failed. Node 22 build passes with 0 `.woff` assets.
 
 ### Handoff notes
-- Do not start Stage 2. Wait for the user to run the Node 22 build and the 360px viewport check.
+- Stage 2 is complete. Do not start Stage 3 (landing page, dashboards) without approval.
 - `vendor/` had 8 zero-filled files (two packages) that blocked Livewire boot; fixed by reinstalling `laravel/framework` and `livewire/livewire`.
 - `public/hot` is absent, so the built assets in `public/build` are what the browser loads.
+- `@livewireStyles`/`@livewireScripts` appear once each in every layout (`app`, `guest`, `public`); a page only renders one layout, so there is no duplication.

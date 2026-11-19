@@ -18,8 +18,9 @@ class PasswordResetTest extends TestCase
         $response = $this->get('/forgot-password');
 
         $response
-            ->assertSeeVolt('pages.auth.forgot-password')
-            ->assertStatus(200);
+            ->assertOk()
+            ->assertSee(config('app.name'))
+            ->assertSeeVolt('pages.auth.forgot-password');
     }
 
     public function test_reset_password_link_can_be_requested(): void

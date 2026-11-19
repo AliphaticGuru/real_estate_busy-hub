@@ -19,6 +19,8 @@ class ProfileTest extends TestCase
 
         $response
             ->assertOk()
+            ->assertSee(config('app.name'))
+            ->assertSee('wire:model="name"', false)
             ->assertSeeVolt('profile.update-profile-information-form')
             ->assertSeeVolt('profile.update-password-form')
             ->assertSeeVolt('profile.delete-user-form');

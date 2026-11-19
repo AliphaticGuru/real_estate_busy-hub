@@ -26,3 +26,10 @@
 - A user toggle (pin button) enables auto-hide and stores the preference in `localStorage` (`public-nav-autohide`). When enabled and the page is not at the top, the header slides out after 2250ms without scrolling and returns on the next scroll.
 - At the top of the page (`scrollY === 0`) the header always stays visible.
 - The mobile menu panel is `absolute top-full` inside the fixed header, so opening it overlays the page instead of pushing content down.
+
+## Authenticated UI (stage 2)
+- The brand colour lives in `resources/css/app.css` under `@theme` (`--color-brand-*`); auth/profile focus rings and primary buttons use `brand-500`/`brand-600`.
+- The five placeholder components (`input`, `button`, `card`, `alert`, `page-header`) were rebuilt with explicit props instead of the undefined `$attrs`/`$variant-class`; inputs and buttons enforce a 44px minimum tap target.
+- The authenticated nav and the app/guest layouts reuse the public design tokens (white surface, `border-gray-100`, `config('app.name')`, shared footer) and keep one `@livewireStyles`/`@livewireScripts` pair per layout.
+- Volt PHP blocks, validation and redirects were left untouched; only markup and classes changed.
+- Reason: consistent chrome across guest, auth and public pages, WCAG-sized controls, and no duplicated asset injection.

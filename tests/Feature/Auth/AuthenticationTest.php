@@ -17,7 +17,15 @@ class AuthenticationTest extends TestCase
 
         $response
             ->assertOk()
+            ->assertSee(config('app.name'))
+            ->assertSee('wire:model="form.email"', false)
             ->assertSeeVolt('pages.auth.login');
+    }
+
+    public function test_guests_are_redirected_from_dashboard_and_profile(): void
+    {
+        $this->get('/dashboard')->assertRedirect(route('login'));
+        $this->get('/profile')->assertRedirect(route('login'));
     }
 
     public function test_users_can_authenticate_using_the_login_screen(): void
@@ -64,6 +72,8 @@ class AuthenticationTest extends TestCase
 
         $response
             ->assertOk()
+            ->assertSee(config('app.name'))
+            ->assertSee('aria-label="Toggle navigation menu"', false)
             ->assertSeeVolt('layout.navigation');
     }
 

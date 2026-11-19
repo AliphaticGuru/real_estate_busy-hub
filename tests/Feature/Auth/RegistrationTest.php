@@ -17,6 +17,7 @@ class RegistrationTest extends TestCase
 
         $response
             ->assertOk()
+            ->assertSee(config('app.name'))
             ->assertSeeVolt('pages.auth.register');
     }
 
