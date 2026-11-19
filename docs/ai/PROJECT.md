@@ -35,7 +35,7 @@ Roles are a backed enum on users. Company staff also have a company_id.
 - verification_checks: per-listing checklist (title_document, survey_plan, ownership_proof,
   site_inspection, no_encumbrance), each pending, passed or failed, with notes and checker
 - audit_logs: append-only record of verification changes (jsonb old and new values)
-- inquiries: consultation or inspection requests, linked to a listing or professional, status (new, contacted, closed)
+- inquiries: consultation or inspection requests, linked to a listing or professional, status (new, contacted, closed); user_id (nullable) records the submitting customer
 
 ## Architecture rules
 - Stateless containers; uploads go to S3-compatible storage (Cloudflare R2).
@@ -50,36 +50,11 @@ Roles are a backed enum on users. Company staff also have a company_id.
 
 ## Conventions
 - Local development runs in Docker Compose inside WSL; the repo lives in the WSL filesystem.
-- Tests run on SQLite, PostgreSQL for production.
+- Tests run on PostgreSQL in an isolated `busy_hub_testing` database (forced in `tests/TestCase.php` and `phpunit.xml`); never against the dev database.
+- Authenticated pages use `layouts/app`, auth forms use `layouts/guest`, and public pages use `<x-public-layout>`.
 - One PROGRESS.md item at a time; plan first, implement after approval; tests pass before marking done.
 - Do not add Phase 2 or Phase 3 features (construction consultancy packages, rentals, payments, chat) until asked.
 
 ## Out of scope for now
 Mobile app, in-app chat, document upload and tracking, diaspora dashboards, Paystack payments,
 rental management, Kubernetes.
-
-
-
-<!-- # Project Overview
-
-Verified real estate and construction hub for Nigeria, starting in Abuja.
-Three arms: verified property marketplace, legal due diligence, construction/architectural consultancy.
-Rentals are a later phase.
-
-## Stack
-Laravel, Livewire, Alpine.js, Tailwind, PostgreSQL, Docker Compose, GitHub Actions.
-Deploy: free-tier demo first, then a single VPS (Docker Compose + Caddy). Later AWS/GCP/Kubernetes.
-
-## Phase 1 scope (only this)
-Verified listings with filters, partner profiles, consultation/inspection requests,
-fees and verification-process pages, blog. No chat, no payments, no app.
-
-## Architecture rules
-- Stateless containers; uploads go to S3-compatible storage (Cloudflare R2).
-- Secrets via environment variables only; never commit .env.
-- Single database, scoped by company_id; no multi-tenancy package.
-- Roles: super_admin, company, professional, verifier, customer (backed enum on users).
-- Authorization via per-model policy classes; Gates only for non-model abilities.
-- Mobile-first, light, server-rendered pages. WhatsApp (wa.me) button on listings and service pages.
-- Verified-listing workflow is the core feature: pending, in_review, verified, rejected;
-  per-listing checklist; record verifier and timestamp; audit log. -->
