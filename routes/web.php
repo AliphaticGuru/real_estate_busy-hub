@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InquiryController;
 use App\Http\Controllers\ListingController;
 use App\Http\Controllers\VerificationController;
@@ -18,7 +19,7 @@ Route::view('verification', 'verification')->name('verification');
 Route::get('blog', [BlogController::class, 'index'])->name('blog.index');
 Route::get('blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 
-Route::view('dashboard', 'dashboard')
+Route::get('dashboard', DashboardController::class)
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 

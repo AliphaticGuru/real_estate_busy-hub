@@ -4,7 +4,7 @@
 - `InquiryPolicy`: super_admin sees all; company users see only inquiries for their own company's listings; professionals only their own (`professional_id`); customers only their own (`user_id`); `update` excludes customers.
 - Migration: `php artisan make:migration add_user_id_to_inquiries_table` — `user_id`: foreignId('user_id')->nullable()->index()->nullOnDelete().
 - Tests: guest inquiry works (user_id null), authenticated inquiry stores user_id, customer A cannot see customer B's inquiries (verified by `Inquiry::where('user_id', $userA->id)->get()`).
-- Full suite: 109 passed (302 assertions).
+- Full suite: 126 passed (397 assertions).
 
 ## CI (phase progress)
 - GitHub Actions workflow runs the test suite on ubuntu-latest against a `postgres:15-alpine` service container.
@@ -51,3 +51,9 @@
 - `local_certs` is a Caddy global option and cannot sit inside a site block, so the site uses `tls internal` instead; that is also the line to replace with a production `tls` address.
 - Caddyfile environment placeholders use `{$APP_URL:localhost}` syntax; shell-style `${APP_URL:localhost}` is not substituted and makes config adaptation fail.
 - Reason: the old Caddyfile could not adapt, which left the Caddy container in a restart loop after `docker compose up`.
+
+## Role dashboards (stage 2)
+- One `/dashboard` route uses `DashboardController` and `App\Dashboard\DashboardData`; the service switches on the user's role, returns counts and recent rows, and aborts 403 when no role is assigned.
+- Queries are scoped explicitly in the service: company via `listing.company_id`, professional via `professional_id`, customer via `user_id`; the Blade view contains no queries.
+- A company user without a company gets zeroed counts, every list has an empty state, and only existing route names are linked; unfinished actions are disabled "Coming soon" items.
+- Reason: role-aware data without relying on policies to filter result sets, and a view that cannot accidentally widen a scope.

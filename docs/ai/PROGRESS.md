@@ -3,7 +3,7 @@
 Update this file at the end of every work session, before committing.
 
 ## Current focus
-UI foundation: landing page and role dashboards (README last). Stage 1 landing page is implemented and all checks pass; awaiting the user's 360px review before Stage 2. Dashboards not started.
+UI foundation: landing page and role dashboards (README last). Stage 2 role dashboards are implemented and all checks pass; awaiting user review. README remains the last item in this focus.
 
 ## Checklist
 - [x] Laravel scaffolded
@@ -41,8 +41,15 @@ Checkpoint (b) verified: user_id on inquiries, policy split, 11 inquiry tests, i
 - Featured section queries published + verified listings, eager loads images/company, and shows an empty state.
 - `LandingPageTest` covers render, CTAs, verified-only filtering and the empty state; 109 passed overall.
 
+## Stage 4: Role dashboards
+- One `/dashboard` route now uses `DashboardController` and `App\Dashboard\DashboardData`; the service switches on role and returns counts plus recent rows, and aborts 403 when no role is assigned.
+- super_admin gets company/listing/inquiry counts, the verification breakdown and the five latest audit entries; verifier gets the waiting counts and five oldest listings; company, professional and customer get scoped status counts and their five most recent inquiries.
+- Company inquiries are scoped through `listing.company_id`; professional through `professional_id`; customer through `user_id`. The Blade view contains no queries and renders only the service payload.
+- Empty states cover every list; only existing routes are linked, and unfinished actions are disabled "Coming soon" items. `DashboardDataTest` and `DashboardTest` cover all roles and the second-company isolation case.
+
 ### Handoff notes
-- Stage 1 landing page awaits the user's 360px review; do not start dashboards.
-- Full suite: 109 passed (302 assertions); Node 22 build clean with 0 `.woff` assets.
+- Stage 2 dashboards are complete and awaiting review; README is the remaining UI-foundation item.
+- Full suite: 126 passed (397 assertions); Node 22 build clean with 0 `.woff` assets.
+- Pint passes for all Stage 2 files; route names and `<x-*>` components used by the dashboard all resolve.
 - Caddy uses `tls internal` and serves `https://localhost` (see DECISIONS).
 - `public/hot` is absent, so `public/build` assets are what the browser loads.
