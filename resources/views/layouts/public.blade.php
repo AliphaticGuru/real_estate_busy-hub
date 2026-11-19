@@ -12,40 +12,99 @@
         @livewireStyles
     </head>
     <body class="antialiased font-sans bg-gray-50 text-gray-900">
-        <div class="min-h-screen flex flex-col">
+        <div class="min-h-screen flex flex-col pt-16">
             <header
-                x-data="{ open: false, scrolled: false }"
-                x-init="scrolled = window.scrollY > 8"
-                @scroll.window.passive="scrolled = window.scrollY > 8"
-                x-cloak
-                :class="scrolled ? 'translate-y-0 opacity-100 shadow-sm' : '-translate-y-full opacity-0 pointer-events-none'"
-                class="fixed inset-x-0 top-0 z-50 bg-white border-b border-gray-100 transition-all duration-300 ease-in-out"
+                x-data="{
+                    open: false,
+                    scrolled: false,
+                    autoHide: false,
+                    idle: false,
+                    timer: null,
+                    init() {
+                        this.autoHide = localStorage.getItem('public-nav-autohide') === 'true';
+                        this.scrolled = window.scrollY > 0;
+
+                        if (this.autoHide && this.scrolled) {
+                            this.scheduleHide();
+                        }
+                    },
+                    onScroll() {
+                        this.scrolled = window.scrollY > 0;
+                        this.idle = false;
+                        clearTimeout(this.timer);
+
+                        if (this.autoHide && this.scrolled) {
+                            this.scheduleHide();
+                        }
+                    },
+                    scheduleHide() {
+                        clearTimeout(this.timer);
+                        this.timer = setTimeout(() => {
+                            if (this.autoHide && this.scrolled) {
+                                this.idle = true;
+                                this.open = false;
+                            }
+                        }, 2250);
+                    },
+                    toggleAutoHide() {
+                        this.autoHide = !this.autoHide;
+                        this.idle = false;
+                        localStorage.setItem('public-nav-autohide', this.autoHide ? 'true' : 'false');
+                        clearTimeout(this.timer);
+
+                        if (this.autoHide && this.scrolled) {
+                            this.scheduleHide();
+                        }
+                    }
+                }"
+                @scroll.window.passive="onScroll()"
+                :class="(autoHide && idle && scrolled) ? '-translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'"
+                class="fixed inset-x-0 top-0 z-50 bg-white border-b border-gray-100 shadow-sm transition-all duration-300 ease-in-out"
             >
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between gap-4">
                     <a href="{{ route('listings.index') }}" class="text-lg font-semibold text-gray-900">
                         {{ config('app.name') }}
                     </a>
 
-                    <nav class="hidden sm:flex items-center gap-4 text-sm" aria-label="{{ __('Primary navigation') }}">
-                        <a href="{{ route('listings.index') }}" class="text-gray-600 hover:text-gray-900">{{ __('Listings') }}</a>
-                        <a href="{{ route('fees') }}" class="text-gray-600 hover:text-gray-900">{{ __('Fees') }}</a>
-                        <a href="{{ route('verification') }}" class="text-gray-600 hover:text-gray-900">{{ __('Verification') }}</a>
-                        <a href="{{ route('blog.index') }}" class="text-gray-600 hover:text-gray-900">{{ __('Blog') }}</a>
-                    </nav>
+                    <div class="flex items-center gap-4">
+                        <nav class="hidden sm:flex items-center gap-4 text-sm" aria-label="{{ __('Primary navigation') }}">
+                            <a href="{{ route('listings.index') }}" class="text-gray-600 hover:text-gray-900">{{ __('Listings') }}</a>
+                            <a href="{{ route('fees') }}" class="text-gray-600 hover:text-gray-900">{{ __('Fees') }}</a>
+                            <a href="{{ route('verification') }}" class="text-gray-600 hover:text-gray-900">{{ __('Verification') }}</a>
+                            <a href="{{ route('blog.index') }}" class="text-gray-600 hover:text-gray-900">{{ __('Blog') }}</a>
+                        </nav>
 
-                    <button
-                        type="button"
-                        class="sm:hidden inline-flex h-11 w-11 items-center justify-center rounded-md text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                        @click="open = !open"
-                        aria-expanded="false"
-                        x-bind:aria-expanded="open ? 'true' : 'false'"
-                        aria-controls="public-mobile-menu"
-                        aria-label="{{ __('Toggle navigation menu') }}"
-                    >
-                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-                        </svg>
-                    </button>
+                        <div class="flex items-center gap-1">
+                            <button
+                                type="button"
+                                class="inline-flex h-11 w-11 items-center justify-center rounded-md text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                @click="toggleAutoHide()"
+                                aria-pressed="false"
+                                x-bind:aria-pressed="autoHide ? 'true' : 'false'"
+                                aria-label="{{ __('Toggle auto-hide navigation') }}"
+                                title="{{ __('Toggle auto-hide navigation') }}"
+                            >
+                                <svg class="h-5 w-5" :class="autoHide ? 'text-indigo-600' : 'text-gray-500'" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+                                </svg>
+                            </button>
+
+                            <button
+                                type="button"
+                                class="sm:hidden inline-flex h-11 w-11 items-center justify-center rounded-md text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                @click="open = !open"
+                                aria-expanded="false"
+                                x-bind:aria-expanded="open ? 'true' : 'false'"
+                                aria-controls="public-mobile-menu"
+                                aria-label="{{ __('Toggle navigation menu') }}"
+                            >
+                                <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 <nav

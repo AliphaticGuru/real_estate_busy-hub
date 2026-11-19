@@ -22,6 +22,7 @@
 - Reason: keeps JS minimal and server-rendered content intact at 360px.
 
 ## Floating/sticky public header (checkpoint c fix)
-- The public header is `fixed` and translated off-screen at `scrollY <= 8`; it slides in with a 300ms transition once the page scrolls.
+- The public header is `fixed` and visible by default; the page wrapper gets `pt-16` so content is not covered.
+- A user toggle (pin button) enables auto-hide and stores the preference in `localStorage` (`public-nav-autohide`). When enabled and the page is not at the top, the header slides out after 2250ms without scrolling and returns on the next scroll.
+- At the top of the page (`scrollY === 0`) the header always stays visible.
 - The mobile menu panel is `absolute top-full` inside the fixed header, so opening it overlays the page instead of pushing content down.
-- Reason: keeps the navbar available while reading without causing layout shift.
