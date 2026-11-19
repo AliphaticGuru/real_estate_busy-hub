@@ -57,23 +57,6 @@
 
             <footer class="py-10 text-center text-sm text-gray-500">
                 <p>{{ config('app.name') }} · {{ __('Find verified real estate & construction partners in Abuja') }}</p>
-
-                @php
-                    $whatsappNumber = preg_replace('/\D+/', '', (string) config('services.whatsapp.number'));
-                @endphp
-
-                @if ($whatsappNumber !== '')
-                    <p class="mt-4">
-                        <a
-                            href="https://wa.me/{{ $whatsappNumber }}?text={{ rawurlencode(__('Hello! I would like to speak to a verified partner.')) }}"
-                            class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 focus:bg-green-700 active:bg-green-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150"
-                            target="_blank"
-                            rel="noopener"
-                        >
-                            {{ __('Chat on WhatsApp') }}
-                        </a>
-                    </p>
-                @endif
             </footer>
         </div>
 

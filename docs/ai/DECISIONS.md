@@ -10,10 +10,10 @@
 - GitHub Actions workflow runs the test suite on ubuntu-latest against a `postgres:15-alpine` service container.
 - Test suite uses the configured database when `DB_CONNECTION=pgsql` is set (CI / local Postgres); defaults to
   in-memory SQLite otherwise.
-## Public layout and WhatsApp footer (checkpoint c)
+## Public layout (checkpoint c)
 - Public pages use the anonymous `<x-public-layout>` component, which includes `layouts/public.blade.php`; `@livewireStyles`/`@livewireScripts` live only in that layout so they cannot be duplicated.
-- The footer WhatsApp link comes from `config('services.whatsapp.number')`, is reduced to digits, and is omitted when the configured number is empty.
-- Listing pages keep their own pre-filled WhatsApp link, preferring the company number and falling back to the configured number.
+- The public footer is brand/tagline only. The footer WhatsApp button was removed on request.
+- Listing pages keep their own pre-filled WhatsApp link, preferring the company number and falling back to `config('services.whatsapp.number')`.
 - Reason: one layout prevents divergent headers/footers, and an empty config must not render a broken `wa.me/` link.
 
 ## Mobile public navigation (checkpoint c fix)

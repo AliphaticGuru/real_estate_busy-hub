@@ -3,7 +3,7 @@
 Update this file at the end of every work session, before committing.
 
 ## Current focus
-Checkpoint (c) corrections complete: shared public layout, page conversions, WhatsApp footer, Node 22 build, tests. Awaiting the user's own build run and 360px check before Stage 2.
+Checkpoint (c) corrections complete: shared public layout, page conversions, mobile navigation, Node 22 build, tests. Awaiting the user's own build run and 360px check before Stage 2.
 
 ## Checklist
 - [x] Laravel scaffolded
@@ -43,11 +43,11 @@ Checkpoint (c) corrections complete: shared public layout, page conversions, Wha
 - `resources/views/layouts/public.blade.php`: public HTML layout with header nav, footer, `@livewireStyles` and `@livewireScripts` (only place they appear).
 - `resources/views/components/public-layout.blade.php`: anonymous Blade component (`@include('layouts.public')`), used as `<x-public-layout>`.
 - Converted every public page: listings index/show, companies/show, inquiries/create, blog index/show, fees, verification.
-- WhatsApp footer reads `config('services.whatsapp.number')`, strips non-digits, and hides when empty. `WHATSAPP_NUMBER=` added to `.env.example`.
-- Public page tests assert `config('app.name')` and factory data; added WhatsApp digits/hidden tests.
+- Public footer is brand/tagline only; WhatsApp stays on listing detail pages, where the link is pre-filled from the company number or `config('services.whatsapp.number')`.
+- Public page tests assert `config('app.name')` and factory data; added mobile-navigation test.
 - `vite.config.js`: removed the Bunny font config; `npm run build` under Node 22 passes and produces 0 `.woff` assets.
 - Mobile public header: Alpine-driven hamburger (`x-data`, `sm:hidden`, `x-cloak` panel with `responsive-nav-link` items); desktop nav is `hidden sm:flex`.
-- Footer WhatsApp is only rendered when `config('services.whatsapp.number')` has digits; local `.env` needs `WHATSAPP_NUMBER` for the button to appear.
+- No WhatsApp button in the public footer. The listing detail page keeps its own pre-filled WhatsApp link.
 - Full suite: 107 passed (271 assertions), 0 failed.
 
 ### Handoff notes

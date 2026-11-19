@@ -85,22 +85,14 @@ class ListingPublicTest extends TestCase
             ->assertDontSee('Lagos City House');
     }
 
-    public function test_listing_index_has_mobile_navigation_and_footer_whatsapp(): void
+    public function test_listing_index_has_mobile_navigation_and_footer(): void
     {
-        config()->set('services.whatsapp.number', '+234 800 000 0000');
-
-        $response = $this->get(route('listings.index'))
+        $this->get(route('listings.index'))
             ->assertOk()
             ->assertSee('<footer', false)
             ->assertSee('aria-label="Toggle navigation menu"', false)
             ->assertSee('x-data="{ open: false }"', false)
             ->assertSee('hidden sm:flex', false)
             ->assertSee('sm:hidden', false);
-
-        $content = $response->getContent();
-        $footerStart = strpos($content, '<footer');
-
-        $this->assertNotFalse($footerStart);
-        $this->assertStringContainsString('https://wa.me/2348000000000', substr($content, $footerStart));
     }
 }

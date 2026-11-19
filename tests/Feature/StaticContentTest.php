@@ -43,21 +43,4 @@ class StaticContentTest extends TestCase
         $this->get(route('blog.show', 'not-a-real-post'))->assertNotFound();
     }
 
-    public function test_public_footer_shows_the_whatsapp_number_as_digits_only(): void
-    {
-        config()->set('services.whatsapp.number', '+234 800 000 0000');
-
-        $this->get(route('fees'))
-            ->assertOk()
-            ->assertSee('https://wa.me/2348000000000', false);
-    }
-
-    public function test_public_footer_hides_whatsapp_when_the_number_is_empty(): void
-    {
-        config()->set('services.whatsapp.number', null);
-
-        $this->get(route('fees'))
-            ->assertOk()
-            ->assertDontSee('wa.me', false);
-    }
 }
