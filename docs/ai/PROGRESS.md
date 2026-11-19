@@ -3,7 +3,7 @@
 Update this file at the end of every work session, before committing.
 
 ## Current focus
-UI foundation: landing page and role dashboards (README last). Stage 2 role dashboards are implemented and all checks pass; awaiting user review. README remains the last item in this focus.
+UI foundation: landing page and role dashboards (README last). Stage 2 role dashboards are implemented and all checks pass; the README is rewritten with verified setup and deployment notes. Awaiting user review.
 
 ## Checklist
 - [x] Laravel scaffolded
@@ -19,7 +19,7 @@ UI foundation: landing page and role dashboards (README last). Stage 2 role dash
 - [x] Production deploy files (docker-compose.prod.yml, Caddyfile, deploy workflow, backup script)
 - [x] UI layouts: public layout, mobile navigation, footer
 - [x] Auth and profile restyle with shared Blade components
-- [ ] UI foundation: landing page and role dashboards (README last)
+- [x] UI foundation: landing page and role dashboards (README last)
 
 Checkpoint (b) verified: user_id on inquiries, policy split, 11 inquiry tests, isolated test database.
 
@@ -48,8 +48,8 @@ Checkpoint (b) verified: user_id on inquiries, policy split, 11 inquiry tests, i
 - Empty states cover every list; only existing routes are linked, and unfinished actions are disabled "Coming soon" items. `DashboardDataTest` and `DashboardTest` cover all roles and the second-company isolation case.
 
 ### Handoff notes
-- Stage 2 dashboards are complete and awaiting review; README is the remaining UI-foundation item.
+- Stage 2 dashboards are complete and awaiting review; the README setup, test, asset and deployment instructions were rewritten and verified.
 - Full suite: 126 passed (397 assertions); Node 22 build clean with 0 `.woff` assets.
-- Pint passes for all Stage 2 files; route names and `<x-*>` components used by the dashboard all resolve.
+- Pint passes for all Stage 2 files; repository-wide `pint --test` still reports 9 pre-existing style issues outside this docs change.
 - Caddy uses `tls internal` and serves `https://localhost` (see DECISIONS).
 - `public/hot` is absent, so `public/build` assets are what the browser loads.
