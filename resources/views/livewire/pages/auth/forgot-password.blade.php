@@ -36,26 +36,41 @@ new #[Layout('layouts.guest')] class extends Component
     }
 }; ?>
 
-<div>
-    <div class="mb-4 text-sm text-gray-600">
-        {{ __('Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.') }}
-    </div>
+<div class="space-y-6">
+    <x-page-header
+        :title="__('Forgot password')"
+        :subtitle="__('Enter your email and we will send you a reset link.')"
+    />
 
     <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+    @if (session('status'))
+        <x-alert variant="success">{{ session('status') }}</x-alert>
+    @endif
 
-    <form wire:submit="sendPasswordResetLink">
+    <form wire:submit="sendPasswordResetLink" class="space-y-4">
         <!-- Email Address -->
         <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input wire:model="email" id="email" class="block mt-1 w-full" type="email" name="email" required autofocus />
+            <x-input
+                wire:model="email"
+                id="email"
+                name="email"
+                type="email"
+                :label="__('Email')"
+                required
+                autofocus
+                autocomplete="username"
+            />
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
-        <div class="flex items-center justify-end mt-4">
-            <x-primary-button>
-                {{ __('Email Password Reset Link') }}
-            </x-primary-button>
-        </div>
+        <x-button type="submit" class="w-full">
+            {{ __('Email Password Reset Link') }}
+        </x-button>
     </form>
+
+    <p class="text-center text-sm text-gray-600">
+        <a href="{{ route('login') }}" wire:navigate class="font-medium text-brand-700 underline-offset-4 hover:underline focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2">
+            {{ __('Back to log in') }}
+        </a>
+    </p>
 </div>

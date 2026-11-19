@@ -25,7 +25,7 @@ new class extends Component
 
 <section class="space-y-6">
     <header>
-        <h2 class="text-lg font-medium text-gray-900">
+        <h2 class="text-lg font-semibold text-gray-900">
             {{ __('Delete Account') }}
         </h2>
 
@@ -34,15 +34,17 @@ new class extends Component
         </p>
     </header>
 
-    <x-danger-button
+    <x-button
+        type="button"
+        variant="danger"
         x-data=""
         x-on:click.prevent="$dispatch('open-modal', 'confirm-user-deletion')"
-    >{{ __('Delete Account') }}</x-danger-button>
+    >{{ __('Delete Account') }}</x-button>
 
     <x-modal name="confirm-user-deletion" :show="$errors->isNotEmpty()" focusable>
         <form wire:submit="deleteUser" class="p-6">
 
-            <h2 class="text-lg font-medium text-gray-900">
+            <h2 class="text-lg font-semibold text-gray-900">
                 {{ __('Are you sure you want to delete your account?') }}
             </h2>
 
@@ -51,28 +53,26 @@ new class extends Component
             </p>
 
             <div class="mt-6">
-                <x-input-label for="password" value="{{ __('Password') }}" class="sr-only" />
-
-                <x-text-input
+                <x-input
                     wire:model="password"
                     id="password"
                     name="password"
                     type="password"
-                    class="mt-1 block w-3/4"
+                    :label="__('Password')"
                     placeholder="{{ __('Password') }}"
                 />
 
                 <x-input-error :messages="$errors->get('password')" class="mt-2" />
             </div>
 
-            <div class="mt-6 flex justify-end">
-                <x-secondary-button x-on:click="$dispatch('close')">
+            <div class="mt-6 flex flex-wrap justify-end gap-3">
+                <x-button type="button" variant="secondary" x-on:click="$dispatch('close')">
                     {{ __('Cancel') }}
-                </x-secondary-button>
+                </x-button>
 
-                <x-danger-button class="ms-3">
+                <x-button variant="danger">
                     {{ __('Delete Account') }}
-                </x-danger-button>
+                </x-button>
             </div>
         </form>
     </x-modal>
