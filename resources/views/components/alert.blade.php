@@ -1,4 +1,17 @@
-<!-- alert.blade.php -->
-<div {{ $attrs }} class="alert {{ $variant-class }}">
+@props(['variant' => 'status'])
+
+@php
+    $variants = [
+        'status' => 'border-brand-200 bg-brand-50 text-brand-800',
+        'success' => 'border-green-200 bg-green-50 text-green-800',
+        'error' => 'border-red-200 bg-red-50 text-red-800',
+        'warning' => 'border-amber-200 bg-amber-50 text-amber-800',
+        'info' => 'border-sky-200 bg-sky-50 text-sky-800',
+    ];
+
+    $classes = $variants[$variant] ?? $variants['status'];
+@endphp
+
+<div role="alert" {{ $attributes->merge(['class' => "rounded-md border px-4 py-3 text-sm {$classes}"]) }}>
     {{ $slot }}
 </div>
