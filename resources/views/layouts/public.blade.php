@@ -6,6 +6,8 @@
 
         <title>{{ isset($title) && $title !== '' ? $title . ' · ' : '' }}{{ config('app.name') }}</title>
 
+        {{ $head ?? '' }}
+
         <!-- Styles -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 
