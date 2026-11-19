@@ -3,7 +3,7 @@
 Update this file at the end of every work session, before committing.
 
 ## Current focus
-Checkpoint (c) complete and verified at 360px. Stage 2 complete on `ui-layouts`: authenticated nav, app/guest layouts, auth pages and profile restyled; shared components repaired; Node 22 build and 106 tests pass. Stage 3 (landing page, dashboards) not started.
+UI foundation: landing page and role dashboards (README last). Stage 1 (landing page) is in progress; dashboards remain blocked until approval.
 
 ## Checklist
 - [x] Laravel scaffolded
@@ -17,6 +17,9 @@ Checkpoint (c) complete and verified at 360px. Stage 2 complete on `ui-layouts`:
 - [x] Static/content pages: fees, verification process, blog
 - [x] GitHub Actions CI (tests against Postgres service container)
 - [x] Production deploy files (docker-compose.prod.yml, Caddyfile, deploy workflow, backup script)
+- [x] UI layouts: public layout, mobile navigation, footer
+- [x] Auth and profile restyle with shared Blade components
+- [ ] UI foundation: landing page and role dashboards (README last)
 
 ## Checkpoint (b) Summary
 ### Completed:
