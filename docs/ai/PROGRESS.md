@@ -3,7 +3,7 @@
 Update this file at the end of every work session, before committing.
 
 ## Current focus
-UI foundation: landing page and role dashboards (README last). Stage 1 (landing page) is in progress; dashboards remain blocked until approval.
+UI foundation: landing page and role dashboards (README last). Stage 1 landing page is implemented and all checks pass; awaiting the user's 360px review before Stage 2. Dashboards not started.
 
 ## Checklist
 - [x] Laravel scaffolded
@@ -64,8 +64,18 @@ UI foundation: landing page and role dashboards (README last). Stage 1 (landing 
 - Tests: login/register/forgot-password assert `config('app.name')`; login/profile assert `wire:model` bindings reach the inputs; guests redirect from `/dashboard` and `/profile`.
 - Full suite: 106 passed (285 assertions), 0 failed. Node 22 build passes with 0 `.woff` assets.
 
+## Stage 3 Summary: Landing page
+- `resources/views/welcome.blade.php` is a server-rendered `<x-public-layout>` page with hero promise, 4-step verification summary covering all five checklist keys, three service arms (consultancy marked "Coming soon · Phase 2"), transparency points, up to 3 featured verified published listings, and placeholder partner cards.
+- No external fonts, CDN images or new packages. One `h1`; sections use `h2`/`h3`.
+- `resources/views/layouts/public.blade.php` now renders an optional `head` named slot after `<title>`, so the landing page supplies the meta description and Open Graph tags without a separate layout.
+- Featured query: `status = published`, `verification_status = verified`, eager loads `images` and `company`, latest `verified_at`, limit 3; inline empty state when none exist.
+- Repaired two more placeholders used by the page: `badge` (variants including `placeholder`) and `empty-state`.
+- Tests: `tests/Feature/LandingPageTest.php` covers render/CTA/OG tags, one `h1`, verified-only featured listings (drafts and unverified excluded), and the empty state.
+- Full suite: 109 passed (302 assertions), 0 failed. Node 22 build passes with 0 `.woff` assets.
+
 ### Handoff notes
-- Stage 2 is complete. Do not start Stage 3 (landing page, dashboards) without approval.
+- Stage 1 (landing page) is ready for the user's 360px review. Do not start Stage 2 (dashboards) until approved.
+- `welcome.blade.php` no longer links Bunny fonts or Laravel CDN images.
 - `vendor/` had 8 zero-filled files (two packages) that blocked Livewire boot; fixed by reinstalling `laravel/framework` and `livewire/livewire`.
 - `public/hot` is absent, so the built assets in `public/build` are what the browser loads.
 - `@livewireStyles`/`@livewireScripts` appear once each in every layout (`app`, `guest`, `public`); a page only renders one layout, so there is no duplication.

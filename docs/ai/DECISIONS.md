@@ -33,3 +33,10 @@
 - The authenticated nav and the app/guest layouts reuse the public design tokens (white surface, `border-gray-100`, `config('app.name')`, shared footer) and keep one `@livewireStyles`/`@livewireScripts` pair per layout.
 - Volt PHP blocks, validation and redirects were left untouched; only markup and classes changed.
 - Reason: consistent chrome across guest, auth and public pages, WCAG-sized controls, and no duplicated asset injection.
+
+## Landing page (stage 3, stage 1)
+- `layouts/public.blade.php` renders an optional `head` named slot after `<title>`; the landing page uses it for the meta description and Open Graph tags rather than adding a one-off layout.
+- Featured listings are queried in the view with explicit `status = published` and `verification_status = verified` filters, eager loading `images` and `company`, ordered by `verified_at` and limited to three.
+- Partner profiles are generic placeholder cards marked with the repaired `badge` component (`variant="placeholder"`); no names, testimonials or statistics are invented.
+- Only the `/` route renders the landing page; no sitemap route is added in this stage.
+- Reason: server-rendered SEO content with no new dependencies, and honest placeholder content until partners are onboarded.
