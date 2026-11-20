@@ -330,7 +330,8 @@ class InquiryTest extends TestCase
 
         $this->get(route('listings.show', $listing->slug))
             ->assertOk()
-            ->assertSee('Request an inspection or consultation')
+            ->assertSee('Inquire')
+            ->assertSee('aria-label="Request an inspection or consultation"', false)
             ->assertSee(route('inquiries.create', $listing->slug), false);
     }
 
