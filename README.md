@@ -35,7 +35,7 @@ docker run --rm -v "$PWD:/app" -w /app composer:2 install --no-interaction --no-
 docker compose up -d
 ```
 
-Generate the application key:
+Generate the application key(first run only):
 
 ```bash
 docker compose exec -T app php artisan key:generate

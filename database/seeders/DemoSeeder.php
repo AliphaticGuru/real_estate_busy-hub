@@ -3,9 +3,9 @@
 namespace Database\Seeders;
 
 use App\Enums\CompanyStatus;
-use App\Enums\InquiryStatus;
 use App\Enums\ListingStatus;
 use App\Enums\ListingVerificationStatus;
+use App\Enums\RoleName;
 use App\Models\Company;
 use App\Models\Listing;
 use App\Models\User;
@@ -61,7 +61,7 @@ class DemoSeeder extends Seeder
             ],
         );
 
-        $customer->assignRole(\App\Enums\RoleName::Customer);
+        $customer->assignRole(RoleName::Customer);
         $customer->save();
 
         Listing::create([

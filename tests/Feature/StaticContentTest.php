@@ -42,5 +42,4 @@ class StaticContentTest extends TestCase
     {
         $this->get(route('blog.show', 'not-a-real-post'))->assertNotFound();
     }
-
 }
