@@ -2,8 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Dashboard\DashboardData;
+use App\Models\Company;
 use App\Models\Inquiry;
 use App\Models\Listing;
+use App\Models\Professional;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -16,7 +19,7 @@ class InquiryTest extends TestCase
     {
         $listing = Listing::factory()->published()->create();
 
-        $this->post(route('inquiries.store', $listing->id), [
+        $this->post(route('inquiries.store', $listing->slug), [
             'type' => 'consultation',
             'name' => 'John Doe',
             'phone' => '+2348000000000',
@@ -39,7 +42,7 @@ class InquiryTest extends TestCase
     {
         $listing = Listing::factory()->published()->create();
 
-        $this->post(route('inquiries.store', $listing->id), [
+        $this->post(route('inquiries.store', $listing->slug), [
             'type' => 'inspection',
             'name' => 'Jane Doe',
             'phone' => '+2348000000001',
@@ -64,7 +67,7 @@ class InquiryTest extends TestCase
         $listing = Listing::factory()->published()->create();
 
         $this->actingAs($user)
-            ->post(route('inquiries.store', $listing->id), [
+            ->post(route('inquiries.store', $listing->slug), [
                 'type' => 'consultation',
                 'name' => 'John Doe',
                 'phone' => '+2348000000000',
@@ -96,7 +99,7 @@ class InquiryTest extends TestCase
 
         // User A submits an inquiry
         $this->actingAs($userA)
-            ->post(route('inquiries.store', $listing->id), [
+            ->post(route('inquiries.store', $listing->slug), [
                 'type' => 'consultation',
                 'name' => 'User A',
                 'phone' => '+2348000000005',
@@ -121,11 +124,11 @@ class InquiryTest extends TestCase
     public function test_company_user_cannot_view_another_company_inquiries(): void
     {
         // Create companies first
-        $company = \App\Models\Company::firstOrCreate(
+        $company = Company::firstOrCreate(
             ['slug' => 'company-a'],
             ['name' => 'Company A', 'slug' => 'company-a', 'description' => 'Company A']
         );
-        $companyB = \App\Models\Company::firstOrCreate(
+        $companyB = Company::firstOrCreate(
             ['slug' => 'company-b'],
             ['name' => 'Company B', 'slug' => 'company-b', 'description' => 'Company B']
         );
@@ -145,7 +148,7 @@ class InquiryTest extends TestCase
 
         // Company A submits an inquiry for their listing
         $this->actingAs($companyA)
-            ->post(route('inquiries.store', $listingA->id), [
+            ->post(route('inquiries.store', $listingA->slug), [
                 'type' => 'consultation',
                 'name' => 'Company A Rep',
                 'phone' => '+2348000000010',
@@ -170,8 +173,8 @@ class InquiryTest extends TestCase
     public function test_professional_cannot_view_another_professional_inquiries(): void
     {
         // Use Professional factory to create professionals with required fields
-        $profA = \App\Models\Professional::factory()->create();
-        $profB = \App\Models\Professional::factory()->create();
+        $profA = Professional::factory()->create();
+        $profB = Professional::factory()->create();
 
         $listing = Listing::factory()->published()->create();
 
@@ -211,7 +214,7 @@ class InquiryTest extends TestCase
         $listing = Listing::factory()->published()->create();
 
         $this->actingAs($user)
-            ->post(route('inquiries.store', $listing->id), [
+            ->post(route('inquiries.store', $listing->slug), [
                 'type' => 'consultation',
                 'name' => 'Customer',
                 'phone' => '+2348000000011',
@@ -254,7 +257,7 @@ class InquiryTest extends TestCase
 
         // Post with user_id in the form data - should be ignored
         $this->actingAs($user)
-            ->post(route('inquiries.store', $listing->id), [
+            ->post(route('inquiries.store', $listing->slug), [
                 'type' => 'consultation',
                 'name' => 'John Doe',
                 'phone' => '+2348000000000',
@@ -279,7 +282,7 @@ class InquiryTest extends TestCase
         $listing = Listing::factory()->published()->create();
 
         $this->from(route('listings.show', $listing->slug))
-            ->post(route('inquiries.store', $listing->id), [
+            ->post(route('inquiries.store', $listing->slug), [
                 'type' => 'consultation',
                 'name' => 'John Doe',
                 'phone' => '+2348000000000',
@@ -293,7 +296,7 @@ class InquiryTest extends TestCase
     {
         $listing = Listing::factory()->published()->create();
 
-        $this->post(route('inquiries.store', $listing->id), [
+        $this->post(route('inquiries.store', $listing->slug), [
             'type' => 'consultation',
             'name' => 'John Doe',
             'phone' => '+2348000000000',
@@ -302,5 +305,55 @@ class InquiryTest extends TestCase
         ]);
 
         $this->assertDatabaseCount('inquiries', 0);
+    }
+
+    public function test_create_page_returns_200_for_a_published_listing(): void
+    {
+        $listing = Listing::factory()->published()->create();
+
+        $this->get(route('inquiries.create', $listing->slug))
+            ->assertOk()
+            ->assertSee($listing->title)
+            ->assertSee('Request inspection or consultation');
+    }
+
+    public function test_create_page_returns_404_for_a_draft_listing(): void
+    {
+        $listing = Listing::factory()->create();
+
+        $this->get(route('inquiries.create', $listing->slug))->assertNotFound();
+    }
+
+    public function test_listing_detail_page_links_to_the_inquiry_form(): void
+    {
+        $listing = Listing::factory()->published()->create();
+
+        $this->get(route('listings.show', $listing->slug))
+            ->assertOk()
+            ->assertSee('Request an inspection or consultation')
+            ->assertSee(route('inquiries.create', $listing->slug), false);
+    }
+
+    public function test_logged_in_customers_inquiry_appears_on_their_dashboard(): void
+    {
+        $customer = User::factory()->customer()->create();
+        $listing = Listing::factory()->published()->create();
+
+        $this->actingAs($customer)->post(route('inquiries.store', $listing->slug), [
+            'type' => 'inspection',
+            'name' => 'Customer Name',
+            'phone' => '+2348000000020',
+            'email' => 'customer@example.com',
+            'message' => 'Please arrange an inspection.',
+        ])->assertRedirect(route('listings.show', $listing->slug));
+
+        $inquiry = Inquiry::query()->sole();
+
+        $this->assertSame($customer->id, $inquiry->user_id);
+
+        $data = app(DashboardData::class)->for($customer);
+
+        $this->assertSame(1, $data['counts']['inquiry_status']['new']);
+        $this->assertTrue($data['recentInquiries']->contains('id', $inquiry->id));
     }
 }

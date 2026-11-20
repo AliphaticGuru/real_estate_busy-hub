@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ListingStatus;
 use App\Models\Inquiry;
 use App\Models\Listing;
 use Illuminate\Contracts\View\View;
@@ -16,9 +17,7 @@ class InquiryController extends Controller
      */
     public function create(Listing $listing): View
     {
-        if ($listing->status?->value !== 'published') {
-            abort(404);
-        }
+        $this->ensurePublished($listing);
 
         return view('inquiries.create', ['listing' => $listing]);
     }
@@ -28,9 +27,7 @@ class InquiryController extends Controller
      */
     public function store(Request $request, Listing $listing): RedirectResponse
     {
-        if ($listing->status?->value !== 'published') {
-            abort(404);
-        }
+        $this->ensurePublished($listing);
 
         $validated = $request->validate([
             'type' => ['required', 'string', Rule::in(['consultation', 'inspection'])],
@@ -42,12 +39,22 @@ class InquiryController extends Controller
         ]);
 
         $inquiry = new Inquiry($validated);
-$inquiry->user_id = $request->user()?->id;
-$inquiry->listing_id = $listing->id;
-$inquiry->save();
+        $inquiry->listing_id = $listing->id;
+        $inquiry->user_id = $request->user()?->id;
+        $inquiry->save();
 
         return redirect()
             ->route('listings.show', $listing->slug)
             ->with('status', __('Thank you! Your inquiry has been sent.'));
+    }
+
+    /**
+     * Draft, archived and other non-public listings are not inquiry targets.
+     */
+    private function ensurePublished(Listing $listing): void
+    {
+        if ($listing->status !== ListingStatus::Published) {
+            abort(404);
+        }
     }
 }

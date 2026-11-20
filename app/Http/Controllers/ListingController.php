@@ -32,13 +32,13 @@ class ListingController extends Controller
     /**
      * Public listing detail page.
      */
-    public function show(string $slug): View
+    public function show(Listing $listing): View
     {
-        $listing = Listing::query()
-            ->where('status', ListingStatus::Published)
-            ->with(['company', 'images'])
-            ->where('slug', $slug)
-            ->firstOrFail();
+        if ($listing->status !== ListingStatus::Published) {
+            abort(404);
+        }
+
+        $listing->load(['company', 'images']);
 
         return view('listings.show', ['listing' => $listing]);
     }

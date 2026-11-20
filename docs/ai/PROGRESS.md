@@ -3,7 +3,7 @@
 Update this file at the end of every work session, before committing.
 
 ## Current focus
-UI foundation: landing page and role dashboards (README last). Stage 2 role dashboards are implemented and all checks pass; awaiting user review. README remains the last item in this focus.
+UI foundation: landing page and role dashboards (README last). The inquiry-flow bugfix is complete and awaiting review; README remains outstanding on the UI-foundation branch.
 
 ## Checklist
 - [x] Laravel scaffolded
@@ -47,9 +47,17 @@ Checkpoint (b) verified: user_id on inquiries, policy split, 11 inquiry tests, i
 - Company inquiries are scoped through `listing.company_id`; professional through `professional_id`; customer through `user_id`. The Blade view contains no queries and renders only the service payload.
 - Empty states cover every list; only existing routes are linked, and unfinished actions are disabled "Coming soon" items. `DashboardDataTest` and `DashboardTest` cover all roles and the second-company isolation case.
 
+## Inquiry flow fix (branch `inquiry-flow`)
+- Public listing and inquiry routes now use explicit `{listing:slug}` binding: `listings.show`, `inquiries.create` and `inquiries.store`. `ListingController@show` accepts a `Listing` and aborts 404 unless it is published.
+- `InquiryController` keeps a single published guard, assigns `user_id` only from the authenticated user, and redirects to the listing with a success `status`.
+- The inquiry form uses the shared `x-input`, `x-button` and `x-input-error` components, shows field errors, keeps old input, and prefills name/email for authenticated users.
+- Published listing pages show a 44px "Request an inspection or consultation" action next to WhatsApp; `x-button` now renders an anchor when `href` is supplied.
+- `InquiryTest` covers published/draft create pages, the detail-page link, guest submissions, authenticated customer ownership plus `DashboardData` visibility, and ignoring a posted `user_id`.
+
 ### Handoff notes
-- Stage 2 dashboards are complete and awaiting review; README is the remaining UI-foundation item.
-- Full suite: 126 passed (397 assertions); Node 22 build clean with 0 `.woff` assets.
-- Pint passes for all Stage 2 files; route names and `<x-*>` components used by the dashboard all resolve.
+- The inquiry-flow fix is complete and awaiting review; README is still the remaining UI-foundation item on its own branch.
+- Root cause: listing routes bound `{listing}` by `id`, so slug URLs caused `SQLSTATE[22P02] invalid input syntax for type bigint`; explicit `{listing:slug}` binding fixes both the detail and inquiry routes.
+- Full suite: 130 passed (409 assertions); Node 22 build clean with 0 `.woff` assets.
+- Pint passes for every file touched by this fix; repository-wide `pint --test` still reports pre-existing issues outside this change.
 - Caddy uses `tls internal` and serves `https://localhost` (see DECISIONS).
 - `public/hot` is absent, so `public/build` assets are what the browser loads.

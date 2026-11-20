@@ -57,3 +57,8 @@
 - Queries are scoped explicitly in the service: company via `listing.company_id`, professional via `professional_id`, customer via `user_id`; the Blade view contains no queries.
 - A company user without a company gets zeroed counts, every list has an empty state, and only existing route names are linked; unfinished actions are disabled "Coming soon" items.
 - Reason: role-aware data without relying on policies to filter result sets, and a view that cannot accidentally widen a scope.
+
+## Slug binding for public listing routes (inquiry-flow fix)
+- `listings.show`, `inquiries.create` and `inquiries.store` use explicit `{listing:slug}` route binding instead of a global `getRouteKeyName()`.
+- Reason: URLs stay slug-based, inquiry pages no longer pass slugs into an `id` lookup (which caused a PostgreSQL bigint error), and `verify/checks.update` keeps its existing id binding.
+- `x-button` renders an anchor when an `href` prop is supplied, so link-style actions keep the same 44px tap target as submit buttons.

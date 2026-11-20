@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Route;
 Route::view('/', 'welcome');
 
 Route::get('listings', [ListingController::class, 'index'])->name('listings.index');
-Route::get('listings/{slug}', [ListingController::class, 'show'])->name('listings.show');
+Route::get('listings/{listing:slug}', [ListingController::class, 'show'])->name('listings.show');
 
 Route::view('fees', 'fees')->name('fees');
 Route::view('verification', 'verification')->name('verification');
@@ -33,7 +33,7 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::get('companies/{slug}', [CompanyController::class, 'show'])->name('companies.show');
-Route::get('listings/{listing}/inquiries/create', [InquiryController::class, 'create'])->name('inquiries.create');
-Route::post('listings/{listing}/inquiries', [InquiryController::class, 'store'])->name('inquiries.store');
+Route::get('listings/{listing:slug}/inquiries/create', [InquiryController::class, 'create'])->name('inquiries.create');
+Route::post('listings/{listing:slug}/inquiries', [InquiryController::class, 'store'])->name('inquiries.store');
 
 require __DIR__.'/auth.php';

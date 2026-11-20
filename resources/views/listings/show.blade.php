@@ -4,6 +4,10 @@
         &larr; {{ __('Back to listings') }}
     </a>
 
+    @if (session('status'))
+        <x-alert variant="success" class="mb-6">{{ session('status') }}</x-alert>
+    @endif
+
     <div class="mt-6 bg-white overflow-hidden shadow-sm sm:rounded-lg">
         <div class="p-6">
             <div class="flex justify-between">
@@ -42,16 +46,22 @@
                     $whatsappMessage = rawurlencode('Hello! I am interested in this listing: ' . $listing->title . ' — ' . $listing->city . ', ' . $listing->district . '. Price: ₦' . number_format($listing->price / 100) . '.');
                 @endphp
 
-                @if ($whatsappNumber !== '')
-                    <a
-                        href="https://wa.me/{{ $whatsappNumber }}?text={{ $whatsappMessage }}"
-                        class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 focus:bg-green-700 active:bg-green-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150"
-                        target="_blank"
-                        rel="noopener"
-                    >
-                        {{ __('WhatsApp') }}
-                    </a>
-                @endif
+                <div class="flex flex-wrap items-center gap-3">
+                    <x-button :href="route('inquiries.create', $listing->slug)" variant="primary">
+                        {{ __('Request an inspection or consultation') }}
+                    </x-button>
+
+                    @if ($whatsappNumber !== '')
+                        <a
+                            href="https://wa.me/{{ $whatsappNumber }}?text={{ $whatsappMessage }}"
+                            class="inline-flex min-h-[44px] items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 focus:bg-green-700 active:bg-green-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150"
+                            target="_blank"
+                            rel="noopener"
+                        >
+                            {{ __('WhatsApp') }}
+                        </a>
+                    @endif
+                </div>
             </div>
         </div>
     </div>
