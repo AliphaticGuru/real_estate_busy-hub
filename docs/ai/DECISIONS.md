@@ -62,3 +62,8 @@
 - `listings.show`, `inquiries.create` and `inquiries.store` use explicit `{listing:slug}` route binding instead of a global `getRouteKeyName()`.
 - Reason: URLs stay slug-based, inquiry pages no longer pass slugs into an `id` lookup (which caused a PostgreSQL bigint error), and `verify/checks.update` keeps its existing id binding.
 - `x-button` renders an anchor when an `href` prop is supplied, so link-style actions keep the same 44px tap target as submit buttons.
+
+## Listing detail actions (listing-buttons-readme)
+- Published listing pages show "Inquire" and "WhatsApp" below the company name in one left-aligned `flex flex-wrap` row; `grow` lets the actions share a line at narrow widths or fill the row when they wrap.
+- The Inquire link keeps `aria-label="Request an inspection or consultation"` so the short visible label retains the descriptive accessible name.
+- Reason: both actions stay visible and tappable at 360px without adding JavaScript, while screen readers keep the full intent.

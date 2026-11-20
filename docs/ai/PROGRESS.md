@@ -3,7 +3,7 @@
 Update this file at the end of every work session, before committing.
 
 ## Current focus
-UI foundation: landing page and role dashboards (README last). The inquiry-flow bugfix is complete and awaiting review; README remains outstanding on the UI-foundation branch.
+UI foundation: landing page and role dashboards (README last). All UI-foundation items are complete and awaiting review.
 
 ## Checklist
 - [x] Laravel scaffolded
@@ -19,7 +19,7 @@ UI foundation: landing page and role dashboards (README last). The inquiry-flow 
 - [x] Production deploy files (docker-compose.prod.yml, Caddyfile, deploy workflow, backup script)
 - [x] UI layouts: public layout, mobile navigation, footer
 - [x] Auth and profile restyle with shared Blade components
-- [ ] UI foundation: landing page and role dashboards (README last)
+- [x] UI foundation: landing page and role dashboards (README last)
 
 Checkpoint (b) verified: user_id on inquiries, policy split, 11 inquiry tests, isolated test database.
 
@@ -50,14 +50,20 @@ Checkpoint (b) verified: user_id on inquiries, policy split, 11 inquiry tests, i
 ## Inquiry flow fix (branch `inquiry-flow`)
 - Public listing and inquiry routes now use explicit `{listing:slug}` binding: `listings.show`, `inquiries.create` and `inquiries.store`. `ListingController@show` accepts a `Listing` and aborts 404 unless it is published.
 - `InquiryController` keeps a single published guard, assigns `user_id` only from the authenticated user, and redirects to the listing with a success `status`.
-- The inquiry form uses the shared `x-input`, `x-button` and `x-input-error` components, shows field errors, keeps old input, and prefills name/email for authenticated users.
+- The inquiry form uses the shared `x-input`, `x-button` and `x-input-error` components, shows for authenticated users.
 - Published listing pages show a 44px "Request an inspection or consultation" action next to WhatsApp; `x-button` now renders an anchor when `href` is supplied.
 - `InquiryTest` covers published/draft create pages, the detail-page link, guest submissions, authenticated customer ownership plus `DashboardData` visibility, and ignoring a posted `user_id`.
 
+## Listing detail actions and README (branch `listing-buttons-readme`)
+- The published listing detail page places "Inquire" and "WhatsApp" directly below the company name in one left-aligned, wrapping row. Both keep the 44px tap target, and `grow` makes each action fill the row when they wrap.
+- "Inquire" carries `aria-label="Request an inspection or consultation"` so the shorter visible label does not reduce the accessible name.
+- `README.md` now documents the project, Phase 1 scope and status, the verified local setup, demo accounts, tests, Pint, asset builds, troubleshooting, project structure, environment variables and deployment files.
+- README setup commands were run on this checkout; clone and `cp .env.example .env` were not run because the repository and local `.env` already existed.
+
 ### Handoff notes
-- The inquiry-flow fix is complete and awaiting review; README is still the remaining UI-foundation item on its own branch.
-- Root cause: listing routes bound `{listing}` by `id`, so slug URLs caused `SQLSTATE[22P02] invalid input syntax for type bigint`; explicit `{listing:slug}` binding fixes both the detail and inquiry routes.
-- Full suite: 130 passed (409 assertions); Node 22 build clean with 0 `.woff` assets.
-- Pint passes for every file touched by this fix; repository-wide `pint --test` still reports pre-existing issues outside this change.
+- All UI-foundation work, including the README rewrite, is complete and awaiting review.
+- Root cause of the earlier inquiry bug: listing routes bound `{listing}` by `id`, so slug URLs caused `SQLSTATE[22P02] invalid input syntax for type bigint`; explicit `{listing:slug}` binding fixes both the detail and inquiry routes.
+- Full suite: 130 passed (410 assertions); Node 22 build clean with 0 `.woff` assets.
+- Pint passes for every file touched by the recent work; repository-wide `pint --test` still reports 7 pre-existing style issues outside these changes.
 - Caddy uses `tls internal` and serves `https://localhost` (see DECISIONS).
 - `public/hot` is absent, so `public/build` assets are what the browser loads.
