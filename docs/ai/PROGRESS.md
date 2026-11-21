@@ -20,7 +20,7 @@ UI foundation: landing page and role dashboards (README last). All UI-foundation
 - [x] UI layouts: public layout, mobile navigation, footer
 - [x] Auth and profile restyle with shared Blade components
 - [x] UI foundation: landing page and role dashboards (README last)
-- [ ] Inquiry management: list, detail, status transitions with audit
+- [x] Inquiry management: list, detail, status transitions with audit
 
 Checkpoint (b) verified: user_id on inquiries, policy split, 11 inquiry tests, isolated test database.
 

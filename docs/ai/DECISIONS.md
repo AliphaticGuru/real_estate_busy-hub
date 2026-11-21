@@ -67,3 +67,14 @@
 - Published listing pages show "Inquire" and "WhatsApp" below the company name in one left-aligned `flex flex-wrap` row; `grow` lets the actions share a line at narrow widths or fill the row when they wrap.
 - The Inquire link keeps `aria-label="Request an inspection or consultation"` so the short visible label retains the descriptive accessible name.
 - Reason: both actions stay visible and tappable at 360px without adding JavaScript, while screen readers keep the full intent.
+
+## Customer role assignment fix (inquiry-management)
+- The `User` model keeps a default Customer role (`booted` creating hook) so plain factory users start as customers; other roles are assigned deliberately via `forRole()` or the registration flow.
+- The register Volt component now calls `$user->assignRole(RoleName::Customer)` after creating the user, so registration assigns the customer role explicitly instead of relying on the model default.
+- Factories, seeders and tests set roles deliberately via `forRole()` or explicit `assignRole()` (e.g. `User::factory()->professional()`, `UserSeeder`, `RoleTest`, `AuthenticationTest`, `RegistrationTest`).
+- Reason: removes the "professional treated as customer" ambiguity by making the customer role an explicit default for new users while registration remains the explicit source of the customer role; factories and tests no longer inherit implicit defaults.
+
+## Inquiry status management (inquiry-management)
+- `InquiryController@updateStatus` returns 422 for tampered status values not in `InquiryStatus` cases, and redirects back with an error flash for disallowed/stale transitions.
+- Success redirects to `inquiries.show` with a success flash; the status badge variant lives on the enum (`InquiryStatus::badgeVariant()`).
+- Reason: tampered payloads fail fast with 422, stale transitions bounce back with a readable error via the shared `x-alert` component, and valid transitions flow to the show page.
