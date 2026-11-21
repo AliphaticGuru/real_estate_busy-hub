@@ -17,4 +17,18 @@ enum InquiryStatus: string
             default => 'neutral',
         };
     }
+
+    /**
+     * The statuses this status may transition to.
+     *
+     * @return array<int, self>
+     */
+    public function allowedTransitions(): array
+    {
+        return match ($this) {
+            self::New => [self::Contacted, self::Closed],
+            self::Contacted => [self::Closed],
+            self::Closed => [self::Contacted],
+        };
+    }
 }

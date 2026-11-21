@@ -21,6 +21,12 @@
         <form method="POST" action="{{ route('inquiries.store', $listing->slug) }}" class="mt-6 space-y-5">
             @csrf
 
+            {{-- Honeypot: hidden from people, catnip for bots. --}}
+            <div class="hidden" aria-hidden="true">
+                <label for="website">{{ __('Website') }}</label>
+                <input type="text" name="website" id="website" tabindex="-1" autocomplete="off">
+            </div>
+
             <div>
                 <label for="type" class="block text-sm font-medium text-gray-700">{{ __('Type') }}</label>
                 <select

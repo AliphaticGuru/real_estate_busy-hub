@@ -722,6 +722,93 @@ class InquiryTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_show_page_renders_status_control_as_post_form(): void
+    {
+        $company = Company::factory()->create();
+        $user = User::factory()->company()->create(['company_id' => $company->id]);
+        $listing = Listing::factory()->published()->create(['company_id' => $company->id]);
+
+        $inquiry = Inquiry::factory()->create([
+            'listing_id' => $listing->id,
+            'professional_id' => null,
+            'status' => 'new',
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('inquiries.show', $inquiry))
+            ->assertOk()
+            ->assertSee('method="POST"', false)
+            ->assertSee('name="_method" value="PATCH"', false)
+            ->assertSee('name="_token"', false)
+            ->assertSee('name="status" value="contacted"', false)
+            ->assertSee('name="status" value="closed"', false)
+            ->assertSee('Mark as Contacted')
+            ->assertSee('Close inquiry')
+            ->assertDontSee('method="PATCH"', false);
+    }
+
+    public function test_show_page_offers_only_valid_status_transitions(): void
+    {
+        $company = Company::factory()->create();
+        $user = User::factory()->company()->create(['company_id' => $company->id]);
+        $listing = Listing::factory()->published()->create(['company_id' => $company->id]);
+
+        $contacted = Inquiry::factory()->create([
+            'listing_id' => $listing->id,
+            'professional_id' => null,
+            'status' => 'contacted',
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('inquiries.show', $contacted))
+            ->assertOk()
+            ->assertSee('Mark as Closed')
+            ->assertDontSee('Mark as Contacted')
+            ->assertDontSee('Close inquiry')
+            ->assertDontSee('Reopen');
+
+        $closed = Inquiry::factory()->create([
+            'listing_id' => $listing->id,
+            'professional_id' => null,
+            'status' => 'closed',
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('inquiries.show', $closed))
+            ->assertOk()
+            ->assertSee('Reopen')
+            ->assertDontSee('Mark as Contacted')
+            ->assertDontSee('Mark as Closed')
+            ->assertDontSee('Close inquiry');
+    }
+
+    public function test_status_control_submits_through_page_route(): void
+    {
+        $company = Company::factory()->create();
+        $user = User::factory()->company()->create(['company_id' => $company->id]);
+        $listing = Listing::factory()->published()->create(['company_id' => $company->id]);
+
+        $inquiry = Inquiry::factory()->create([
+            'listing_id' => $listing->id,
+            'professional_id' => null,
+            'status' => 'new',
+        ]);
+
+        $this->actingAs($user)
+            ->from(route('inquiries.show', $inquiry))
+            ->post(route('inquiries.status.update', $inquiry), [
+                '_method' => 'PATCH',
+                'status' => 'contacted',
+            ])
+            ->assertRedirect(route('inquiries.show', $inquiry))
+            ->assertSessionHas('status', 'Inquiry status updated.');
+
+        $this->assertDatabaseHas('inquiries', [
+            'id' => $inquiry->id,
+            'status' => 'contacted',
+        ]);
+    }
+
     public function test_allowed_transition_new_to_contacted(): void
     {
         $company = Company::factory()->create();

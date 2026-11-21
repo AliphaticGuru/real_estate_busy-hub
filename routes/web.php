@@ -34,7 +34,9 @@ Route::middleware('auth')->group(function () {
 
 Route::get('companies/{slug}', [CompanyController::class, 'show'])->name('companies.show');
 Route::get('listings/{listing:slug}/inquiries/create', [InquiryController::class, 'create'])->name('inquiries.create');
-Route::post('listings/{listing:slug}/inquiries', [InquiryController::class, 'store'])->name('inquiries.store');
+Route::post('listings/{listing:slug}/inquiries', [InquiryController::class, 'store'])
+    ->middleware('throttle:5,1')
+    ->name('inquiries.store');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('inquiries', [InquiryController::class, 'index'])->name('inquiries.index');

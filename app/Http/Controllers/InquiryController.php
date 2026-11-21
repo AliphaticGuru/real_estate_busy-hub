@@ -7,10 +7,13 @@ use App\Enums\ListingStatus;
 use App\Models\AuditLog;
 use App\Models\Inquiry;
 use App\Models\Listing;
+use App\Services\InquiryNotifier;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
+use Throwable;
 
 class InquiryController extends Controller
 {
@@ -27,9 +30,15 @@ class InquiryController extends Controller
     /**
      * Store a consultation / inspection request for a listing.
      */
-    public function store(Request $request, Listing $listing): RedirectResponse
+    public function store(Request $request, Listing $listing, InquiryNotifier $notifier): RedirectResponse
     {
         $this->ensurePublished($listing);
+
+        if ($request->filled('website')) {
+            return redirect()
+                ->route('listings.show', $listing->slug)
+                ->with('status', __('Thank you! Your inquiry has been sent.'));
+        }
 
         $validated = $request->validate([
             'type' => ['required', 'string', Rule::in(['consultation', 'inspection'])],
@@ -44,6 +53,15 @@ class InquiryController extends Controller
         $inquiry->listing_id = $listing->id;
         $inquiry->user_id = $request->user()?->id;
         $inquiry->save();
+
+        try {
+            $notifier->notify($inquiry);
+        } catch (Throwable $exception) {
+            Log::warning('Inquiry notification failed.', [
+                'inquiry_id' => $inquiry->id,
+                'error' => $exception->getMessage(),
+            ]);
+        }
 
         return redirect()
             ->route('listings.show', $listing->slug)
@@ -189,13 +207,18 @@ class InquiryController extends Controller
      */
     private function isAllowedTransition(string $from, string $to): bool
     {
-        $allowed = [
-            InquiryStatus::New->value => [InquiryStatus::Contacted->value, InquiryStatus::Closed->value],
-            InquiryStatus::Contacted->value => [InquiryStatus::Closed->value],
-            InquiryStatus::Closed->value => [InquiryStatus::Contacted->value],
-        ];
+        $status = InquiryStatus::tryFrom($from);
 
-        return in_array($to, $allowed[$from] ?? [], true);
+        if ($status === null) {
+            return false;
+        }
+
+        $allowed = array_map(
+            fn (InquiryStatus $transition): string => $transition->value,
+            $status->allowedTransitions(),
+        );
+
+        return in_array($to, $allowed, true);
     }
 
     /**

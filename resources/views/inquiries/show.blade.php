@@ -94,21 +94,25 @@
             <x-card class="mb-6">
                 <div class="p-6">
                     <div class="flex flex-wrap items-center gap-4">
-                        <form method="PATCH" action="{{ route('inquiries.status.update', $inquiry) }}">
-                            @method('PATCH')
-                            <input type="hidden" name="status"
-                                value="{{ $inquiry->status === \App\Enums\InquiryStatus::New ? \App\Enums\InquiryStatus::Contacted->value : \App\Enums\InquiryStatus::Closed->value }}">
+                        @foreach ($inquiry->status->allowedTransitions() as $transition)
+                            <form method="POST" action="{{ route('inquiries.status.update', $inquiry) }}">
+                                @csrf
+                                @method('PATCH')
+                                <input type="hidden" name="status" value="{{ $transition->value }}">
 
-                            <x-button type="submit" class="min-h-[44px]">
-                                @if ($inquiry->status === \App\Enums\InquiryStatus::New)
-                                    {{ __('Mark as Contacted') }}
-                                @elseif ($inquiry->status === \App\Enums\InquiryStatus::Contacted)
-                                    {{ __('Mark as Closed') }}
-                                @elseif ($inquiry->status === \App\Enums\InquiryStatus::Closed)
-                                    {{ __('Reopen') }}
-                                @endif
-                            </x-button>
-                        </form>
+                                <x-button
+                                    type="submit"
+                                    :variant="$transition === \App\Enums\InquiryStatus::Closed ? 'secondary' : 'primary'"
+                                    class="min-h-[44px]"
+                                >
+                                    @if ($transition === \App\Enums\InquiryStatus::Contacted)
+                                        {{ $inquiry->status === \App\Enums\InquiryStatus::Closed ? __('Reopen') : __('Mark as Contacted') }}
+                                    @else
+                                        {{ $inquiry->status === \App\Enums\InquiryStatus::New ? __('Close inquiry') : __('Mark as Closed') }}
+                                    @endif
+                                </x-button>
+                            </form>
+                        @endforeach
 
                         @if ($whatsappLink)
                             <a href="{{ $whatsappLink }}"
