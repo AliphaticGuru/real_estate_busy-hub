@@ -135,6 +135,26 @@ Copy `.env.example` and fill in values locally. Never commit `.env`.
 
 Secrets belong in environment variables or the deployment platform, never in the repository.
 
+### Email and queues
+
+Inquiry notifications are sent through Laravel's mail and queue system. Mail settings come from environment variables only:
+
+- `MAIL_MAILER` — transport. `.env.example` uses `log`, which writes the rendered email to `storage/logs/laravel.log` for local development.
+- `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD` — SMTP connection details when `MAIL_MAILER=smtp`.
+- `MAIL_FROM_ADDRESS`, `MAIL_FROM_NAME` — sender identity. `MAIL_FROM_NAME` defaults to `APP_NAME`.
+
+`QUEUE_CONNECTION=database` is the default and needs no external service; the `jobs` and `failed_jobs` tables already exist in `database/migrations`.
+
+Run a worker locally with:
+
+```sh
+php artisan queue:work --tries=3 --max-time=3600
+```
+
+`docker-compose.yml` and `docker-compose.prod.yml` both define a `queue` service that runs that command with `restart: unless-stopped`, so notifications are delivered without a manual worker.
+
+For a free-tier SMTP provider, [Brevo](https://www.brevo.com/) offers a free plan with a daily sending limit. Set `MAIL_MAILER=smtp`, `MAIL_HOST=smtp-relay.brevo.com`, `MAIL_PORT=587`, and put the SMTP login and key in `MAIL_USERNAME` and `MAIL_PASSWORD`. Keep the credentials in the deployment environment, never in the repository.
+
 ## Deployment
 
 The intended path is a free-tier demo first, then a single VPS running Docker Compose and Caddy. Later phases may move to AWS, GCP or Kubernetes.

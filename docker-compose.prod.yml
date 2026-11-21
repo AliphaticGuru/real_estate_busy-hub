@@ -16,7 +16,7 @@ services:
       - DB_PASSWORD=secret
       - CACHE_STORE=redis
       - SESSION_DRIVER=redis
-      - QUEUE_CONNECTION=redis
+      - QUEUE_CONNECTION=database
       - BROADCAST_CONNECTION=log
     ports:
       - "80:80"
@@ -28,6 +28,34 @@ services:
       interval: 30s
       timeout: 3s
       start_period: 20s
+      retries: 3
+
+  queue:
+    image: busy-hub-app:latest
+    container_name: busy-hub-queue
+    working_dir: /var/www/html
+    command: php artisan queue:work --tries=3 --max-time=3600
+    restart: unless-stopped
+    environment:
+      - APP_ENV=production
+      - DB_CONNECTION=pgsql
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_DATABASE=busy_hub
+      - DB_USERNAME=busyhub
+      - DB_PASSWORD=secret
+      - CACHE_STORE=redis
+      - SESSION_DRIVER=redis
+      - QUEUE_CONNECTION=database
+      - BROADCAST_CONNECTION=log
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f 'queue:work' > /dev/null"]
+      interval: 30s
+      timeout: 3s
+      start_period: 10s
       retries: 3
 
   db:
