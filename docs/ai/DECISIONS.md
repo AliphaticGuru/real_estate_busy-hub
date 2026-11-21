@@ -78,3 +78,9 @@
 - `InquiryController@updateStatus` returns 422 for tampered status values not in `InquiryStatus` cases, and redirects back with an error flash for disallowed/stale transitions.
 - Success redirects to `inquiries.show` with a success flash; the status badge variant lives on the enum (`InquiryStatus::badgeVariant()`).
 - Reason: tampered payloads fail fast with 422, stale transitions bounce back with a readable error via the shared `x-alert` component, and valid transitions flow to the show page.
+
+## Inquiry authorization via InquiryPolicy (inquiry-management)
+- `App\Http\Controllers\Controller` uses `Illuminate\Foundation\Auth\Access\AuthorizesRequests`; this Laravel version has no `Illuminate\Foundation\Http\Controllers\Controller` base, and the empty app base made `authorize()` undefined.
+- `inquiries.show` and `inquiries.status.update` authorize through `InquiryPolicy` (`view` / `update`); `Inquiry::viewableBy()` and the `whereViewableBy()` scope are kept for list scoping only.
+- Reason: a single authorization path (policy) for single inquiries and a single scoping path (model scope) for lists, with a test proving they agree.
+- Removed `database/seeders/TownSeeder.php` (unrequested demo data) and its `DatabaseSeeder` reference; `CompanySeeder` remains.

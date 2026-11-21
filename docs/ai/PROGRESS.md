@@ -3,7 +3,7 @@
 Update this file at the end of every work session, before committing.
 
 ## Current focus
-UI foundation: landing page and role dashboards (README last). All UI-foundation items are complete and awaiting review.
+Inquiry management: list, detail and status transitions with policy-based authorization (branch `inquiry-management`). Implementation and tests are complete and awaiting review.
 
 ## Checklist
 - [x] Laravel scaffolded
@@ -68,3 +68,11 @@ Checkpoint (b) verified: user_id on inquiries, policy split, 11 inquiry tests, i
 - Pint passes for every file touched by the recent work; repository-wide `pint --test` still reports 7 pre-existing style issues outside these changes.
 - Caddy uses `tls internal` and serves `https://localhost` (see DECISIONS).
 - `public/hot` is absent, so `public/build` assets are what the browser loads.
+
+## Inquiry management (branch `inquiry-management`)
+- `inquiries.show` and `inquiries.status.update` authorize through `InquiryPolicy` via `$this->authorize('view'|'update', $inquiry)`; `App\Http\Controllers\Controller` now uses `AuthorizesRequests` (the previous empty base caused `Call to undefined method App\Http\Controllers\InquiryController::authorize()`).
+- List scoping stays in `Inquiry::viewableBy()` and the `whereViewableBy()` query scope; `InquiryController@index` delegates to it, so the list contains exactly the inquiries the policy allows to be viewed.
+- `test_inquiry_list_scope_agrees_with_policy_view` proves the list scope and policy agree for super_admin, company, professional, customer and verifier; all existing denial tests still pass and none were removed or weakened.
+- Removed the unrequested `database/seeders/TownSeeder.php` and its `DatabaseSeeder` reference; `DatabaseSeederTest` predates this branch (`faa67b2`).
+- `app/Models/User.php` is unchanged from `main`: the `booted()` hook only fills a null `role_id` with Customer; registration assigns the role explicitly.
+- Full suite: 157 passed (518 assertions); `pint --test` passes 109 files.
