@@ -28,6 +28,11 @@ GitHub Actions. Deploy target: single VPS (Docker Compose + Caddy), later AWS/GC
   fees and verification-process pages, blog. No chat, no payments yet.
 - Write tests (Pest or PHPUnit) for each feature; run them before declaring done.
 
+
+- Run `git fsck --full --no-reflogs` before starting a new checkpoint and after any crash, restart, or segmentation fault. Stop and report if it prints errors.
+- Never run git, composer or npm in a container as root against the bind-mounted repo; use `--user $(id -u):$(id -g)`.
+- Never run two package installs at once. Push to origin after every verified checkpoint.
+
 ## Reporting rules
 - After editing vite.config.js, package.json, or any CSS, run the Node 22 build and paste the result. A passing PHP test suite does not verify front-end assets.
 
