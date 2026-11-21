@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Enums\RoleName;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Volt\Volt;
@@ -38,7 +39,7 @@ class RegistrationTest extends TestCase
 
     public function test_new_users_are_registered_with_the_customer_role(): void
     {
-        Volt::test('pages.auth.register')
+        $component = Volt::test('pages.auth.register')
             ->set('name', 'Test User')
             ->set('email', 'customer@example.com')
             ->set('password', 'password')
@@ -48,5 +49,21 @@ class RegistrationTest extends TestCase
         $user = User::where('email', 'customer@example.com')->firstOrFail();
 
         $this->assertTrue($user->isCustomer());
+        $this->assertSame(RoleName::Customer, $user->role->name);
+    }
+
+    public function test_newly_registered_user_reaches_customer_dashboard(): void
+    {
+        $component = Volt::test('pages.auth.register')
+            ->set('name', 'Test User')
+            ->set('email', 'newcustomer@example.com')
+            ->set('password', 'password')
+            ->set('password_confirmation', 'password')
+            ->call('register');
+
+        $this->get('/dashboard')->assertOk();
+
+        $this->assertAuthenticated();
+        $this->assertTrue($this->get('/dashboard')->isOk());
     }
 }

@@ -16,6 +16,8 @@ class RoleTest extends TestCase
     {
         $user = User::factory()->create();
 
+        $user->assignRole(RoleName::Customer);
+
         $this->assertTrue($user->isCustomer());
         $this->assertSame(RoleName::Customer, $user->role->name);
     }
