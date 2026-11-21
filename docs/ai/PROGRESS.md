@@ -3,7 +3,7 @@
 Update this file at the end of every work session, before committing.
 
 ## Current focus
-Inquiry email notifications: queued recipient mail with spam protection (branch `inquiry-notifications`). Planning; implementation not started.
+Inquiry email notifications: queued recipient mail with spam protection (branch `inquiry-notifications`). Implementation and tests are complete and awaiting review.
 
 ## Checklist
 - [x] Laravel scaffolded
@@ -21,7 +21,7 @@ Inquiry email notifications: queued recipient mail with spam protection (branch 
 - [x] Auth and profile restyle with shared Blade components
 - [x] UI foundation: landing page and role dashboards (README last)
 - [x] Inquiry management: list, detail, status transitions with audit
-- [ ] Inquiry email notifications: queued recipient mail, spam protection
+- [x] Inquiry email notifications: queued recipient mail, spam protection
 
 Checkpoint (b) verified: user_id on inquiries, policy split, 11 inquiry tests, isolated test database.
 
@@ -77,3 +77,20 @@ Checkpoint (b) verified: user_id on inquiries, policy split, 11 inquiry tests, i
 - Removed the unrequested `database/seeders/TownSeeder.php` and its `DatabaseSeeder` reference; `DatabaseSeederTest` predates this branch (`faa67b2`).
 - `app/Models/User.php` is unchanged from `main`: the `booted()` hook only fills a null `role_id` with Customer; registration assigns the role explicitly.
 - Full suite: 157 passed (518 assertions); `pint --test` passes 109 files.
+
+## Inquiry email notifications (branch `inquiry-notifications`)
+- Status controls on `inquiries.show` are now real forms: `method="POST"`, `@csrf`, `@method('PATCH')`, a hidden `status` field and a submit button. The previous `method="PATCH"` form made browsers fall back to GET, which produced `The GET method is not supported for route inquiries/{id}/status`.
+- Valid transitions live in `InquiryStatus::allowedTransitions()` and both the show page and `updateStatus` use them; the page offers only the transitions available from the current status.
+- Added the queued `App\Notifications\InquiryReceived` (mail only, `ShouldQueue`, `afterCommit`) and `App\Services\InquiryNotifier`. Recipient precedence is the professional's user email for professional inquiries, then the listing company email; a missing email logs a warning and skips silently.
+- The controller wraps the notifier call in `try/catch (Throwable)` and logs a warning, so a mail or queue failure never breaks the inquiry submission.
+- Spam protection: `throttle:5,1` on `inquiries.store` with a friendly `resources/views/errors/429.blade.php`, and a hidden `website` honeypot that silently discards filled submissions before validation.
+- `docker-compose.yml` and `docker-compose.prod.yml` now run a `queue` service (`php artisan queue:work --tries=3 --max-time=3600`, `restart: unless-stopped`) with a worker-specific healthcheck. Prod `QUEUE_CONNECTION` changed from `redis` (no redis service) to `database`.
+- README documents the mail/queue environment variables, the worker command and a free-tier Brevo SMTP option without secrets.
+- Bug 2 proof: a real HTTP inquiry queued one job; the compose `queue` service delivered it, and `storage/logs/laravel.log` shows `To: hello@acme-realty.test`, the listing title, type, first name, message excerpt and the `inquiries.show` button, with zero occurrences of the submitter's phone or email.
+- Full suite: 167 passed (588 assertions); `pint --test` passes 112 files; Node 22 build passes (CSS 39.55 kB, JS 0.00 kB from an empty `app.js`); both compose files validate.
+
+### Handoff notes (inquiry-notifications)
+- `docker-compose.yml` runs `queue` alongside `app`, `db` and `caddy`; the queue container is healthy and processes jobs automatically.
+- Local mail stays `MAIL_MAILER=log`; switch to SMTP through environment variables only.
+- Prod still sets `CACHE_STORE=redis` and `SESSION_DRIVER=redis` with no redis service (pre-existing, outside this item); only `QUEUE_CONNECTION` was moved to `database` because the worker needs a real backend.
+- Tests use `Notification::fake()`; the full suite and Pint were run after the final code change.

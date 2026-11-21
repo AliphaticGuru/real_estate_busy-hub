@@ -84,3 +84,15 @@
 - `inquiries.show` and `inquiries.status.update` authorize through `InquiryPolicy` (`view` / `update`); `Inquiry::viewableBy()` and the `whereViewableBy()` scope are kept for list scoping only.
 - Reason: a single authorization path (policy) for single inquiries and a single scoping path (model scope) for lists, with a test proving they agree.
 - Removed `database/seeders/TownSeeder.php` (unrequested demo data) and its `DatabaseSeeder` reference; `CompanySeeder` remains.
+
+## Inquiry email notifications (inquiry-notifications)
+- `App\Notifications\InquiryReceived` is mail-only, implements `ShouldQueue`, and sets `afterCommit` in the constructor; `App\Services\InquiryNotifier` resolves the recipient and sends it on demand.
+- Recipient precedence: `professional_id` set → that professional's user email; otherwise the listing company email. A missing email logs a warning and skips; the controller also catches `Throwable` so mail failures never break the submission.
+- `InquiryStatus::allowedTransitions()` is the single source of truth for the status form and `updateStatus`; the show page renders one POST form (`@csrf` + `@method('PATCH')`) per valid transition. Reason: the HTML form method must be POST, and duplicating the transition map in the view would let the UI and controller drift.
+- Spam protection is `throttle:5,1` on `inquiries.store` plus a hidden `website` honeypot checked before validation. Reason: cheap, stateless protection for guests without adding a CAPTCHA dependency.
+- Queue uses the database driver. Both compose files add a `queue` service running `php artisan queue:work --tries=3 --max-time=3600` with `restart: unless-stopped`; prod `QUEUE_CONNECTION` is now `database` because no redis service exists. Reason: the existing migrations already create `jobs`/`failed_jobs`, so no schema change was needed.
+- The queue service overrides the image healthcheck with `pgrep -f 'queue:work'`; the inherited PHP-FPM check would mark it unhealthy even while the worker ran.
+
+## Mail and queue environment configuration
+- Mail settings come only from `MAIL_MAILER`, `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_FROM_ADDRESS` and `MAIL_FROM_NAME`; local development uses `MAIL_MAILER=log`, and the README documents a free-tier Brevo SMTP option without secrets.
+- Reason: keeps credentials out of the repository and lets production switch transports without code changes.
