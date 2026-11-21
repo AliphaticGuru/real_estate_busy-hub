@@ -15,6 +15,8 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             UserSeeder::class,
             DemoSeeder::class,
+            TownSeeder::class,
+            CompanySeeder::class,
         ]);
     }
 }
