@@ -803,6 +803,11 @@ class InquiryTest extends TestCase
             ->assertRedirect(route('inquiries.show', $inquiry))
             ->assertSessionHas('status', 'Inquiry status updated.');
 
+        $this->actingAs($user)
+            ->get(route('inquiries.show', $inquiry))
+            ->assertOk()
+            ->assertSee('Inquiry status updated.');
+
         $this->assertDatabaseHas('inquiries', [
             'id' => $inquiry->id,
             'status' => 'contacted',

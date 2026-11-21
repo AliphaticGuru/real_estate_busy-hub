@@ -87,7 +87,7 @@ Checkpoint (b) verified: user_id on inquiries, policy split, 11 inquiry tests, i
 - `docker-compose.yml` and `docker-compose.prod.yml` now run a `queue` service (`php artisan queue:work --tries=3 --max-time=3600`, `restart: unless-stopped`) with a worker-specific healthcheck. Prod `QUEUE_CONNECTION` changed from `redis` (no redis service) to `database`.
 - README documents the mail/queue environment variables, the worker command and a free-tier Brevo SMTP option without secrets.
 - Bug 2 proof: a real HTTP inquiry queued one job; the compose `queue` service delivered it, and `storage/logs/laravel.log` shows `To: hello@acme-realty.test`, the listing title, type, first name, message excerpt and the `inquiries.show` button, with zero occurrences of the submitter's phone or email.
-- Full suite: 167 passed (588 assertions); `pint --test` passes 112 files; Node 22 build passes (CSS 39.55 kB, JS 0.00 kB from an empty `app.js`); both compose files validate.
+- Full suite: 167 passed (590 assertions); `pint --test` passes 112 files; Node 22 build passes (CSS 39.55 kB, JS 0.00 kB from an empty `app.js`); both compose files validate.
 
 ### Handoff notes (inquiry-notifications)
 - `docker-compose.yml` runs `queue` alongside `app`, `db` and `caddy`; the queue container is healthy and processes jobs automatically.
