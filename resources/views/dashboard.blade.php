@@ -114,8 +114,11 @@
             {{-- Company, professional and customer inquiries --}}
             @if (in_array($data['role'], [RoleName::Company, RoleName::Professional, RoleName::Customer], true))
                 <x-card class="overflow-hidden">
-                    <div class="border-b border-gray-100 px-5 py-4">
+                    <div class="flex flex-col gap-2 border-b border-gray-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
                         <h2 class="text-base font-semibold text-gray-900">{{ __('Recent inquiries') }}</h2>
+                        <a href="{{ route('inquiries.index') }}" class="text-sm font-semibold text-brand-700 hover:text-brand-800">
+                            {{ __('View all') }}
+                        </a>
                     </div>
 
                     @if ($data['recentInquiries']->isEmpty())
@@ -130,7 +133,9 @@
                                 <li class="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
                                     <div class="min-w-0">
                                         <p class="text-sm font-semibold text-gray-900">
-                                            {{ $inquiry->name }}
+                                            <a href="{{ route('inquiries.show', $inquiry) }}" class="hover:text-brand-700">
+                                                {{ $inquiry->name }}
+                                            </a>
                                             <span class="font-normal text-gray-500">
                                                 · {{ Str::headline($inquiry->type?->value ?? '') }}
                                             </span>

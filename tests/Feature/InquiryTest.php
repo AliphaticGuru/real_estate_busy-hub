@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Dashboard\DashboardData;
+use App\Enums\RoleName;
 use App\Models\Company;
 use App\Models\Inquiry;
 use App\Models\Listing;
@@ -356,5 +357,540 @@ class InquiryTest extends TestCase
 
         $this->assertSame(1, $data['counts']['inquiry_status']['new']);
         $this->assertTrue($data['recentInquiries']->contains('id', $inquiry->id));
+    }
+
+    // ============================================================
+    // Inquiry Management Tests
+    // ============================================================
+
+    public function test_inquiry_index_lists_only_scoped_inquiries(): void
+    {
+        // Company A
+        $companyA = Company::factory()->create();
+        $userA = User::factory()->company()->create(['company_id' => $companyA->id]);
+        $listingA = Listing::factory()->published()->create(['company_id' => $companyA->id]);
+        $inquiryA = Inquiry::factory()->create(['listing_id' => $listingA->id, 'status' => 'new']);
+
+        // Company B
+        $companyB = Company::factory()->create();
+        $userB = User::factory()->company()->create(['company_id' => $companyB->id]);
+        $listingB = Listing::factory()->published()->create(['company_id' => $companyB->id]);
+        $inquiryB = Inquiry::factory()->create(['listing_id' => $listingB->id, 'status' => 'new']);
+
+        // Company A sees only their inquiry
+        $this->actingAs($userA)
+            ->get(route('inquiries.index'))
+            ->assertOk()
+            ->assertSee($inquiryA->name)
+            ->assertDontSee($inquiryB->name);
+
+        // Company B sees only their inquiry
+        $this->actingAs($userB)
+            ->get(route('inquiries.index'))
+            ->assertOk()
+            ->assertSee($inquiryB->name)
+            ->assertDontSee($inquiryA->name);
+    }
+
+    public function test_professional_index_lists_only_their_inquiries(): void
+    {
+        $profA = Professional::factory()->create();
+        $profB = Professional::factory()->create();
+
+        // Assign Professional role to the users
+        $profA->user->assignRole(RoleName::Professional);
+        $profB->user->assignRole(RoleName::Professional);
+
+        $listing = Listing::factory()->published()->create();
+
+        $inquiryA = Inquiry::factory()->create([
+            'listing_id' => $listing->id,
+            'professional_id' => $profA->id,
+            'status' => 'new',
+        ]);
+        $inquiryB = Inquiry::factory()->create([
+            'listing_id' => $listing->id,
+            'professional_id' => $profB->id,
+            'status' => 'new',
+        ]);
+
+        $this->actingAs($profA->user)
+            ->get(route('inquiries.index'))
+            ->assertOk()
+            ->assertSee($inquiryA->name)
+            ->assertDontSee($inquiryB->name);
+
+        $this->actingAs($profB->user)
+            ->get(route('inquiries.index'))
+            ->assertOk()
+            ->assertSee($inquiryB->name)
+            ->assertDontSee($inquiryA->name);
+    }
+
+    public function test_customer_index_lists_only_their_inquiries(): void
+    {
+        $customerA = User::factory()->customer()->create();
+        $customerB = User::factory()->customer()->create();
+
+        $listing = Listing::factory()->published()->create();
+
+        $inquiryA = Inquiry::factory()->create([
+            'listing_id' => $listing->id,
+            'user_id' => $customerA->id,
+            'status' => 'new',
+        ]);
+        $inquiryB = Inquiry::factory()->create([
+            'listing_id' => $listing->id,
+            'user_id' => $customerB->id,
+            'status' => 'new',
+        ]);
+
+        $this->actingAs($customerA)
+            ->get(route('inquiries.index'))
+            ->assertOk()
+            ->assertSee($inquiryA->name)
+            ->assertDontSee($inquiryB->name);
+
+        $this->actingAs($customerB)
+            ->get(route('inquiries.index'))
+            ->assertOk()
+            ->assertSee($inquiryB->name)
+            ->assertDontSee($inquiryA->name);
+    }
+
+    public function test_super_admin_sees_all_inquiries(): void
+    {
+        $admin = User::factory()->superAdmin()->create();
+
+        $companyA = Company::factory()->create();
+        $userA = User::factory()->company()->create(['company_id' => $companyA->id]);
+        $listingA = Listing::factory()->published()->create(['company_id' => $companyA->id]);
+        $inquiryA = Inquiry::factory()->create(['listing_id' => $listingA->id, 'status' => 'new']);
+
+        $companyB = Company::factory()->create();
+        $userB = User::factory()->company()->create(['company_id' => $companyB->id]);
+        $listingB = Listing::factory()->published()->create(['company_id' => $companyB->id]);
+        $inquiryB = Inquiry::factory()->create(['listing_id' => $listingB->id, 'status' => 'new']);
+
+        $this->actingAs($admin)
+            ->get(route('inquiries.index'))
+            ->assertOk()
+            ->assertSee($inquiryA->name)
+            ->assertSee($inquiryB->name);
+    }
+
+    public function test_verifier_gets_403_on_inquiry_index(): void
+    {
+        $verifier = User::factory()->verifier()->create();
+        $listing = Listing::factory()->published()->create();
+        Inquiry::factory()->create(['listing_id' => $listing->id]);
+
+        $this->actingAs($verifier)
+            ->get(route('inquiries.index'))
+            ->assertForbidden();
+    }
+
+    public function test_guest_redirected_from_inquiry_index(): void
+    {
+        $this->get(route('inquiries.index'))->assertRedirect(route('login'));
+    }
+
+    public function test_inquiry_index_filters_by_status(): void
+    {
+        $company = Company::factory()->create();
+        $user = User::factory()->company()->create(['company_id' => $company->id]);
+        $listing = Listing::factory()->published()->create(['company_id' => $company->id]);
+
+        $inquiryNew = Inquiry::factory()->create(['listing_id' => $listing->id, 'status' => 'new', 'name' => 'New Inquiry']);
+        $inquiryContacted = Inquiry::factory()->create(['listing_id' => $listing->id, 'status' => 'contacted', 'name' => 'Contacted Inquiry']);
+        $inquiryClosed = Inquiry::factory()->create(['listing_id' => $listing->id, 'status' => 'closed', 'name' => 'Closed Inquiry']);
+
+        $this->actingAs($user)
+            ->get(route('inquiries.index', ['status' => 'new']))
+            ->assertOk()
+            ->assertSee('New Inquiry')
+            ->assertDontSee('Contacted Inquiry')
+            ->assertDontSee('Closed Inquiry');
+
+        $this->actingAs($user)
+            ->get(route('inquiries.index', ['status' => 'contacted']))
+            ->assertOk()
+            ->assertSee('Contacted Inquiry')
+            ->assertDontSee('New Inquiry')
+            ->assertDontSee('Closed Inquiry');
+    }
+
+    public function test_inquiry_show_displays_detail_for_recipient(): void
+    {
+        $company = Company::factory()->create();
+        $user = User::factory()->company()->create(['company_id' => $company->id]);
+        $listing = Listing::factory()->published()->create(['company_id' => $company->id]);
+
+        $inquiry = Inquiry::factory()->create([
+            'listing_id' => $listing->id,
+            'type' => 'inspection',
+            'name' => 'John Doe',
+            'phone' => '+2348000000001',
+            'email' => 'john@example.com',
+            'message' => 'Please inspect.',
+            'preferred_date' => '2026-12-15',
+            'status' => 'new',
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('inquiries.show', $inquiry))
+            ->assertOk()
+            ->assertSee('John Doe')
+            ->assertSee('Please inspect.')
+            ->assertSee('Inspection')
+            ->assertSee('+2348000000001')
+            ->assertSee('john@example.com')
+            ->assertSee('Reply on WhatsApp');
+    }
+
+    public function test_customer_show_does_not_show_contact_fields(): void
+    {
+        $customer = User::factory()->customer()->create();
+        $listing = Listing::factory()->published()->create();
+
+        $inquiry = Inquiry::factory()->create([
+            'listing_id' => $listing->id,
+            'user_id' => $customer->id,
+            'name' => 'Customer Name',
+            'phone' => '+2348000000002',
+            'email' => 'customer@example.com',
+            'message' => 'Customer message.',
+            'status' => 'new',
+        ]);
+
+        $this->actingAs($customer)
+            ->get(route('inquiries.show', $inquiry))
+            ->assertOk()
+            ->assertSee('Customer Name')
+            ->assertSee('Customer message.')
+            ->assertDontSee('+2348000000002')
+            ->assertDontSee('customer@example.com')
+            ->assertDontSee('Reply on WhatsApp');
+    }
+
+    public function test_company_cannot_view_another_companys_inquiry(): void
+    {
+        $companyA = Company::factory()->create();
+        $userA = User::factory()->company()->create(['company_id' => $companyA->id]);
+        $listingA = Listing::factory()->published()->create(['company_id' => $companyA->id]);
+        $inquiryA = Inquiry::factory()->create(['listing_id' => $listingA->id]);
+
+        $companyB = Company::factory()->create();
+        $userB = User::factory()->company()->create(['company_id' => $companyB->id]);
+
+        $this->actingAs($userB)
+            ->get(route('inquiries.show', $inquiryA))
+            ->assertForbidden();
+    }
+
+    public function test_professional_cannot_view_another_professionals_inquiry(): void
+    {
+        $profA = Professional::factory()->create();
+        $profB = Professional::factory()->create();
+
+        $listing = Listing::factory()->published()->create();
+        $inquiryA = Inquiry::factory()->create([
+            'listing_id' => $listing->id,
+            'professional_id' => $profA->id,
+        ]);
+
+        $this->actingAs($profB->user)
+            ->get(route('inquiries.show', $inquiryA))
+            ->assertForbidden();
+    }
+
+    public function test_customer_cannot_view_another_customers_inquiry(): void
+    {
+        $customerA = User::factory()->customer()->create();
+        $customerB = User::factory()->customer()->create();
+
+        $listing = Listing::factory()->published()->create();
+        $inquiryA = Inquiry::factory()->create([
+            'listing_id' => $listing->id,
+            'user_id' => $customerA->id,
+        ]);
+
+        $this->actingAs($customerB)
+            ->get(route('inquiries.show', $inquiryA))
+            ->assertForbidden();
+    }
+
+    public function test_customer_cannot_update_own_inquiry_status(): void
+    {
+        $customer = User::factory()->customer()->create();
+        $listing = Listing::factory()->published()->create();
+
+        $inquiry = Inquiry::factory()->create([
+            'listing_id' => $listing->id,
+            'user_id' => $customer->id,
+            'status' => 'new',
+        ]);
+
+        $this->actingAs($customer)
+            ->patch(route('inquiries.status.update', $inquiry), ['status' => 'contacted'])
+            ->assertForbidden();
+    }
+
+    public function test_verifier_gets_403_on_inquiry_show(): void
+    {
+        $verifier = User::factory()->verifier()->create();
+        $listing = Listing::factory()->published()->create();
+        $inquiry = Inquiry::factory()->create(['listing_id' => $listing->id]);
+
+        $this->actingAs($verifier)
+            ->get(route('inquiries.show', $inquiry))
+            ->assertForbidden();
+    }
+
+    public function test_allowed_transition_new_to_contacted(): void
+    {
+        $company = Company::factory()->create();
+        $user = User::factory()->company()->create(['company_id' => $company->id]);
+        $listing = Listing::factory()->published()->create(['company_id' => $company->id]);
+
+        $inquiry = Inquiry::factory()->create([
+            'listing_id' => $listing->id,
+            'status' => 'new',
+        ]);
+
+        $this->actingAs($user)
+            ->patch(route('inquiries.status.update', $inquiry), ['status' => 'contacted'])
+            ->assertRedirect(route('inquiries.show', $inquiry))
+            ->assertSessionHas('status');
+
+        $this->assertDatabaseHas('inquiries', [
+            'id' => $inquiry->id,
+            'status' => 'contacted',
+        ]);
+
+        $this->assertDatabaseHas('audit_logs', [
+            'action' => 'inquiry.status.updated',
+            'auditable_id' => $inquiry->id,
+            'old_values' => json_encode(['status' => 'new']),
+            'new_values' => json_encode(['status' => 'contacted']),
+        ]);
+    }
+
+    public function test_allowed_transition_contacted_to_closed(): void
+    {
+        $company = Company::factory()->create();
+        $user = User::factory()->company()->create(['company_id' => $company->id]);
+        $listing = Listing::factory()->published()->create(['company_id' => $company->id]);
+
+        $inquiry = Inquiry::factory()->create([
+            'listing_id' => $listing->id,
+            'status' => 'contacted',
+        ]);
+
+        $this->actingAs($user)
+            ->patch(route('inquiries.status.update', $inquiry), ['status' => 'closed'])
+            ->assertRedirect(route('inquiries.show', $inquiry));
+
+        $this->assertDatabaseHas('inquiries', [
+            'id' => $inquiry->id,
+            'status' => 'closed',
+        ]);
+    }
+
+    public function test_allowed_reopen_closed_to_contacted(): void
+    {
+        $company = Company::factory()->create();
+        $user = User::factory()->company()->create(['company_id' => $company->id]);
+        $listing = Listing::factory()->published()->create(['company_id' => $company->id]);
+
+        $inquiry = Inquiry::factory()->create([
+            'listing_id' => $listing->id,
+            'status' => 'closed',
+        ]);
+
+        $this->actingAs($user)
+            ->patch(route('inquiries.status.update', $inquiry), ['status' => 'contacted'])
+            ->assertRedirect(route('inquiries.show', $inquiry));
+
+        $this->assertDatabaseHas('inquiries', [
+            'id' => $inquiry->id,
+            'status' => 'contacted',
+        ]);
+    }
+
+    public function test_allowed_transition_new_to_closed(): void
+    {
+        $company = Company::factory()->create();
+        $user = User::factory()->company()->create(['company_id' => $company->id]);
+        $listing = Listing::factory()->published()->create(['company_id' => $company->id]);
+
+        $inquiry = Inquiry::factory()->create([
+            'listing_id' => $listing->id,
+            'status' => 'new',
+        ]);
+
+        $this->actingAs($user)
+            ->patch(route('inquiries.status.update', $inquiry), ['status' => 'closed'])
+            ->assertRedirect(route('inquiries.show', $inquiry));
+
+        $this->assertDatabaseHas('inquiries', [
+            'id' => $inquiry->id,
+            'status' => 'closed',
+        ]);
+    }
+
+    public function test_disallowed_transition_contacted_to_new_rejected(): void
+    {
+        $company = Company::factory()->create();
+        $user = User::factory()->company()->create(['company_id' => $company->id]);
+        $listing = Listing::factory()->published()->create(['company_id' => $company->id]);
+
+        $inquiry = Inquiry::factory()->create([
+            'listing_id' => $listing->id,
+            'status' => 'contacted',
+        ]);
+
+        $this->actingAs($user)
+            ->patch(route('inquiries.status.update', $inquiry), ['status' => 'new'])
+            ->assertSessionHasErrors('status');
+
+        $this->assertDatabaseHas('inquiries', [
+            'id' => $inquiry->id,
+            'status' => 'contacted',
+        ]);
+    }
+
+    public function test_disallowed_transition_closed_to_new_rejected(): void
+    {
+        $company = Company::factory()->create();
+        $user = User::factory()->company()->create(['company_id' => $company->id]);
+        $listing = Listing::factory()->published()->create(['company_id' => $company->id]);
+
+        $inquiry = Inquiry::factory()->create([
+            'listing_id' => $listing->id,
+            'status' => 'closed',
+        ]);
+
+        $this->actingAs($user)
+            ->patch(route('inquiries.status.update', $inquiry), ['status' => 'new'])
+            ->assertSessionHasErrors('status');
+
+        $this->assertDatabaseHas('inquiries', [
+            'id' => $inquiry->id,
+            'status' => 'closed',
+        ]);
+    }
+
+    public function test_invalid_status_value_rejected(): void
+    {
+        $company = Company::factory()->create();
+        $user = User::factory()->company()->create(['company_id' => $company->id]);
+        $listing = Listing::factory()->published()->create(['company_id' => $company->id]);
+
+        $inquiry = Inquiry::factory()->create([
+            'listing_id' => $listing->id,
+            'status' => 'new',
+        ]);
+
+        $this->actingAs($user)
+            ->patch(route('inquiries.status.update', $inquiry), ['status' => 'invalid'])
+            ->assertStatus(422);
+    }
+
+    public function test_posted_user_id_on_status_update_ignored(): void
+    {
+        $company = Company::factory()->create();
+        $user = User::factory()->company()->create(['company_id' => $company->id]);
+        $otherUser = User::factory()->create();
+
+        $listing = Listing::factory()->published()->create(['company_id' => $company->id]);
+        $inquiry = Inquiry::factory()->create([
+            'listing_id' => $listing->id,
+            'status' => 'new',
+        ]);
+
+        $this->actingAs($user)
+            ->patch(route('inquiries.status.update', $inquiry), [
+                'status' => 'contacted',
+                'user_id' => $otherUser->id,
+            ])
+            ->assertRedirect(route('inquiries.show', $inquiry));
+
+        $this->assertDatabaseHas('audit_logs', [
+            'action' => 'inquiry.status.updated',
+            'auditable_id' => $inquiry->id,
+            'user_id' => $user->id,
+        ]);
+    }
+
+    public function test_posted_listing_id_on_status_update_ignored(): void
+    {
+        $company = Company::factory()->create();
+        $user = User::factory()->company()->create(['company_id' => $company->id]);
+        $listing = Listing::factory()->published()->create(['company_id' => $company->id]);
+        $otherListing = Listing::factory()->published()->create(['company_id' => $company->id]);
+
+        $inquiry = Inquiry::factory()->create([
+            'listing_id' => $listing->id,
+            'status' => 'new',
+        ]);
+
+        $this->actingAs($user)
+            ->patch(route('inquiries.status.update', $inquiry), [
+                'status' => 'contacted',
+                'listing_id' => $otherListing->id,
+            ])
+            ->assertRedirect(route('inquiries.show', $inquiry));
+
+        $this->assertDatabaseHas('inquiries', [
+            'id' => $inquiry->id,
+            'listing_id' => $listing->id,
+        ]);
+    }
+
+    public function test_posted_professional_id_on_status_update_ignored(): void
+    {
+        $company = Company::factory()->create();
+        $user = User::factory()->company()->create(['company_id' => $company->id]);
+        $prof = Professional::factory()->create();
+
+        $listing = Listing::factory()->published()->create(['company_id' => $company->id]);
+
+        $inquiry = Inquiry::factory()->create([
+            'listing_id' => $listing->id,
+            'status' => 'new',
+            'professional_id' => null,
+        ]);
+
+        $this->actingAs($user)
+            ->patch(route('inquiries.status.update', $inquiry), [
+                'status' => 'contacted',
+                'professional_id' => $prof->id,
+            ])
+            ->assertRedirect(route('inquiries.show', $inquiry));
+
+        $this->assertDatabaseHas('inquiries', [
+            'id' => $inquiry->id,
+            'professional_id' => null,
+        ]);
+    }
+
+    public function test_dashboard_recent_inquiries_link_to_detail_page(): void
+    {
+        $company = Company::factory()->create();
+        $user = User::factory()->company()->create(['company_id' => $company->id]);
+        $listing = Listing::factory()->published()->create(['company_id' => $company->id]);
+
+        $inquiry = Inquiry::factory()->create([
+            'listing_id' => $listing->id,
+            'status' => 'new',
+            'name' => 'Test Inquiry',
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('dashboard'))
+            ->assertOk()
+            ->assertSee('Test Inquiry')
+            ->assertSee(route('inquiries.show', $inquiry), false);
     }
 }

@@ -36,4 +36,10 @@ Route::get('companies/{slug}', [CompanyController::class, 'show'])->name('compan
 Route::get('listings/{listing:slug}/inquiries/create', [InquiryController::class, 'create'])->name('inquiries.create');
 Route::post('listings/{listing:slug}/inquiries', [InquiryController::class, 'store'])->name('inquiries.store');
 
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('inquiries', [InquiryController::class, 'index'])->name('inquiries.index');
+    Route::get('inquiries/{inquiry}', [InquiryController::class, 'show'])->name('inquiries.show');
+    Route::patch('inquiries/{inquiry}/status', [InquiryController::class, 'updateStatus'])->name('inquiries.status.update');
+});
+
 require __DIR__.'/auth.php';
