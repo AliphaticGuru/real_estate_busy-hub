@@ -7,7 +7,6 @@ use App\Enums\ListingStatus;
 use App\Models\AuditLog;
 use App\Models\Inquiry;
 use App\Models\Listing;
-use App\Models\Professional;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -60,17 +59,12 @@ class InquiryController extends Controller
 
         if ($user->isSuperAdmin()) {
             $query = Inquiry::query();
-        } elseif ($user->isCompany()) {
-            $query = Inquiry::query()->whereHas('listing', fn ($q) => $q->where('company_id', $user->company_id));
-        } elseif ($user->isProfessional()) {
-            $professional = Professional::where('user_id', $user->id)->first();
-            $query = $professional
-                ? Inquiry::query()->where('professional_id', $professional->id)
-                : Inquiry::query()->whereRaw('1 = 0');
+        } elseif ($user->isCompany() || $user->isProfessional() || $user->isCustomer()) {
+            // List scoping lives in Inquiry::viewableBy()/whereViewableBy();
+            // authorization for a single inquiry goes through InquiryPolicy.
+            $query = Inquiry::query()->whereViewableBy($user);
         } else {
-            $query = $user->isCustomer()
-                ? Inquiry::query()->where('user_id', $user->id)
-                : abort(403);
+            abort(403);
         }
 
         $query->with(['listing', 'professional']);
@@ -97,9 +91,7 @@ class InquiryController extends Controller
      */
     public function show(Inquiry $inquiry, Request $request): View
     {
-        if (! $inquiry->viewableBy($request->user())) {
-            abort(403);
-        }
+        $this->authorize('view', $inquiry);
 
         $inquiry->load(['listing', 'professional', 'user']);
 
@@ -129,9 +121,7 @@ class InquiryController extends Controller
      */
     public function updateStatus(Request $request, Inquiry $inquiry): RedirectResponse
     {
-        if (! $inquiry->updatableBy($request->user())) {
-            abort(403);
-        }
+        $this->authorize('update', $inquiry);
 
         $newStatus = $request->input('status');
 

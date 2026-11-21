@@ -9,6 +9,7 @@ use App\Models\Inquiry;
 use App\Models\Listing;
 use App\Models\Professional;
 use App\Models\User;
+use App\Policies\InquiryPolicy;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -518,6 +519,80 @@ class InquiryTest extends TestCase
             ->assertSee('Contacted Inquiry')
             ->assertDontSee('New Inquiry')
             ->assertDontSee('Closed Inquiry');
+    }
+
+    public function test_inquiry_list_scope_agrees_with_policy_view(): void
+    {
+        $policy = app(InquiryPolicy::class);
+
+        // Super admin: the policy allows every inquiry; the list contains all of them.
+        $admin = User::factory()->superAdmin()->create();
+        $adminInquiry = Inquiry::factory()->create(['status' => 'new', 'name' => 'Scope Admin Inquiry']);
+
+        $response = $this->actingAs($admin)->get(route('inquiries.index'))->assertOk();
+        $listedIds = $response->viewData('inquiries')->getCollection()->pluck('id');
+
+        $this->assertTrue($listedIds->contains($adminInquiry->id));
+        $this->assertTrue($policy->view($admin, $adminInquiry));
+
+        // Company: only inquiries for the company's own listings; the policy agrees.
+        $companyA = Company::factory()->create();
+        $companyUser = User::factory()->company()->create(['company_id' => $companyA->id]);
+        $listingA = Listing::factory()->published()->create(['company_id' => $companyA->id]);
+        $companyInquiry = Inquiry::factory()->create(['listing_id' => $listingA->id, 'status' => 'new', 'name' => 'Scope Company Inquiry']);
+
+        $companyB = Company::factory()->create();
+        $otherCompanyUser = User::factory()->company()->create(['company_id' => $companyB->id]);
+        $listingB = Listing::factory()->published()->create(['company_id' => $companyB->id]);
+        $otherCompanyInquiry = Inquiry::factory()->create(['listing_id' => $listingB->id, 'status' => 'new', 'name' => 'Scope Other Company Inquiry']);
+
+        $response = $this->actingAs($companyUser)->get(route('inquiries.index'))->assertOk();
+        $listedIds = $response->viewData('inquiries')->getCollection()->pluck('id');
+
+        $this->assertTrue($listedIds->contains($companyInquiry->id));
+        $this->assertFalse($listedIds->contains($otherCompanyInquiry->id));
+        $this->assertTrue($policy->view($companyUser, $companyInquiry));
+        $this->assertFalse($policy->view($otherCompanyUser, $companyInquiry));
+        $this->assertTrue($policy->view($otherCompanyUser, $otherCompanyInquiry));
+
+        // Professional: only inquiries addressed to that professional; the policy agrees.
+        $profA = Professional::factory()->create();
+        $profA->user->assignRole(RoleName::Professional);
+        $profB = Professional::factory()->create();
+        $profB->user->assignRole(RoleName::Professional);
+
+        $professionalInquiry = Inquiry::factory()->create(['professional_id' => $profA->id, 'status' => 'new', 'name' => 'Scope Professional Inquiry']);
+        $otherProfessionalInquiry = Inquiry::factory()->create(['professional_id' => $profB->id, 'status' => 'new', 'name' => 'Scope Other Professional Inquiry']);
+
+        $response = $this->actingAs($profA->user)->get(route('inquiries.index'))->assertOk();
+        $listedIds = $response->viewData('inquiries')->getCollection()->pluck('id');
+
+        $this->assertTrue($listedIds->contains($professionalInquiry->id));
+        $this->assertFalse($listedIds->contains($otherProfessionalInquiry->id));
+        $this->assertTrue($policy->view($profA->user, $professionalInquiry));
+        $this->assertFalse($policy->view($profA->user, $otherProfessionalInquiry));
+
+        // Customer: only inquiries they submitted; the policy agrees.
+        $customerA = User::factory()->customer()->create();
+        $customerB = User::factory()->customer()->create();
+        $listing = Listing::factory()->published()->create();
+
+        $customerInquiry = Inquiry::factory()->create(['listing_id' => $listing->id, 'user_id' => $customerA->id, 'status' => 'new', 'name' => 'Scope Customer Inquiry']);
+        $otherCustomerInquiry = Inquiry::factory()->create(['listing_id' => $listing->id, 'user_id' => $customerB->id, 'status' => 'new', 'name' => 'Scope Other Customer Inquiry']);
+
+        $response = $this->actingAs($customerA)->get(route('inquiries.index'))->assertOk();
+        $listedIds = $response->viewData('inquiries')->getCollection()->pluck('id');
+
+        $this->assertTrue($listedIds->contains($customerInquiry->id));
+        $this->assertFalse($listedIds->contains($otherCustomerInquiry->id));
+        $this->assertTrue($policy->view($customerA, $customerInquiry));
+        $this->assertFalse($policy->view($customerA, $otherCustomerInquiry));
+
+        // Verifier: the policy denies every inquiry and the list endpoint returns 403.
+        $verifier = User::factory()->verifier()->create();
+
+        $this->assertFalse($policy->view($verifier, $customerInquiry));
+        $this->actingAs($verifier)->get(route('inquiries.index'))->assertForbidden();
     }
 
     public function test_inquiry_show_displays_detail_for_recipient(): void

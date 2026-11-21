@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\InquiryStatus;
 use App\Enums\InquiryType;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -39,42 +40,42 @@ class Inquiry extends Model
     }
 
     /**
+     * Scope a query to only inquiries the given user is allowed to view.
+     */
+    public function scopeWhereViewableBy(Builder $query, ?User $user): Builder
+    {
+        if ($user === null) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        if ($user->isSuperAdmin()) {
+            return $query;
+        }
+
+        return $query->where(function (Builder $query) use ($user) {
+            $query->where(function (Builder $query) use ($user) {
+                $query->whereHas('professional', fn (Builder $professional) => $professional->where('user_id', $user->id));
+            })->orWhere(function (Builder $query) use ($user) {
+                $query->whereHas('listing', fn (Builder $listing) => $listing->where('company_id', $user->company_id));
+            })->orWhere(function (Builder $query) use ($user) {
+                $query->where('user_id', $user->id);
+            });
+        });
+    }
+
+    /**
      * Determine if the inquiry is viewable by the given user.
      */
     public function viewableBy(?User $user): bool
     {
-        if (! $user) {
+        if ($user === null) {
             return false;
         }
 
-        if ($user->isSuperAdmin()) {
-            return true;
-        }
-
-        // Professional scoping: check professional first
-        if ($this->professional_id !== null) {
-            $professional = $this->professional;
-            if ($professional?->user_id === $user->id) {
-                return true;
-            }
-            // If professional_id is set but professional doesn't match,
-            // fall through to listing check (company users may still have access)
-        }
-
-        // Company scoping: view via listing.company_id
-        if ($this->listing_id !== null) {
-            $listing = $this->listing;
-            if ($listing?->company_id !== null && $user->company_id === $listing->company_id) {
-                return true;
-            }
-        }
-
-        // Customer scoping: view via user_id
-        if ($this->user_id !== null && $this->user_id === $user->id) {
-            return true;
-        }
-
-        return false;
+        return static::query()
+            ->whereKey($this->getKey())
+            ->whereViewableBy($user)
+            ->exists();
     }
 
     /**
