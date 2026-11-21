@@ -3,7 +3,7 @@
 Update this file at the end of every work session, before committing.
 
 ## Current focus
-Inquiry management: list, detail and status transitions with policy-based authorization (branch `inquiry-management`). Implementation and tests are complete and awaiting review.
+Inquiry email notifications: queued recipient mail with spam protection (branch `inquiry-notifications`). Planning; implementation not started.
 
 ## Checklist
 - [x] Laravel scaffolded
@@ -21,6 +21,7 @@ Inquiry management: list, detail and status transitions with policy-based author
 - [x] Auth and profile restyle with shared Blade components
 - [x] UI foundation: landing page and role dashboards (README last)
 - [x] Inquiry management: list, detail, status transitions with audit
+- [ ] Inquiry email notifications: queued recipient mail, spam protection
 
 Checkpoint (b) verified: user_id on inquiries, policy split, 11 inquiry tests, isolated test database.
 
