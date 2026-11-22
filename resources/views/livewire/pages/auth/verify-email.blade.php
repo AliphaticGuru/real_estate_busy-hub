@@ -9,17 +9,38 @@ use Livewire\Volt\Component;
 new #[Layout('layouts.guest')] class extends Component
 {
     /**
+     * Copy shown while the email address is still unverified.
+     */
+    public string $verificationStatus = 'Waiting for confirmation...';
+
+    /**
+     * Users who are already verified do not need the notice page.
+     */
+    public function mount(): void
+    {
+        $this->redirectWhenVerified();
+    }
+
+    /**
+     * Check the verification state after each poll of the page.
+     */
+    public function checkVerified(): void
+    {
+        $this->redirectWhenVerified();
+    }
+
+    /**
      * Send an email verification notification to the user.
      */
     public function sendVerification(): void
     {
-        if (Auth::user()->hasVerifiedEmail()) {
+        if ($this->freshUser()?->hasVerifiedEmail()) {
             $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
 
             return;
         }
 
-        Auth::user()->sendEmailVerificationNotification();
+        $this->freshUser()->sendEmailVerificationNotification();
 
         Session::flash('status', 'verification-link-sent');
     }
@@ -33,9 +54,31 @@ new #[Layout('layouts.guest')] class extends Component
 
         $this->redirect('/', navigate: true);
     }
+
+    /**
+     * The signed link does the verifying; this only reads the latest state.
+     */
+    private function redirectWhenVerified(): void
+    {
+        if (! $this->freshUser()?->hasVerifiedEmail()) {
+            return;
+        }
+
+        $this->verificationStatus = __('Email verified, redirecting...');
+
+        $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
+    }
+
+    /**
+     * The authenticated user re-read from the database.
+     */
+    private function freshUser()
+    {
+        return Auth::user()?->fresh();
+    }
 }; ?>
 
-<div class="space-y-6">
+<div wire:poll.5s.visible="checkVerified" class="space-y-6">
     <x-page-header
         :title="__('Verify your email')"
         :subtitle="__('One more step before you can use your account.')"
@@ -50,6 +93,10 @@ new #[Layout('layouts.guest')] class extends Component
             {{ __('A new verification link has been sent to the email address you provided during registration.') }}
         </x-alert>
     @endif
+
+    <p aria-live="polite" class="text-sm font-medium text-gray-700">
+        {{ $verificationStatus }}
+    </p>
 
     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <x-button type="button" wire:click="sendVerification" class="w-full sm:w-auto">
