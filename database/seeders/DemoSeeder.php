@@ -5,9 +5,11 @@ namespace Database\Seeders;
 use App\Enums\CompanyStatus;
 use App\Enums\ListingStatus;
 use App\Enums\ListingVerificationStatus;
+use App\Enums\ProfessionalType;
 use App\Enums\RoleName;
 use App\Models\Company;
 use App\Models\Listing;
+use App\Models\Professional;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -63,6 +65,8 @@ class DemoSeeder extends Seeder
 
         $customer->assignRole(RoleName::Customer);
         $customer->save();
+
+        $this->seedProfessionals($company, $verifier);
 
         Listing::create([
             'company_id' => $company->id,
@@ -123,5 +127,74 @@ class DemoSeeder extends Seeder
             'verified_at' => null,
             'verified_by' => null,
         ]);
+    }
+
+    /**
+     * Seed verified professionals of different types plus one awaiting verification.
+     */
+    private function seedProfessionals(Company $company, User $verifier): void
+    {
+        $professionals = [
+            [
+                'name' => 'Ada Okafor',
+                'email' => 'lawyer@busyhub.test',
+                'slug' => 'ada-okafor',
+                'type' => ProfessionalType::Lawyer,
+                'company_id' => $company->id,
+                'registration_body' => 'Nigerian Bar Association',
+                'registration_number' => 'NBA/ABJ/2011/0042',
+                'bio' => 'Property and construction lawyer advising buyers and developers in Abuja.',
+                'credentials_verified_at' => now(),
+            ],
+            [
+                'name' => 'Tunde Bello',
+                'email' => 'architect@busyhub.test',
+                'slug' => 'tunde-bello',
+                'type' => ProfessionalType::Architect,
+                'company_id' => null,
+                'registration_body' => 'Architects Registration Council of Nigeria',
+                'registration_number' => 'ARCON/2014/1187',
+                'bio' => 'Residential and commercial architect with a focus on sustainable design.',
+                'credentials_verified_at' => now(),
+            ],
+            [
+                'name' => 'Ngozi Eze',
+                'email' => 'engineer@busyhub.test',
+                'slug' => 'ngozi-eze',
+                'type' => ProfessionalType::Engineer,
+                'company_id' => null,
+                'registration_body' => 'Council for the Regulation of Engineering in Nigeria',
+                'registration_number' => 'COREN/2018/3321',
+                'bio' => 'Structural engineer awaiting credentials verification.',
+                'credentials_verified_at' => null,
+            ],
+        ];
+
+        foreach ($professionals as $attributes) {
+            $user = User::firstOrCreate(
+                ['email' => $attributes['email']],
+                [
+                    'name' => $attributes['name'],
+                    'password' => 'password',
+                    'email_verified_at' => now(),
+                ],
+            );
+
+            $user->assignRole(RoleName::Professional);
+
+            Professional::firstOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'company_id' => $attributes['company_id'],
+                    'slug' => $attributes['slug'],
+                    'type' => $attributes['type']->value,
+                    'registration_body' => $attributes['registration_body'],
+                    'registration_number' => $attributes['registration_number'],
+                    'bio' => $attributes['bio'],
+                    'credentials_verified_at' => $attributes['credentials_verified_at'],
+                    'verified_by' => $attributes['credentials_verified_at'] !== null ? $verifier->id : null,
+                ],
+            );
+        }
     }
 }

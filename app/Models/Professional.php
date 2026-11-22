@@ -9,10 +9,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Str;
 
 #[Fillable([
     'user_id',
     'company_id',
+    'slug',
     'type',
     'registration_body',
     'registration_number',
@@ -30,6 +32,31 @@ class Professional extends Model
             'type' => ProfessionalType::class,
             'credentials_verified_at' => 'datetime',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function (Professional $professional): void {
+            if (blank($professional->slug)) {
+                $professional->slug = static::uniqueSlug($professional);
+            }
+        });
+    }
+
+    private static function uniqueSlug(Professional $professional): string
+    {
+        $name = $professional->user?->name ?: ($professional->type?->value ?? 'professional').' professional';
+        $base = Str::limit(Str::slug($name), 200, '');
+        $base = $base !== '' ? $base : 'professional';
+
+        $slug = $base;
+        $suffix = 2;
+
+        while (static::query()->where('slug', $slug)->exists()) {
+            $slug = $base.'-'.$suffix++;
+        }
+
+        return $slug;
     }
 
     public function user(): BelongsTo

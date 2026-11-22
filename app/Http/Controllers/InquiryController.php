@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Enums\InquiryStatus;
+use App\Enums\InquiryType;
 use App\Enums\ListingStatus;
 use App\Models\AuditLog;
 use App\Models\Inquiry;
 use App\Models\Listing;
+use App\Models\Professional;
 use App\Services\InquiryNotifier;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -34,38 +36,55 @@ class InquiryController extends Controller
     {
         $this->ensurePublished($listing);
 
-        if ($request->filled('website')) {
-            return redirect()
-                ->route('listings.show', $listing->slug)
-                ->with('status', __('Thank you! Your inquiry has been sent.'));
+        if ($this->isHoneypot($request)) {
+            return $this->redirectToListing($listing);
         }
 
-        $validated = $request->validate([
-            'type' => ['required', 'string', Rule::in(['consultation', 'inspection'])],
-            'name' => ['required', 'string', 'max:255'],
-            'phone' => ['required', 'string', 'max:20'],
-            'email' => ['required', 'string', 'email', 'max:255'],
-            'message' => ['required', 'string'],
-            'preferred_date' => ['nullable', 'date'],
-        ]);
+        $validated = $this->validateInquiry($request, ['consultation', 'inspection']);
 
         $inquiry = new Inquiry($validated);
         $inquiry->listing_id = $listing->id;
         $inquiry->user_id = $request->user()?->id;
         $inquiry->save();
 
-        try {
-            $notifier->notify($inquiry);
-        } catch (Throwable $exception) {
-            Log::warning('Inquiry notification failed.', [
-                'inquiry_id' => $inquiry->id,
-                'error' => $exception->getMessage(),
-            ]);
+        $this->notifyQuietly($notifier, $inquiry);
+
+        return $this->redirectToListing($listing);
+    }
+
+    /**
+     * Public consultation request form for a verified professional.
+     */
+    public function createForProfessional(Professional $professional): View
+    {
+        $this->ensureVerifiedProfessional($professional);
+
+        return view('professionals.inquiries.create', ['professional' => $professional]);
+    }
+
+    /**
+     * Store a consultation request addressed to a verified professional.
+     */
+    public function storeForProfessional(Request $request, Professional $professional, InquiryNotifier $notifier): RedirectResponse
+    {
+        $this->ensureVerifiedProfessional($professional);
+
+        if ($this->isHoneypot($request)) {
+            return $this->redirectToProfessional($professional);
         }
 
-        return redirect()
-            ->route('listings.show', $listing->slug)
-            ->with('status', __('Thank you! Your inquiry has been sent.'));
+        $validated = $this->validateInquiry($request);
+        $validated['type'] = InquiryType::Consultation->value;
+
+        $inquiry = new Inquiry($validated);
+        $inquiry->listing_id = null;
+        $inquiry->professional_id = $professional->id;
+        $inquiry->user_id = $request->user()?->id;
+        $inquiry->save();
+
+        $this->notifyQuietly($notifier, $inquiry);
+
+        return $this->redirectToProfessional($professional);
     }
 
     /**
@@ -172,6 +191,76 @@ class InquiryController extends Controller
         if ($listing->status !== ListingStatus::Published) {
             abort(404);
         }
+    }
+
+    /**
+     * Only professionals with verified credentials accept public requests.
+     */
+    private function ensureVerifiedProfessional(Professional $professional): void
+    {
+        if ($professional->credentials_verified_at === null) {
+            abort(404);
+        }
+    }
+
+    /**
+     * Honeypot field submissions are silently discarded.
+     */
+    private function isHoneypot(Request $request): bool
+    {
+        return $request->filled('website');
+    }
+
+    /**
+     * Validate the shared inquiry fields, optionally including the type.
+     *
+     * @param  array<int, string>|null  $types
+     * @return array<string, mixed>
+     */
+    private function validateInquiry(Request $request, ?array $types = null): array
+    {
+        $rules = [
+            'name' => ['required', 'string', 'max:255'],
+            'phone' => ['required', 'string', 'max:20'],
+            'email' => ['required', 'string', 'email', 'max:255'],
+            'message' => ['required', 'string'],
+            'preferred_date' => ['nullable', 'date'],
+        ];
+
+        if ($types !== null) {
+            $rules['type'] = ['required', 'string', Rule::in($types)];
+        }
+
+        return $request->validate($rules);
+    }
+
+    /**
+     * Send the notification without ever breaking the submission flow.
+     */
+    private function notifyQuietly(InquiryNotifier $notifier, Inquiry $inquiry): void
+    {
+        try {
+            $notifier->notify($inquiry);
+        } catch (Throwable $exception) {
+            Log::warning('Inquiry notification failed.', [
+                'inquiry_id' => $inquiry->id,
+                'error' => $exception->getMessage(),
+            ]);
+        }
+    }
+
+    private function redirectToListing(Listing $listing): RedirectResponse
+    {
+        return redirect()
+            ->route('listings.show', $listing->slug)
+            ->with('status', __('Thank you! Your inquiry has been sent.'));
+    }
+
+    private function redirectToProfessional(Professional $professional): RedirectResponse
+    {
+        return redirect()
+            ->route('professionals.show', $professional->slug)
+            ->with('status', __('Thank you! Your inquiry has been sent.'));
     }
 
     /**

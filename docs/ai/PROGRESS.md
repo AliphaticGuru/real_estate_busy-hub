@@ -3,7 +3,7 @@
 Update this file at the end of every work session, before committing.
 
 ## Current focus
-Professional consultations: public verified-professional profiles with consultation requests (branch `professional-consultations`). Planning; implementation not started.
+Professional consultations: public verified-professional profiles with consultation requests (branch `professional-consultations`). Implementation complete and awaiting review.
 
 ## Checklist
 - [x] Laravel scaffolded
@@ -22,7 +22,7 @@ Professional consultations: public verified-professional profiles with consultat
 - [x] UI foundation: landing page and role dashboards (README last)
 - [x] Inquiry management: list, detail, status transitions with audit
 - [x] Inquiry email notifications: queued recipient mail, spam protection
-- [ ] Professional consultations: public verified profiles and consultation requests
+- [x] Professional consultations: public verified profiles and consultation requests
 
 Checkpoint (b) verified: user_id on inquiries, policy split, 11 inquiry tests, isolated test database.
 
@@ -95,3 +95,18 @@ Checkpoint (b) verified: user_id on inquiries, policy split, 11 inquiry tests, i
 - Local mail stays `MAIL_MAILER=log`; switch to SMTP through environment variables only.
 - Prod still sets `CACHE_STORE=redis` and `SESSION_DRIVER=redis` with no redis service (pre-existing, outside this item); only `QUEUE_CONNECTION` was moved to `database` because the worker needs a real backend.
 - Tests use `Notification::fake()`; the full suite and Pint were run after the final code change.
+
+## Professional consultations (branch `professional-consultations`)
+- Added a nullable unique `professionals.slug`, backfilled from each user's name with collision suffixes, and auto-generated on `Professional::creating`. Public professional routes bind `{professional:slug}`; null or unknown slugs 404 instead of exposing ids.
+- `ProfessionalController@index/show` lists only professionals with `credentials_verified_at`, supports `?type=`, and links the company and credentials. The profile shows a 44px "Request consultation" action and never renders the professional's email or phone.
+- `InquiryController@createForProfessional/storeForProfessional` reuse the honeypot, shared validation and `InquiryNotifier`; `type` is forced to `consultation`, `listing_id` null, `professional_id` from the route and `user_id` only from the authenticated user. The listing form keeps its type selector; both forms share `inquiries/partials/fields.blade.php`.
+- `InquiryReceived` prints `Professional: <name>` for professional inquiries instead of a listing line, and still excludes the submitter's phone and email.
+- Public nav/footer link to "Partners"; company profiles list their verified professionals only. `DemoSeeder` seeds Ada Okafor (verified lawyer at Acme Realty), Tunde Bello (verified architect) and Ngozi Eze (unverified engineer).
+- Tests: `ProfessionalProfileTest`, `ProfessionalInquiryTest` and `ProfessionalSlugMigrationTest`; full suite 191 passed (713 assertions), `pint --test` passes 117 files, Node 22 build clean.
+- `migrate:fresh --seed` and a path-scoped rollback/re-migrate were run on the dev database; the migration removed and re-added `slug` and regenerated all three seeded slugs.
+- Targeted rollback note: `migrate:rollback --path=<single migration>` still lists the other migrations in the same batch as "Migration not found"; they stay applied and only the targeted migration rolls back.
+
+### Handoff notes (professional-consultations)
+- All requested behaviour is implemented and verified on this branch; nothing was started beyond the current focus.
+- The only WhatsApp action on a professional profile uses the platform number from `config('services.whatsapp.number')`; users without a configured number see only the consultation action.
+- The existing `DatabaseMigrationsTest` (`--step 8`) now also exercises the slug migration down/up and still passes.

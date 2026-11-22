@@ -25,4 +25,14 @@ class ProfessionalFactory extends Factory
             'verified_by' => null,
         ];
     }
+
+    /**
+     * Mark the professional's credentials as verified.
+     */
+    public function verified(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'credentials_verified_at' => now(),
+        ]);
+    }
 }

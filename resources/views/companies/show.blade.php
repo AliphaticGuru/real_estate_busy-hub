@@ -27,6 +27,24 @@
         </div>
     </div>
 
+    @if ($professionals->isNotEmpty())
+        <div class="mt-8">
+            <h2 class="text-lg font-semibold text-gray-900">{{ __('Verified professionals') }}</h2>
+            <ul class="mt-4 divide-y divide-gray-200">
+                @foreach ($professionals as $professional)
+                    <li class="py-4">
+                        <a href="{{ route('professionals.show', $professional->slug) }}" class="block text-lg font-medium text-gray-900 hover:text-indigo-600">
+                            {{ $professional->user?->name ?? __('Professional') }}
+                        </a>
+                        <div class="text-sm text-gray-500">
+                            {{ $professional->type?->label() }}
+                        </div>
+                    </li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     @if ($listings->isNotEmpty())
         <div class="mt-8">
             <h2 class="text-lg font-semibold text-gray-900">{{ __('Listings') }}</h2>

@@ -96,3 +96,11 @@
 ## Mail and queue environment configuration
 - Mail settings come only from `MAIL_MAILER`, `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_FROM_ADDRESS` and `MAIL_FROM_NAME`; local development uses `MAIL_MAILER=log`, and the README documents a free-tier Brevo SMTP option without secrets.
 - Reason: keeps credentials out of the repository and lets production switch transports without code changes.
+
+## Professional consultations (professional-consultations)
+- `professionals.slug` is nullable and unique; the migration backfills from `users.name` with numeric suffixes, and `Professional::creating` fills it for new rows. All public professional routes use `{professional:slug}`, so numeric ids are never exposed; null or unknown slugs return 404.
+- The public directory and profile filter on `credentials_verified_at is not null`; the same guard protects the consultation form and both store actions, so unverified professionals cannot receive requests even by direct URL.
+- Professional inquiries reuse the listing inquiry path: shared honeypot, shared field validation and `InquiryNotifier`, with `type` forced to `consultation`, `listing_id` null, `professional_id` from the route and `user_id` only from the authenticated user. The professional form omits the listing form's type selector.
+- `InquiryReceived` shows `Professional: <name>` when `professional_id` is set and keeps the listing line otherwise. Reason: one email template with clear recipient context and no submitter contact details.
+- `DemoSeeder` seeds two verified professionals of different types plus one unverified engineer, with one attached to Acme Realty, so both the visible and 404 paths are demonstrable locally.
+- No `ProfessionalPolicy` was added: the pages are public, and inquiry access already goes through `InquiryPolicy` / `Inquiry::whereViewableBy()`.

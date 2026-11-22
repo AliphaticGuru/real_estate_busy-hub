@@ -35,7 +35,11 @@ class InquiryReceived extends Notification implements ShouldQueue
         return (new MailMessage)
             ->subject(__('New :type inquiry', ['type' => $type]))
             ->greeting(__('New inquiry received'))
-            ->line(__('Listing: :title', ['title' => $this->inquiry->listing?->title ?? __('General inquiry')]))
+            ->line($this->inquiry->professional_id !== null
+                ? __('Professional: :name', [
+                    'name' => $this->inquiry->professional?->user?->name ?? __('Professional'),
+                ])
+                : __('Listing: :title', ['title' => $this->inquiry->listing?->title ?? __('General inquiry')]))
             ->line(__('Type: :type', ['type' => $type]))
             ->line(__('From: :name', ['name' => $firstName]))
             ->line(__('Message: :excerpt', ['excerpt' => $excerpt]))

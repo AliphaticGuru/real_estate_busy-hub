@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\ListingStatus;
 use App\Models\Company;
 use App\Models\Listing;
+use App\Models\Professional;
 use Illuminate\Contracts\View\View;
 
 class CompanyController extends Controller
@@ -23,6 +24,18 @@ class CompanyController extends Controller
             ->latest()
             ->get();
 
-        return view('companies.show', ['company' => $company, 'listings' => $listings]);
+        $professionals = Professional::query()
+            ->where('company_id', $company->id)
+            ->whereNotNull('credentials_verified_at')
+            ->with('user')
+            ->orderBy('type')
+            ->orderBy('id')
+            ->get();
+
+        return view('companies.show', [
+            'company' => $company,
+            'listings' => $listings,
+            'professionals' => $professionals,
+        ]);
     }
 }

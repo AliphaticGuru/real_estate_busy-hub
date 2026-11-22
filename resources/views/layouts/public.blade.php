@@ -71,6 +71,7 @@
                     <div class="flex items-center gap-4">
                         <nav class="hidden sm:flex items-center gap-4 text-sm" aria-label="{{ __('Primary navigation') }}">
                             <a href="{{ route('listings.index') }}" class="text-gray-600 hover:text-gray-900">{{ __('Listings') }}</a>
+                            <a href="{{ route('professionals.index') }}" class="text-gray-600 hover:text-gray-900">{{ __('Partners') }}</a>
                             <a href="{{ route('fees') }}" class="text-gray-600 hover:text-gray-900">{{ __('Fees') }}</a>
                             <a href="{{ route('verification') }}" class="text-gray-600 hover:text-gray-900">{{ __('Verification') }}</a>
                             <a href="{{ route('blog.index') }}" class="text-gray-600 hover:text-gray-900">{{ __('Blog') }}</a>
@@ -124,6 +125,7 @@
                 >
                     <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col gap-1 text-sm">
                         <x-responsive-nav-link :href="route('listings.index')" :active="request()->routeIs('listings.*')" @click="open = false">{{ __('Listings') }}</x-responsive-nav-link>
+                        <x-responsive-nav-link :href="route('professionals.index')" :active="request()->routeIs('professionals.*')" @click="open = false">{{ __('Partners') }}</x-responsive-nav-link>
                         <x-responsive-nav-link :href="route('fees')" :active="request()->routeIs('fees')" @click="open = false">{{ __('Fees') }}</x-responsive-nav-link>
                         <x-responsive-nav-link :href="route('verification')" :active="request()->routeIs('verification')" @click="open = false">{{ __('Verification') }}</x-responsive-nav-link>
                         <x-responsive-nav-link :href="route('blog.index')" :active="request()->routeIs('blog.*')" @click="open = false">{{ __('Blog') }}</x-responsive-nav-link>
@@ -137,6 +139,9 @@
 
             <footer class="py-10 text-center text-sm text-gray-500">
                 <p>{{ config('app.name') }} · {{ __('Find verified real estate & construction partners in Abuja') }}</p>
+                <p class="mt-2">
+                    <a href="{{ route('professionals.index') }}" class="text-brand-700 hover:underline">{{ __('Partners') }}</a>
+                </p>
             </footer>
         </div>
 
