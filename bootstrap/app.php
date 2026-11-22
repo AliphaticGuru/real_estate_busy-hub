@@ -1,6 +1,7 @@
 <?php
 
 use App\Console\Commands\AppCreateAdminCommand;
+use App\Console\Commands\PreLaunchCheckCommand;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -17,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withCommands([
         AppCreateAdminCommand::class,
+        PreLaunchCheckCommand::class,
     ])
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
