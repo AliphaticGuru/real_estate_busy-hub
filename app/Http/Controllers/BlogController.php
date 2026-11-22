@@ -12,7 +12,7 @@ class BlogController extends Controller
      *
      * @return array<int, array{slug: string, title: string, excerpt: string, content: string, published_at: Carbon}>
      */
-    private function posts(): array
+    public function posts(): array
     {
         return [
             [

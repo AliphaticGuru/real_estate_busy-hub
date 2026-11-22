@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InquiryController;
 use App\Http\Controllers\ListingController;
 use App\Http\Controllers\ProfessionalController;
+use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\VerificationController;
 use Illuminate\Support\Facades\Route;
 
@@ -53,5 +54,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('inquiries/{inquiry}', [InquiryController::class, 'show'])->name('inquiries.show');
     Route::patch('inquiries/{inquiry}/status', [InquiryController::class, 'updateStatus'])->name('inquiries.status.update');
 });
+
+Route::get('robots.txt', function () {
+    $disallowed = ['dashboard', 'inquiries', 'profile', 'verify', 'login', 'register'];
+
+    $lines = ['User-agent: *'];
+
+    foreach ($disallowed as $path) {
+        $lines[] = 'Disallow: /'.$path;
+    }
+
+    $lines[] = '';
+    $lines[] = 'Sitemap: '.url('sitemap.xml');
+
+    return response(implode(PHP_EOL, $lines).PHP_EOL, 200, ['Content-Type' => 'text/plain']);
+})->name('robots.txt');
+
+Route::get('sitemap.xml', [SitemapController::class, 'index'])->name('sitemap.xml');
 
 require __DIR__.'/auth.php';
