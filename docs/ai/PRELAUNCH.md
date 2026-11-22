@@ -5,10 +5,23 @@
 - Base: implementation on top of `cbe6c65` (`professional-consultations` build)
 - Scope: read-only pre-launch audit. No application code was changed during this stage.
 
+## Stage 2 fixes applied (branch `prelaunch-app-fixes`)
+
+Application-level findings from this audit were fixed during the pre-launch hardening build. Each fixed item below is marked **FIXED** and references the implementing commit:
+
+- Environment-guarded demo seeders and `php artisan app:create-admin`: **FIXED** — commit `f9c208f`.
+- Email verification enforcement (`MustVerifyEmail`, `auth, verified`): **FIXED** — commit `db85ed1`.
+- Password policy (`Password::defaults()` with uncompromised check in production): **FIXED** — commit `5b89dab`.
+- Styled error pages, noindex guards, robots and sitemap: **FIXED** — commit `635747d`.
+- Draft legal pages and inquiry consent: **FIXED** — commit `5ff3fd1`.
+- Environment hygiene and `php artisan prelaunch:check`: **FIXED** — commit `3601814`.
+
+Infrastructure findings that remain open and require owner/infrastructure decisions: proxy topology, trusted proxies, deploy workflow, backups, two-factor authentication and retention policy (see sections 2, 4, 5, 6 and 7).
+
 ## Verdict legend
 
 - **OK** — verified acceptable during the audit.
-- **FIX** — issue found; fix recommended. Not applied during this stage.
+- **FIX** — issue found; fix recommended or applied during stage 2 (see the stage 2 fix list above).
 - **DECISION NEEDED** — product, legal, or security decision required before launch.
 
 ---
@@ -69,18 +82,24 @@
 - `APP_DEBUG` must be `false` for production.
 - Secure session cookie: `SESSION_SECURE_COOKIE` is not set; session uses `same_site` default `lax`, `http_only` default `true`, lifetime `120`. Production should set `SESSION_SECURE_COOKIE=true`.
 
+## 2.1 Production HTTPS and environment expectations (updated)
+
+- **Verdict: FIXED**
+- Commit: `3601814` (stage 2, item 6).
+- `.env.example` now sets `APP_NAME="Busy Hub"`, `MAIL_FROM_ADDRESS="no-reply@your-domain.example"` and `SESSION_SECURE_COOKIE=true`.
+- Added `.env.production.example` with production-safe values: `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL=https://your-domain.example`, `LOG_CHANNEL=daily`, `LOG_DAILY_DAYS=14`, `LOG_LEVEL=warning`, `SESSION_DRIVER=database`, `SESSION_SECURE_COOKIE=true`, `CACHE_STORE=database`, `QUEUE_CONNECTION=database`, `MAIL_MAILER=smtp`.
+- Added `php artisan prelaunch:check` (commit `3601814`) which exits non-zero in production when `APP_DEBUG` is true, `APP_URL` is localhost or `http`, `MAIL_MAILER` is `log` or `array`, the session cookie is not secure, `SESSION_DRIVER`/`CACHE_STORE` is redis without `REDIS_HOST`, or `APP_NAME` is the default `Laravel`.
+
 ---
 
 ## 3. Mail identity
 
-- **Verdict: FIX**
-- Locations and defaults:
-  - `.env.example`: `APP_NAME=Laravel`, `APP_URL=http://localhost:8000`, `MAIL_MAILER=log`, `MAIL_FROM_ADDRESS="hello@example.com"`, `MAIL_FROM_NAME="${APP_NAME}"`.
-  - `.env`: `APP_NAME=Laravel`, `APP_URL=https://localhost`, `MAIL_MAILER=log`, `MAIL_FROM_ADDRESS="hello@example.com"`, `MAIL_FROM_NAME="${APP_NAME}"`.
-  - `config/app.php`: defaults `Laravel` and `http://localhost`.
-  - `config/mail.php`: from address default `hello@example.com`, from name default `Laravel`, SMTP local domain from `APP_URL`.
-- Rendered mail in current logs uses `Laravel` as the application/greeting/signature name; sender identity is generic.
-- Production mail identity is not launch-ready without explicit sender, domain, transport, and credentials.
+- **Verdict: FIXED** (sender identity; production transport and credentials remain open)
+- Commit: `3601814` (stage 2, item 6).
+- Files: `.env.example`, `.env`, `config/mail.php`, `config/app.php`.
+- `APP_NAME` is now `Busy Hub`; `MAIL_FROM_ADDRESS` is a clearly placeholder value; `MAIL_FROM_NAME` comes from `APP_NAME`.
+- The rendered mail identity is therefore sourced from the application name and a placeholder sender.
+- Production mail transport, domain and credentials remain open (see section 6 deploy notes).
 
 ---
 
@@ -122,18 +141,22 @@
 
 ### Password rules
 
-- **Verdict: FIX**
-- Files: `resources/views/livewire/pages/auth/register.blade.php`, password update form, reset form, vendor default.
-- Uses `Password::defaults()`; vendor default is min length `8` and does not add mixed-case/letter/number/symbol strength by default.
-- No application-level custom `Password::defaults()` was found.
+- **Verdict: FIXED**
+- Commit: `5b89dab` (stage 2, item 3).
+- Files: `app/Providers/AppServiceProvider.php`, `resources/views/livewire/pages/auth/register.blade.php`, password update form, reset form, vendor default.
+- `AppServiceProvider` now sets `Password::defaults()` to minimum length `10` with letters, mixed case and numbers; the `uncompromised()` check is applied only when the app runs in production.
+- Weak passwords are rejected at registration and password update; strong passwords are accepted.
+- Follow-up: existing demo accounts keep the shared password and are outside the new policy until reset.
 
 ### Email verification enforcement
 
-- **Verdict: FIX**
+- **Verdict: FIXED**
+- Commit: `db85ed1` (stage 2, item 2).
 - Files: `routes/web.php`, `app/Models/User.php`, auth verification controller.
-- Protected inquiry/dashboard routes use `auth, verified`.
-- However, `App\Models\User` does not implement `Illuminate\Contracts\Auth\MustVerifyEmail`, so Laravel’s email-verification enforcement middleware is not effective.
-- Verification controller checks `hasVerifiedEmail()`, but unverified users are not structurally blocked by the model/route contract.
+- `App\Models\User` now implements `Illuminate\Contracts\Auth\MustVerifyEmail`.
+- Protected routes use the `auth, verified` middleware; `/profile` is protected with `auth, verified` (dashboard and inquiries already were).
+- Unverified users are redirected to the verification notice; verified users proceed.
+- Demo accounts keep `email_verified_at` set (see `f9c208f`).
 
 ### Session and account security
 
@@ -150,10 +173,12 @@
 
 ### Seeded demo accounts
 
-- **Verdict: DECISION NEEDED**
-- Files: `database/seeders/DatabaseSeeder.php`, `UserSeeder.php`, `DemoSeeder.php`.
-- The default database seeder creates demo users/professionals.
-- Production deploy workflow does not run the seeder, but the default seeder is not environment-guarded.
+- **Verdict: FIXED**
+- Commit: `f9c208f` (stage 2, item 1).
+- Files: `database/seeders/DatabaseSeeder.php`, `UserSeeder.php`, `DemoSeeder.php`, `AppCreateAdminCommand`.
+- The default database seeder now seeds demo users/professionals/listings only in the `local` or `testing` environments; other environments run `RoleSeeder` only.
+- Added `php artisan app:create-admin` to create a super admin interactively or with `--force`.
+- Follow-up: production deployment still needs an admin account via the command.
 
 ---
 
@@ -167,21 +192,21 @@
   - Professional: own professional inquiries.
   - Customer: own inquiries.
   - Verifier: denied in inquiry controller scoping.
-- Retention: no deletion/purge policy or scheduled cleanup found.
-- Pre-launch legal pages required but absent: privacy policy, terms of service, complaints process.
+- Retention: no deletion/purge policy or scheduled cleanup found — **OPEN**.
+- Pre-launch legal pages added during stage 2: privacy policy, terms of service and complaints process with clearly marked draft notices (`5ff3fd1`).
 - Nigeria Data Protection Act: noted as a legal-advice topic only; no legal conclusion added.
 
 ---
 
 ## 8. SEO and error handling
 
-- **Verdict: FIX**
-- Files: `public/robots.txt`, sitemap references, error views, layouts.
-- `public/robots.txt` exists and allows all (`User-agent: * Disallow:`).
-- No sitemap file/route found.
-- Only `resources/views/errors/429.blade.php` exists and uses public layout.
-- No published error views found for 404, 403, 419, or 500.
-- No `noindex` output found in authenticated layouts.
+- **Verdict: FIXED**
+- Commit: `635747d` (stage 2, item 4).
+- Files: `routes/web.php`, `app/Http/Controllers/SitemapController.php`, `resources/views/errors/*`, layouts, `public/robots.txt`.
+- Styled error views added for 403, 404, 419, 500 and 503; server errors render standalone HTML without database, session or Vite manifest dependencies.
+- `noindex, nofollow` meta added to the app and guest layouts.
+- `GET /robots.txt` and `GET /sitemap.xml` added; the sitemap contains static public pages, published verified listings, active companies, verified professionals and published blog posts and is cached for an hour.
+- Static `public/robots.txt` was replaced by a route-based robots.txt that lists the sitemap URL from `APP_URL`.
 
 ---
 

@@ -104,3 +104,11 @@
 - `InquiryReceived` shows `Professional: <name>` when `professional_id` is set and keeps the listing line otherwise. Reason: one email template with clear recipient context and no submitter contact details.
 - `DemoSeeder` seeds two verified professionals of different types plus one unverified engineer, with one attached to Acme Realty, so both the visible and 404 paths are demonstrable locally.
 - No `ProfessionalPolicy` was added: the pages are public, and inquiry access already goes through `InquiryPolicy` / `Inquiry::whereViewableBy()`.
+
+## Pre-launch hardening decisions (prelaunch-app-fixes)
+- `App\Models\User` implements `Illuminate\Contracts\Auth\MustVerifyEmail`, and protected routes use the `auth, verified` middleware; unverified users are redirected to the verification notice and new registrations send the verification notification through the `Registered` event.
+- Reason: email verification is a launch prerequisite, and the framework middleware is the canonical enforcement point.
+- Password defaults come from `AppServiceProvider` (`Password::defaults()`) with min length 10, letters, mixed case, numbers and the uncompromised check only in production.
+- Reason: one policy source for registration, password update and reset, with production-only extra strength.
+- Demo seeders run only in the `local` or `testing` environments, and super admin creation is available via `php artisan app:create-admin` with `--force`.
+- Reason: demo data must never reach a production database.

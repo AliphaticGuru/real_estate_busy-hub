@@ -3,7 +3,7 @@
 Update this file at the end of every work session, before committing.
 
 ## Current focus
-Professional consultations: public verified-professional profiles with consultation requests (branch `professional-consultations`). Implementation complete and awaiting review.
+Pre-launch hardening on branch `prelaunch-app-fixes`: environment-guarded demo seeders plus admin command, email verification enforcement, password policy, error pages/crawling/sitemap, legal pages and inquiry consent, and environment hygiene with the `prelaunch:check` command. Application-level fixes are implemented and committed; awaiting final checks and owner decisions.
 
 ## Checklist
 - [x] Laravel scaffolded
@@ -23,7 +23,7 @@ Professional consultations: public verified-professional profiles with consultat
 - [x] Inquiry management: list, detail, status transitions with audit
 - [x] Inquiry email notifications: queued recipient mail, spam protection
 - [x] Professional consultations: public verified profiles and consultation requests
-- [ ] Pre-launch hardening
+- [x] Pre-launch hardening: seeders, email verification, passwords, error pages, legal, env hygiene (stage 2 fixes applied; infra items open)
 
 Checkpoint (b) verified: user_id on inquiries, policy split, 11 inquiry tests, isolated test database.
 
@@ -110,4 +110,15 @@ Checkpoint (b) verified: user_id on inquiries, policy split, 11 inquiry tests, i
 ### Handoff notes (professional-consultations)
 - All requested behaviour is implemented and verified on this branch; nothing was started beyond the current focus.
 - The only WhatsApp action on a professional profile uses the platform number from `config('services.whatsapp.number')`; users without a configured number see only the consultation action.
-- The existing `DatabaseMigrationsTest` (`--step 8`) now also exercises the slug migration down/up and still passes.
+- The existing `DatabaseMigrationsTest` (`--step 8`) now also exercises the slug migration down/up and still passes. 
+
+## Pre-launch hardening stage 2 (branch `prelaunch-app-fixes`)
+- Environment-guarded demo seeders: `DatabaseSeeder` seeds demo users/professionals/listings only in the `local` or `testing` environments; other environments run `RoleSeeder` only. Added `php artisan app:create-admin` (interactive or `--force`, refuses non-interactive use without `--force`).
+- Email verification: `App\Models\User` implements `MustVerifyEmail`; `/profile` protected with `auth, verified` (dashboard and inquiries already were). Unverified users redirect to the verification notice; new registrations send the verification notification via the `Registered` event.
+- Password policy: `AppServiceProvider` sets `Password::defaults()` (min 10, letters, mixed case, numbers, `uncompromised()` only in production).
+- Error pages and crawling: styled `errors/403|404|419|500|503` views, server errors standalone HTML, `noindex, nofollow` in app/guest layouts, `GET /robots.txt` and `GET /sitemap.xml` (cached 1 hour).
+- Legal pages and consent: `/privacy`, `/terms`, `/complaints` with draft notices, footer links, inquiry consent lines linking to `/privacy`.
+- Environment hygiene: `.env.example` (`APP_NAME="Busy Hub"`, placeholder `MAIL_FROM_ADDRESS`, `SESSION_SECURE_COOKIE=true`), added `.env.production.example`, added `php artisan prelaunch:check`.
+- Full suite: 226 passed (816 assertions); Pint passes 125 files; Node 22 build passes; `git fsck --full --no-reflogs` clean (no errors); `git status --short` empty.
+- Commits on `prelaunch-app-fixes`: `f9c208f`, `db85ed1`, `5b89dab`, `635747d`, `5ff3fd1`, `3601814`.
+- Handoff: infrastructure items stay open (proxy topology, trusted proxies, deploy workflow, backups, 2FA, retention); owner decisions required before launch. Stop here and wait for decisions.
