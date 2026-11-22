@@ -25,7 +25,7 @@ Route::get('dashboard', DashboardController::class)
     ->name('dashboard');
 
 Route::view('profile', 'profile')
-    ->middleware(['auth'])
+    ->middleware(['auth', 'verified'])
     ->name('profile');
 
 Route::middleware('auth')->group(function () {

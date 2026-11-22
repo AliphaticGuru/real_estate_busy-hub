@@ -4,7 +4,9 @@ namespace Tests\Feature\Auth;
 
 use App\Enums\RoleName;
 use App\Models\User;
+use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Livewire\Volt\Volt;
 use Tests\TestCase;
 
@@ -24,6 +26,8 @@ class RegistrationTest extends TestCase
 
     public function test_new_users_can_register(): void
     {
+        Notification::fake();
+
         $component = Volt::test('pages.auth.register')
             ->set('name', 'Test User')
             ->set('email', 'test@example.com')
@@ -33,6 +37,10 @@ class RegistrationTest extends TestCase
         $component->call('register');
 
         $component->assertRedirect(route('dashboard', absolute: false));
+
+        $user = User::where('email', 'test@example.com')->firstOrFail();
+
+        Notification::assertSentTo($user, VerifyEmail::class);
 
         $this->assertAuthenticated();
     }
@@ -52,7 +60,7 @@ class RegistrationTest extends TestCase
         $this->assertSame(RoleName::Customer, $user->role->name);
     }
 
-    public function test_newly_registered_user_reaches_customer_dashboard(): void
+    public function test_newly_registered_user_is_redirected_to_the_verification_notice(): void
     {
         $component = Volt::test('pages.auth.register')
             ->set('name', 'Test User')
@@ -61,9 +69,34 @@ class RegistrationTest extends TestCase
             ->set('password_confirmation', 'password')
             ->call('register');
 
+        $user = User::where('email', 'newcustomer@example.com')->firstOrFail();
+
+        $this->assertAuthenticated();
+        $this->assertFalse($user->hasVerifiedEmail());
+
+        $this->get('/dashboard')->assertRedirect(route('verification.notice', absolute: false));
+
+        $this->get('/profile')->assertRedirect(route('verification.notice', absolute: false));
+
+        $this->get('/inquiries')->assertRedirect(route('verification.notice', absolute: false));
+    }
+
+    public function test_newly_registered_user_reaches_the_customer_dashboard_after_verifying(): void
+    {
+        $component = Volt::test('pages.auth.register')
+            ->set('name', 'Test User')
+            ->set('email', 'verifiedcustomer@example.com')
+            ->set('password', 'password')
+            ->set('password_confirmation', 'password')
+            ->call('register');
+
+        $user = User::where('email', 'verifiedcustomer@example.com')->firstOrFail();
+        $user->markEmailAsVerified();
+
+        $this->actingAs($user);
+
         $this->get('/dashboard')->assertOk();
 
         $this->assertAuthenticated();
-        $this->assertTrue($this->get('/dashboard')->isOk());
     }
 }

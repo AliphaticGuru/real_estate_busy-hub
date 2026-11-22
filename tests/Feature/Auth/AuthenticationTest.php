@@ -29,6 +29,28 @@ class AuthenticationTest extends TestCase
         $this->get('/profile')->assertRedirect(route('login'));
     }
 
+    public function test_unverified_users_are_redirected_to_the_verification_notice(): void
+    {
+        $user = User::factory()->customer()->unverified()->create();
+
+        $this->actingAs($user);
+
+        $this->get('/dashboard')->assertRedirect(route('verification.notice', absolute: false));
+        $this->get('/inquiries')->assertRedirect(route('verification.notice', absolute: false));
+        $this->get('/profile')->assertRedirect(route('verification.notice', absolute: false));
+    }
+
+    public function test_verified_users_are_not_redirected_from_protected_pages(): void
+    {
+        $user = User::factory()->customer()->create();
+
+        $this->actingAs($user);
+
+        $this->get('/dashboard')->assertOk();
+        $this->get('/inquiries')->assertOk();
+        $this->get('/profile')->assertOk();
+    }
+
     public function test_users_can_authenticate_using_the_login_screen(): void
     {
         $user = User::factory()->create();
