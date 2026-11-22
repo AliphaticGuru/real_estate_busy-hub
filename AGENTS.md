@@ -35,6 +35,8 @@ GitHub Actions. Deploy target: single VPS (Docker Compose + Caddy), later AWS/GC
 
 ## Reporting rules
 - After editing vite.config.js, package.json, or any CSS, run the Node 22 build and paste the result. A passing PHP test suite does not verify front-end assets.
+- All npm and node commands run in Docker, never on the host (host Node is 18): `docker run --rm -v "$PWD":/app -w /app --user $(id -u):$(id -g) node:22-alpine3.24 sh -c "npm ci && npm run build"` (add `--network host` if npm hits ECONNRESET). Use the same pattern for any other npm script.
+- SESSION_SECURE_COOKIE belongs in .env.production.example only; .env.example must work over http://localhost:8000.
 
 <laravel-boost-guidelines>
 # Laravel Application
