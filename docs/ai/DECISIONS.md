@@ -112,3 +112,9 @@
 - Reason: one policy source for registration, password update and reset, with production-only extra strength.
 - Demo seeders run only in the `local` or `testing` environments, and super admin creation is available via `php artisan app:create-admin` with `--force`.
 - Reason: demo data must never reach a production database.
+
+## Email verification polling (verify-email-polling)
+- The verification notice page polls every 5 seconds while visible via `wire:poll.5s.visible="checkVerified"`; the poll re-reads the authenticated user with `fresh()` and redirects only when `hasVerifiedEmail()` is true, and already-verified users are redirected on mount.
+- Reason: a signed link may be opened on another device or tab, so the original page must notice verification without custom JavaScript, while the signed link remains the only thing that verifies state.
+- All npm/node commands run in Docker with Node 22, and `SESSION_SECURE_COOKIE` stays in `.env.production.example` only.
+- Reason: host Node is 18 (the Vite build fails there), and `.env.example` must remain usable over `http://localhost:8000`.
