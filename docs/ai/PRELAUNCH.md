@@ -86,7 +86,7 @@ Infrastructure findings that remain open and require owner/infrastructure decisi
 
 - **Verdict: FIXED**
 - Commit: `3601814` (stage 2, item 6).
-- `.env.example` now sets `APP_NAME="Busy Hub"`, `MAIL_FROM_ADDRESS="no-reply@your-domain.example"` and `SESSION_SECURE_COOKIE=true`.
+- `.env.example` now sets `APP_NAME="Busy Hub"` and `MAIL_FROM_ADDRESS="no-reply@your-domain.example"`, and stays usable over `http://localhost:8000` (no `SESSION_SECURE_COOKIE`).
 - Added `.env.production.example` with production-safe values: `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL=https://your-domain.example`, `LOG_CHANNEL=daily`, `LOG_DAILY_DAYS=14`, `LOG_LEVEL=warning`, `SESSION_DRIVER=database`, `SESSION_SECURE_COOKIE=true`, `CACHE_STORE=database`, `QUEUE_CONNECTION=database`, `MAIL_MAILER=smtp`.
 - Added `php artisan prelaunch:check` (commit `3601814`) which exits non-zero in production when `APP_DEBUG` is true, `APP_URL` is localhost or `http`, `MAIL_MAILER` is `log` or `array`, the session cookie is not secure, `SESSION_DRIVER`/`CACHE_STORE` is redis without `REDIS_HOST`, or `APP_NAME` is the default `Laravel`.
 
