@@ -142,6 +142,11 @@
                 <p class="mt-2">
                     <a href="{{ route('professionals.index') }}" class="text-brand-700 hover:underline">{{ __('Partners') }}</a>
                 </p>
+                <nav class="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2" aria-label="{{ __('Legal') }}">
+                    <a href="{{ route('privacy.index') }}" class="text-brand-700 hover:underline">{{ __('Privacy') }}</a>
+                    <a href="{{ route('terms.index') }}" class="text-brand-700 hover:underline">{{ __('Terms') }}</a>
+                    <a href="{{ route('complaints.index') }}" class="text-brand-700 hover:underline">{{ __('Complaints') }}</a>
+                </nav>
             </footer>
         </div>
 

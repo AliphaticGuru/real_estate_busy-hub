@@ -27,5 +27,10 @@
                 {{ __('Submit inquiry') }}
             </x-button>
         </form>
+
+        <p class="mt-6 text-sm text-gray-600">
+            {{ __('By submitting this form you agree to the processing of your details as described in our') }}
+            <a href="{{ route('privacy.index') }}" class="text-brand-700 hover:underline">{{ __('privacy policy') }}</a>.
+        </p>
     </div>
 </x-public-layout>

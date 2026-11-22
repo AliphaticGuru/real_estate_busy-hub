@@ -72,4 +72,8 @@ Route::get('robots.txt', function () {
 
 Route::get('sitemap.xml', [SitemapController::class, 'index'])->name('sitemap.xml');
 
+Route::view('privacy', 'legal.privacy')->name('privacy.index');
+Route::view('terms', 'legal.terms')->name('terms.index');
+Route::view('complaints', 'legal.complaints')->name('complaints.index');
+
 require __DIR__.'/auth.php';
