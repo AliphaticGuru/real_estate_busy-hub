@@ -3,7 +3,7 @@
 Update this file at the end of every work session, before committing.
 
 ## Current focus
-Inquiry email notifications: queued recipient mail with spam protection (branch `inquiry-notifications`). Implementation and tests are complete and awaiting review.
+Professional consultations: public verified-professional profiles with consultation requests (branch `professional-consultations`). Planning; implementation not started.
 
 ## Checklist
 - [x] Laravel scaffolded
@@ -22,6 +22,7 @@ Inquiry email notifications: queued recipient mail with spam protection (branch 
 - [x] UI foundation: landing page and role dashboards (README last)
 - [x] Inquiry management: list, detail, status transitions with audit
 - [x] Inquiry email notifications: queued recipient mail, spam protection
+- [ ] Professional consultations: public verified profiles and consultation requests
 
 Checkpoint (b) verified: user_id on inquiries, policy split, 11 inquiry tests, isolated test database.
 
