@@ -20,15 +20,51 @@ class PasswordUpdateTest extends TestCase
 
         $component = Volt::test('profile.update-password-form')
             ->set('current_password', 'password')
-            ->set('password', 'new-password')
-            ->set('password_confirmation', 'new-password')
+            ->set('password', 'NewPassword123')
+            ->set('password_confirmation', 'NewPassword123')
             ->call('updatePassword');
 
         $component
             ->assertHasNoErrors()
             ->assertNoRedirect();
 
-        $this->assertTrue(Hash::check('new-password', $user->refresh()->password));
+        $this->assertTrue(Hash::check('NewPassword123', $user->refresh()->password));
+    }
+
+    public function test_weak_passwords_are_rejected_when_updating(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user);
+
+        $component = Volt::test('profile.update-password-form')
+            ->set('current_password', 'password')
+            ->set('password', 'weak')
+            ->set('password_confirmation', 'weak')
+            ->call('updatePassword');
+
+        $component->assertHasErrors(['password']);
+
+        $this->assertTrue(Hash::check('password', $user->refresh()->password));
+    }
+
+    public function test_strong_passwords_can_be_updated(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user);
+
+        $component = Volt::test('profile.update-password-form')
+            ->set('current_password', 'password')
+            ->set('password', 'NewPassword123')
+            ->set('password_confirmation', 'NewPassword123')
+            ->call('updatePassword');
+
+        $component
+            ->assertHasNoErrors()
+            ->assertNoRedirect();
+
+        $this->assertTrue(Hash::check('NewPassword123', $user->refresh()->password));
     }
 
     public function test_correct_password_must_be_provided_to_update_password(): void
@@ -39,8 +75,8 @@ class PasswordUpdateTest extends TestCase
 
         $component = Volt::test('profile.update-password-form')
             ->set('current_password', 'wrong-password')
-            ->set('password', 'new-password')
-            ->set('password_confirmation', 'new-password')
+            ->set('password', 'NewPassword123')
+            ->set('password_confirmation', 'NewPassword123')
             ->call('updatePassword');
 
         $component
