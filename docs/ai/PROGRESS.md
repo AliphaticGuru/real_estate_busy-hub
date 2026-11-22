@@ -23,6 +23,7 @@ Professional consultations: public verified-professional profiles with consultat
 - [x] Inquiry management: list, detail, status transitions with audit
 - [x] Inquiry email notifications: queued recipient mail, spam protection
 - [x] Professional consultations: public verified profiles and consultation requests
+- [ ] Pre-launch hardening
 
 Checkpoint (b) verified: user_id on inquiries, policy split, 11 inquiry tests, isolated test database.
 
