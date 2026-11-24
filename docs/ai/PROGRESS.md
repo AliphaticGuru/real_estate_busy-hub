@@ -3,7 +3,7 @@
 Update this file at the end of every work session, before committing.
 
 ## Current focus
-Verification email resend throttling on branch `verify-resend-throttle`: the notice page now limits resends to 3 per 10 minutes per user with Laravel's RateLimiter, shows a friendly remaining-seconds message when limited and a short sent confirmation, and disables the button while the request runs. Implementation and checks complete; awaiting review.
+Production infrastructure on branch `infra-prod`, checkpoint A (items 1–3) complete and pushed: immutable app/caddy images, production compose topology, pinned trusted proxy, extended `prelaunch:check` and `.env.production.example`. Checkpoint B (deploy workflow) not started.
 
 ## Checklist
 - [x] Laravel scaffolded
@@ -139,3 +139,16 @@ Checkpoint (b) verified: user_id on inquiries, policy split, 11 inquiry tests, i
 - Tests added to `EmailVerificationTest`: first three resends send, fourth is limited and shows the message, the limit is isolated per user, and it resets after 11 minutes via `travel()`. Existing verification/polling tests still pass.
 - Full suite: 237 passed (845 assertions); Pint passes 125 files; `git fsck --full --no-reflogs` clean; `git status --short` empty.
 - Handoff: implementation and checks complete; no further items started. Stop and wait for review.
+
+## Production infrastructure, checkpoint A (branch `infra-prod`)
+- One multi-stage `Dockerfile`, two production images: `app` (PHP-FPM as `www-data`, `composer install --no-dev --optimize-autoloader` in a build stage, no `.env` in the image) and `caddy` (`public/` baked in, no shared volume). `docker-compose.prod.yml` runs app, queue, db and caddy from those two images; only Caddy publishes 80/443 and no Redis is used (sessions, cache and queue are on Postgres).
+- Networks and proxies: the compose network is fixed at `172.28.0.0/24` and Caddy is pinned to `172.28.0.10`; `TRUSTED_PROXIES=172.28.0.10` names that single address instead of the whole Docker range.
+- Live measurement through `php_fastcgi` (throwaway `public/ip.php` copied into the running containers, never committed):
+  - through Caddy: `REMOTE_ADDR=172.28.0.1`, `X-Forwarded-For=172.28.0.1`, `request_ip=172.28.0.1` (172.28.0.1 is the Docker gateway that Caddy sees as the client for a host request);
+  - client sends `X-Forwarded-For: 203.0.113.9` to Caddy: the header is replaced, all three values stay `172.28.0.1`;
+  - untrusted FastCGI proxy at `172.28.0.5` forwarding `X-Forwarded-For: 203.0.113.9`: `REMOTE_ADDR=127.0.0.1`, `request_ip=127.0.0.1`, so the spoofed header is ignored;
+  - the host cannot reach the app container at all (`localhost:9000` refused, `172.28.0.3:9000` times out), so FPM has no public HTTP path.
+- `TrustedProxiesTest` covers the wildcard/empty guard, a spoofed header from an untrusted address, a real header from a trusted address, and per-client inquiry throttle buckets. `prelaunch:check` now also fails on `TRUSTED_PROXIES=*`/empty, a missing `APP_KEY`, and `MAIL_MAILER` of `log`/`array`.
+- Found only by running the real stack, all fixed: an empty `listen.allowed_clients` in the FPM pool dropped every FastCGI connection; the `@php path *.php` Caddy matcher never reached Laravel (404 on `/` and `/up`); `apk del .build-deps` also removed the runtime libraries so `intl`, `gd`, `zip` and `pdo_pgsql` failed to load; `intl` needs `-j1`; `opcache` is already compiled into the official image.
+- Checks: 244 passed (861 assertions), Pint 126 files, `docker compose -f docker-compose.prod.yml config --quiet` exit 0, `git fsck --full --no-reflogs` reports dangling objects only, `git status --short` empty.
+- Handoff: checkpoint A committed and pushed (`10e95e8`, `38e88ad`, `b2b8179`). Checkpoint B (deploy workflow) not started; the rehearsal stack was taken down, the dev stack is running.

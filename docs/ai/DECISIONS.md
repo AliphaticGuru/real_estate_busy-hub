@@ -124,3 +124,22 @@
 - Reason: an unauthenticated-style burst from one account must not be able to send unlimited mail, while other users stay unaffected; the limit resets with time.
 - The resend button uses `wire:loading.attr="disabled"` and a short sent confirmation.
 - Reason: prevents duplicate in-flight clicks and gives immediate feedback without custom JavaScript.
+
+## Production infrastructure, checkpoint A (infra-prod)
+- Two images from one multi-stage Dockerfile: `app` (PHP-FPM) and `caddy` (web tier). Both are tagged with the same commit SHA at deploy time.
+- Reason: one build definition, and a rollback restores a matching pair of immutable images.
+- The Caddy image contains the built `public/` directory instead of sharing a volume with the app container.
+- Reason: no volume to go stale or to mix files between releases; static assets and PHP code always come from the same build.
+- The compose network is pinned to `172.28.0.0/24` and Caddy to `172.28.0.10`; `TRUSTED_PROXIES` names only that address (not `172.16.0.0/12`, not `*`).
+- Reason: it is the narrowest list that still survives container restarts, and app/queue/db publish no ports, so FPM is reachable only from that network.
+- `docker/php/www.conf` leaves `listen.allowed_clients` unset.
+- Reason: an empty value is an empty allow-list, and FPM dropped every connection from Caddy ("There are no allowed addresses").
+- `Caddyfile` uses `php_fastcgi app:9000` with no `*.php` matcher and sets `root /var/www/html/public` inside it.
+- Reason: php_fastcgi must rewrite unknown paths to `index.php`; with a `*.php` matcher, `/` and `/up` were served by `file_server` and returned 404.
+- The base image installs the runtime libraries (`libzip`, `libpng`, `libjpeg-turbo`, `libwebp`, `freetype`, `icu-libs`, `libpq`) as world packages and asserts the extensions load at build time.
+- Reason: `apk del .build-deps` also removed libraries that only `-dev` packages had pulled in, so the `.so` files failed to load at runtime.
+- `intl` is built with `-j1`, and `opcache` is not recompiled (already part of the official image).
+- Reason: the C++ intl build raced with `make -j install` ("cp: can't stat 'modules/*'"); opcache is compiled in.
+- The Caddy healthcheck fetches `https://localhost/up` through Caddy to Laravel.
+- Reason: a running Caddy with broken FastCGI still passes a process-level check, which is exactly the failure the rehearsal hit.
+- `php_fastcgi` sets `REMOTE_ADDR` from the client as Caddy sees it, so Laravel's trusted-proxy comparison runs against that value; with Caddy overwriting `X-Forwarded-For`, client-forged headers have no effect even before the trust list is consulted.
