@@ -3,6 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      target: app
     container_name: busy-hub-app
     working_dir: /var/www/html
     # Dev only: the built image runs PHP-FPM (production). Locally we serve the
@@ -35,6 +36,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      target: app
     container_name: busy-hub-queue
     working_dir: /var/www/html
     command: php artisan queue:work --tries=3 --max-time=3600

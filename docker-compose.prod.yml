@@ -1,55 +1,54 @@
 name: busy-hub
 
+# The server keeps its real .env next to this file; rehearsals can point
+# ENV_FILE at a throwaway file. No secrets live in this compose file.
+x-app-common: &app-common
+  env_file:
+    - ${ENV_FILE:-.env}
+  environment:
+    APP_ENV: production
+    DB_CONNECTION: pgsql
+    DB_HOST: db
+    DB_PORT: 5432
+    CACHE_STORE: database
+    SESSION_DRIVER: database
+    QUEUE_CONNECTION: database
+    BROADCAST_CONNECTION: log
+  restart: unless-stopped
+
 services:
   app:
-    image: busy-hub-app:latest
-    container_name: busy-hub-app
-    working_dir: /var/www/html
-    restart: unless-stopped
-    environment:
-      - APP_ENV=production
-      - DB_CONNECTION=pgsql
-      - DB_HOST=db
-      - DB_PORT=5432
-      - DB_DATABASE=busy_hub
-      - DB_USERNAME=busyhub
-      - DB_PASSWORD=secret
-      - CACHE_STORE=redis
-      - SESSION_DRIVER=redis
-      - QUEUE_CONNECTION=database
-      - BROADCAST_CONNECTION=log
-    ports:
-      - "80:80"
+    <<: *app-common
+    image: ${APP_IMAGE:-busy-hub-app}:${IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: app
     depends_on:
       db:
         condition: service_healthy
+    # No published ports: only Caddy is reachable from outside.
+    expose:
+      - "9000"
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1/up"]
+      test: ["CMD-SHELL", "pgrep -f 'php-fpm: master' > /dev/null"]
       interval: 30s
       timeout: 3s
-      start_period: 20s
+      start_period: 10s
       retries: 3
 
   queue:
-    image: busy-hub-app:latest
-    container_name: busy-hub-queue
-    working_dir: /var/www/html
+    <<: *app-common
+    image: ${APP_IMAGE:-busy-hub-app}:${IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: app
     command: php artisan queue:work --tries=3 --max-time=3600
-    restart: unless-stopped
-    environment:
-      - APP_ENV=production
-      - DB_CONNECTION=pgsql
-      - DB_HOST=db
-      - DB_PORT=5432
-      - DB_DATABASE=busy_hub
-      - DB_USERNAME=busyhub
-      - DB_PASSWORD=secret
-      - CACHE_STORE=redis
-      - SESSION_DRIVER=redis
-      - QUEUE_CONNECTION=database
-      - BROADCAST_CONNECTION=log
     depends_on:
       db:
+        condition: service_healthy
+      app:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "pgrep -f 'queue:work' > /dev/null"]
@@ -60,37 +59,79 @@ services:
 
   db:
     image: postgres:15-alpine
-    container_name: busy-hub-db
-    restart: unless-stopped
-    environment:
-      - POSTGRES_DB=busy_hub
-      - POSTGRES_USER=busyhub
-      - POSTGRES_PASSWORD=secret
-    ports:
-      - "5432:5432"
+    env_file:
+      - ${ENV_FILE:-.env}
+    # 2 GB VPS defaults: 256 MB shared buffers (~12.5% of RAM) and 768 MB
+    # effective cache (~37.5%). Tune from measured load, not guesses.
+    command:
+      - postgres
+      - -c
+      - shared_buffers=256MB
+      - -c
+      - effective_cache_size=768MB
+      - -c
+      - work_mem=8MB
+      - -c
+      - max_connections=60
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U busyhub -d busy_hub"]
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER:-busyhub}\" -d \"$${POSTGRES_DB:-busy_hub}\""]
       interval: 30s
       timeout: 3s
-      start_period: 5s
+      start_period: 10s
       retries: 3
+    restart: unless-stopped
 
   caddy:
-    image: caddy:2-alpine
-    container_name: busy-hub-caddy
-    restart: unless-stopped
+    image: ${CADDY_IMAGE:-busy-hub-caddy}:${IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: caddy
+    env_file:
+      - ${ENV_FILE:-.env}
+    # Caddyfile.local selects `tls internal` for the local rehearsal.
+    command:
+      - caddy
+      - run
+      - --config
+      - /etc/caddy/${CADDYFILE:-Caddyfile}
+      - --adapter
+      - caddyfile
     ports:
       - "80:80"
       - "443:443"
+      - "443:443/udp"
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      default:
+        # Fixed address so TRUSTED_PROXIES can name this one container instead
+        # of a whole Docker range. Change both places together.
+        ipv4_address: 172.28.0.10
     depends_on:
       app:
-        condition: service_started
+        condition: service_healthy
+    healthcheck:
+      # Fetch through Caddy to Laravel: proves the whole web path (TLS,
+      # static root, php_fastcgi) works, not just that Caddy is running.
+      test: ["CMD-SHELL", "wget -q --no-check-certificate -O /dev/null https://localhost/up || exit 1"]
+      interval: 30s
+      timeout: 3s
+      start_period: 10s
+      retries: 3
+    restart: unless-stopped
+
+networks:
+  default:
+    # Explicit subnet keeps TRUSTED_PROXIES predictable across hosts.
+    ipam:
+      config:
+        - subnet: 172.28.0.0/24
 
 volumes:
   postgres_data:
   caddy_data:
+  caddy_config:

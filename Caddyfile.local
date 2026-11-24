@@ -1,0 +1,26 @@
+# Local rehearsal Caddyfile — self-signed certificate, no DNS/ACME required.
+# APP_URL is typically http://localhost or https://localhost here; Caddy's
+# `tls internal` issues a locally trusted certificate for the site address.
+{$APP_URL:localhost} {
+    tls internal
+
+    encode zstd gzip
+
+    root * /srv/public
+
+    php_fastcgi app:9000 {
+        root /var/www/html/public
+    }
+
+    file_server
+
+    header {
+        X-Content-Type-Options nosniff
+        Referrer-Policy strict-origin-when-cross-origin
+        X-Frame-Options DENY
+    }
+
+    log {
+        output stdout
+    }
+}

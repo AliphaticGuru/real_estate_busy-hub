@@ -1,46 +1,29 @@
-# Unified Caddyfile — works for both development and production.
-#
-# How it works:
-# - Defaults to localhost dev mode (uses Caddy's internal CA, no domain needed).
-# - For production, set APP_URL env var and replace `tls internal` with the tls line.
-#
-# Local dev (no changes needed):
-#   Caddy will obtain a locally-trusted cert for localhost via `tls internal`.
-#   Reverse proxies to the "app" container on port 8000.
-#
-# Production:
-#   1. Set APP_URL=your-domain.com for the caddy container.
-#   2. Replace `tls internal` below with the tls line and set TLS_ADMIN_EMAIL.
-#   3. Ensure your domain's A record points to the VPS public IP
-#   4. Open ports 80/443 to the internet (Let's Encrypt ACME challenge)
-#
-# Environment variables (set via docker-compose or runtime):
-#   APP_URL          – Defaults to "localhost". Set to your domain for prod.
-#   TLS_ADMIN_EMAIL  – Email for Let's Encrypt notifications (optional, if using tls).
-
+# Production Caddyfile — automatic HTTPS for a public APP_URL.
+# Behind a CDN or external load balancer, add a `trusted_proxies` block with
+# that proxy's IP/CIDR so Caddy preserves the real client IP in X-Forwarded-For.
 {$APP_URL:localhost} {
+    encode zstd gzip
 
-    # -- Dev mode: use Caddy's internal CA to sign a cert for localhost --
-    # This works without a domain, no DNS, no ports open to the internet.
-    tls internal
+    # Static root lives in this image (public/ is baked in). File checks
+    # (try_files) run against it; PHP itself is executed by the app container.
+    root * /srv/public
 
-    # -- Prod mode: replace `tls internal` with the line below --
-    # tls {$TLS_ADMIN_EMAIL:admin@example.com}
-    #
-    # When the production tls line is used and APP_URL is set to a domain, Caddy will
-    # use Let's Encrypt (if port 80 is open to the internet) or the
-    # provided certificate files.
+    # No matcher: Caddy rewrites unknown paths to index.php, executes *.php
+    # through FPM, and leaves real files to file_server. `root` inside the
+    # block is the SCRIPT_FILENAME root used by the PHP-FPM container.
+    php_fastcgi app:9000 {
+        root /var/www/html/public
+    }
 
-    # -- Reverse proxy to the Laravel app --
-    # The app container hostname "app" is defined in both:
-    #   - docker-compose.yml   (dev)
-    #   - docker-compose.prod.yml (production)
-    reverse_proxy app:8000
+    file_server
 
-    # -- Optional: Security headers (good for production) --
-    # header {
-    #     X-Content-Type-Options "nosniff"
-    #     X-Frame-Options "DENY"
-    #     Referrer-Policy "strict-origin-when-cross-origin"
-    # }
+    header {
+        X-Content-Type-Options nosniff
+        Referrer-Policy strict-origin-when-cross-origin
+        X-Frame-Options DENY
+    }
+
+    log {
+        output stdout
+    }
 }
