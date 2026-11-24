@@ -19,10 +19,19 @@ x-app-common: &app-common
     LOG_CHANNEL: stderr
   restart: unless-stopped
 
+# Default log driver/rotation for every production service: json-file with a
+# 10 MB file cap and 5 files retained, then Docker rotates and prunes.
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "5"
+
 services:
   app:
     <<: *app-common
     image: ${APP_IMAGE:-busy-hub-app}:${IMAGE_TAG:-latest}
+    logging: *default-logging
     build:
       context: .
       dockerfile: Dockerfile
@@ -48,6 +57,7 @@ services:
       dockerfile: Dockerfile
       target: app
     command: php artisan queue:work --tries=3 --max-time=3600
+    logging: *default-logging
     depends_on:
       db:
         condition: service_healthy
@@ -64,6 +74,7 @@ services:
     image: postgres:15-alpine
     env_file:
       - ${ENV_FILE:-.env}
+    logging: *default-logging
     # 2 GB VPS defaults: 256 MB shared buffers (~12.5% of RAM) and 768 MB
     # effective cache (~37.5%). Tune from measured load, not guesses.
     command:
@@ -88,6 +99,7 @@ services:
 
   caddy:
     image: ${CADDY_IMAGE:-busy-hub-caddy}:${IMAGE_TAG:-latest}
+    logging: *default-logging
     build:
       context: .
       dockerfile: Dockerfile

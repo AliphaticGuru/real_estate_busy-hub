@@ -146,3 +146,11 @@
 - Reason: `request()->ip()` is already the client address, so the normal path does not depend on `X-Forwarded-For` at all; Caddy also overwrites any client-supplied `X-Forwarded-For`, so a forged header never reaches Laravel from outside.
 - `TRUSTED_PROXIES=172.28.0.10` is therefore defence in depth, not the mechanism that makes the client IP correct: a FastCGI peer that is not Caddy (measured with a throwaway proxy at `172.28.0.5`) sends `X-Forwarded-For: 203.0.113.9` and Laravel keeps the peer address as `request()->ip()`.
 - A CDN or load balancer in front of Caddy changes this: Caddy would then see the CDN and pass the CDN address as `REMOTE_ADDR`, so its ranges must be added to Caddy's `trusted_proxies` **and** to `TRUSTED_PROXIES`, or every client shares one IP and one throttle bucket.
+
+## Production hardening, checkpoint A.2
+- Docker log driver for every production service: `json-file`, `max-size: 10m`, `max-file: 5`.
+- Reason: container stdout is already how logs are collected (`LOG_CHANNEL=stderr`); the rotation caps disk use while keeping them greppable with `docker compose logs`.
+- HSTS `max-age=604800` (one week), no `includeSubDomains`, no `preload`.
+- Reason: one week is the standard safe default to recover from a bad cert/key while limiting exposure; raise it after launch stability is confirmed.
+- Cache-Control `no-store` on all responses except the hashed `/build/*` assets (`public, max-age=31536000, immutable`).
+- Reason: authenticated pages, forms and personalized pages are cacheable by path alone is not enough to be safe; no-store-everywhere keeps the privacy posture simple and lets a future split (no-store for authed/form, no-cache for public) happen without a second image build.

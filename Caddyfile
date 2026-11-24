@@ -33,7 +33,7 @@
         -Via
         # HTTPS is enforced below by Caddy's HTTP->HTTPS redirect, so HSTS is
         # safe here; it is deliberately absent from Caddyfile.local.
-        Strict-Transport-Security "max-age=31536000"
+        Strict-Transport-Security "max-age=604800"
         X-Content-Type-Options nosniff
         Referrer-Policy strict-origin-when-cross-origin
         X-Frame-Options SAMEORIGIN

@@ -243,3 +243,7 @@ Infrastructure findings that remain open and require owner/infrastructure decisi
 - [ ] From a remote client, verify `request()->ip()` is the real public address, over IPv4 **and** IPv6.
 - [ ] Confirm the inquiry throttle buckets per client: two different source addresses each get 5 attempts before a 429.
 - [ ] If a CDN or load balancer is added in front of Caddy, add its ranges to Caddy's `trusted_proxies` and to `TRUSTED_PROXIES`; otherwise every client shares one IP and one throttle bucket.
+
+## Post-launch backlog (not executed)
+
+- [ ] Content-Security-Policy: add a production `Content-Security-Policy` header; Livewire/Alpine scripts, Vite build assets and inline styles must be accounted for (nonce or hash based approach) before first public traffic.
