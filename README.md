@@ -182,6 +182,34 @@ The intended path is a free-tier demo first, then a single VPS running Docker Co
 6. Seed only the roles: `php artisan db:seed --class=RoleSeeder --force`.
 7. Create the first super admin: `php artisan app:create-admin --force`.
 
+### Deploy SSH key hardening
+
+The deploy key is restricted with a forced command, so it cannot be used for
+anything but the deploy entry script:
+
+```text
+deploy  ssh-ed25519 AAAAC3NzaC5lZDI1NTE5AAAAI...  deploy-user@203.0.113.10 \
+        "command=\"/var/www/busy-hub/scripts/deploy-entry\",no-port-forwarding,no-agent-forwarding,no-pty,no-X11"
+```
+
+`/var/www/busy-hub/scripts/deploy-entry`:
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+if [ $# -ne 1 ]; then
+  echo "deploy-entry: usage: deploy-entry <sha>" >&2
+  exit 2
+fi
+exec /var/www/busy-hub/scripts/deploy.sh "$1"
+```
+
+with `chmod 750` on the entry and `chmod 700` on the deploy state directory. The
+workflow writes the private key to a `mktemp` file, `chmod 600`, uses it with
+`IdentitiesOnly=yes`, uses a `PROD_SSH_HOST_KEY` known_hosts entry with
+`StrictHostKeyChecking=yes`, passes the key and the deploy user through `env:`
+only, removes the temp files via an `EXIT` trap and never echoes secret values.
+
 ### Manual rollback
 
 A deploy records the previous release in `/var/www/busy-hub/deploy-state/previous-sha` and, if any deploy step fails, restores the previous release for **both** images (`app` and `caddy`) with the same SHA tag.

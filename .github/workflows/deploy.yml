@@ -54,6 +54,31 @@ jobs:
         id: sha
         run: echo "sha=${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
 
+      - name: Validate deploy SHA
+        env:
+          SHA: ${{ steps.sha.outputs.sha }}
+        run: |
+          set -euo pipefail
+          VALID_SHA='^[0-9a-f]{40}$'
+          if ! printf '%s' "$SHA" | grep -Eq "$VALID_SHA"; then
+            echo "::error::refusing to continue: deploy SHA must be a 40 character hex commit SHA, got: ${SHA}"
+            exit 1
+          fi
+          bad_sha_rejected() {
+            if printf '%s' "$1" | grep -Eq "$VALID_SHA"; then
+              echo "::error::validator accepted a bad SHA: $1" >&2
+              return 1
+            fi
+            return 0
+          }
+          if bad_sha_rejected "deadbeefdeadbeefdeadbeefdeadbeefdeadbeef"; then
+            exit 1
+          fi
+          if bad_sha_rejected "abc123"; then
+            exit 1
+          fi
+          echo "SHA validated: $SHA"
+
       - name: Build and push app image
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
@@ -76,13 +101,55 @@ jobs:
             ${{ env.REGISTRY }}/${{ github.repository }}/caddy:${{ steps.sha.outputs.sha }}
             ${{ env.REGISTRY }}/${{ github.repository }}/caddy:latest
 
-      - name: Deploy over SSH to production
+      - name: Verify deploy SHA is reachable from origin/main and CI passed
         if: ${{ inputs.dry_run != true }}
+        env:
+          SHA: ${{ steps.sha.outputs.sha }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
         run: |
           set -euo pipefail
-          ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
-            -i "${{ secrets.DEPLOY_SSH_KEY }}" \
-            deploy@${{ secrets.PROD_SERVER_IP }} \
-            "bash /var/www/busy-hub/scripts/deploy.sh ${{ steps.sha.outputs.sha }}"
+          MAIN_SHA="$(git ls-remote origin refs/heads/main | awk '{print $1}')"
+          if [ "$SHA" != "$MAIN_SHA" ]; then
+            echo "::error::deploy SHA ${SHA} is not the head of origin/main (${MAIN_SHA}); refusing to deploy"
+            exit 1
+          fi
+          CHECKS_JSON="$(gh api "repos/${REPOSITORY}/commits/${SHA}/check-runs" --jq '.check_runs')"
+          FAILED_COUNT="$(printf '%s' "$CHECKS_JSON" | jq '[.[] | select(.status == "completed" and .conclusion != "success")] | length')"
+          SUCCEEDED_COUNT="$(printf '%s' "$CHECKS_JSON" | jq '[.[] | select(.status == "completed" and .conclusion == "success")] | length')"
+          if [ "$FAILED_COUNT" -gt 0 ]; then
+            echo "::error::deploy blocked: a CI check for ${SHA} concluded with a failure"
+            exit 1
+          fi
+          if [ "$SUCCEEDED_COUNT" -eq 0 ]; then
+            echo "::error::deploy blocked: no successful CI check run found for ${SHA}"
+            exit 1
+          fi
+
+      - name: Deploy over SSH to production
+        if: ${{ inputs.dry_run != true }}
         env:
-          APP_ENV: production
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          PROD_SSH_HOST_KEY: ${{ secrets.PROD_SSH_HOST_KEY }}
+          PROD_SERVER_IP: ${{ secrets.PROD_SERVER_IP }}
+          DEPLOY_SSH_USER: ${{ secrets.DEPLOY_SSH_USER }}
+          DEPLOY_SSH_PORT: ${{ secrets.DEPLOY_SSH_PORT }}
+          DEPLOY_DIR: /var/www/busy-hub
+          SHA: ${{ steps.sha.outputs.sha }}
+        run: |
+          set -euo pipefail
+          KEY_FILE="$(mktemp)"
+          chmod 600 "$KEY_FILE"
+          printf '%s' "$DEPLOY_SSH_KEY" > "$KEY_FILE"
+          KNOWN_HOSTS_FILE="$(mktemp)"
+          printf '%s\n' "$PROD_SSH_HOST_KEY" > "$KNOWN_HOSTS_FILE"
+          cleanup() {
+            rm -f "$KEY_FILE" "$KNOWN_HOSTS_FILE"
+          }
+          trap cleanup EXIT
+          ssh -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$KNOWN_HOSTS_FILE" \
+            -o IdentitiesOnly=yes -i "$KEY_FILE" -p "${DEPLOY_SSH_PORT:-22}" \
+            "${DEPLOY_SSH_USER}@${PROD_SERVER_IP}" \
+            "bash ${DEPLOY_DIR}/scripts/deploy.sh ${SHA}"
+          cleanup
+          trap - EXIT
