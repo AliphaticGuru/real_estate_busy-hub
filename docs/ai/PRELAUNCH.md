@@ -56,8 +56,11 @@ Infrastructure findings that remain open and require owner/infrastructure decisi
 
 ### Caddy and production proxy topology
 
-- **Verdict: FIX**
+- **Verdict: FIXED** (checkpoint A; branch `infra-prod`)
+- Commit: `10e95e8` (branch `infra-prod`).
 - Files: `Caddyfile`, `docker-compose.prod.yml`, `bootstrap/app.php`.
+- Two-image topology built and proven locally: multi-stage `Dockerfile` with `app` (php-fpm) and `caddy` (baked `public/`) images, only Caddy publishing 80/443, app/queue/db unexposed, healthchecks on all four services, fpm resource limits and Postgres 2 GB defaults.
+- Fixed compose network `172.28.0.0/24`, Caddy pinned to `172.28.0.10`.
 - `Caddyfile` uses `{$APP_URL:localhost}` and defaults to `tls internal`; production comments instruct replacing the TLS line with `tls {$TLS_ADMIN_EMAIL:admin@example.com}` and setting a real `APP_URL`.
 - `docker-compose.prod.yml` publishes port `80` on both `app` and `caddy`; `caddy` also publishes `443`.
 - The production `app` image runs `php-fpm` and exposes `9000`, but the Dockerfile CMD is `php-fpm`; health checks target `/up`; Caddy reverse proxies to `app:8000`. The dev compose instead overrides the app command to `php artisan serve --host=0.0.0.0 --port=8000`, which aligns with Caddy.
@@ -65,8 +68,10 @@ Infrastructure findings that remain open and require owner/infrastructure decisi
 
 ### Trusted proxies and `request()->ip()`
 
-- **Verdict: FIX (trust-proxy scope)**
-- File: `bootstrap/app.php` — `$middleware->trustProxies(at: '*');`.
+- **Verdict: FIXED** (checkpoint A; branch `infra-prod`)
+- Commit: `38e88ad` (branch `infra-prod`).
+- File: `bootstrap/app.php` — env-driven `TRUSTED_PROXIES=172.28.0.10` through `$middleware->trustProxies(at: $proxies)`.
+- Proven live: through Caddy `REMOTE_ADDR`/`X-Forwarded-For`/`request_ip` all equal the client address; a client-forged `X-Forwarded-For` through Caddy is overwritten; an untrusted FastCGI peer (`172.28.0.5`) sending `X-Forwarded-For: 203.0.113.9` had it ignored (`request_ip` kept the peer address).
 - Proof via temporary probe script `/tmp/opencode/ip-probe.php` executed in the app container:
   - With forwarded header (`REMOTE_ADDR=172.18.0.9`, `X-Forwarded-For=203.0.113.10`) → `ip: 203.0.113.10`.
   - Direct request without header → `ip: 198.51.100.7`.
@@ -105,8 +110,10 @@ Infrastructure findings that remain open and require owner/infrastructure decisi
 
 ## 4. Deploy workflow and release path
 
-- **Verdict: FIX**
-- Files: `.github/workflows/deploy.yml`.
+- **Verdict: FIXED** (checkpoint B, branch `infra-prod`)
+- Commits: `2fa6082` (initial dry-run-first workflow), `571e9ea` (ssh/sha-validation/smoke-rollback hardening).
+- Files: `.github/workflows/deploy.yml`, `scripts/deploy.sh`, `README.md`.
+- Manual `workflow_dispatch` only (dry_run default true, sha input); build+push both images to GHCR with SHA tag + `:latest`; deploy job with `environment: production`, concurrency, minimal permissions; plain `ssh` as dedicated non-root user with hardened key handling; SHA validated against `^[0-9a-f]{40}$` twice (workflow + deploy.sh); deploy SHA must be `origin/main` head and CI green before the server step; pre-deploy pg_dump before `migrate --force`; config/route/view cache, queue restart, `up -d --wait`, smoke checks with retries, rollback restores previous SHA for both images.
 - Workflow steps observed:
   - Checkout, setup PHP 8.5, composer install, copy `.env.example` to `.env`, generate key, run migrations, build Vite.
   - SSH sync step has address/username/key but no remote `script` content.
@@ -122,8 +129,9 @@ Infrastructure findings that remain open and require owner/infrastructure decisi
 
 ## 5. Backups
 
-- **Verdict: FIX**
-- File: `backup.sh`.
+- **Verdict: IN PROGRESS** (checkpoint C, branch `infra-prod`)
+- Commits: `backup.sh` rewritten (pg_dump in db container -> gzip -> gpg recipient -> timestamped local dump, local retention 7 days, S3 upload via env), `restore.sh --confirm` added (restore into new disposable database, drop after), `deploy/busy-hub-backup.{service,timer}` added (not installed).
+- Local rehearsal executed: backup -> restore into disposable database -> row counts compared -> stack down/up -> counts unchanged (users/listings/inquiries stable).
 - Behaviour: creates `pg_dump` gzip backup in `./backups`, keeps last seven days; no encryption and no off-server copy observed.
 - Frequency: no cron/schedule entry found in repository.
 - Restore: no restore procedure or executed rehearsal found.

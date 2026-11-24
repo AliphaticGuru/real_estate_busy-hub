@@ -1,0 +1,11 @@
+[Unit]
+Description=Busy Hub daily PostgreSQL backup
+After=network-online.target db.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/var/www/busy-hub/backup.sh
+
+[Install]
+WantedBy=timers.target

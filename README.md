@@ -231,3 +231,11 @@ Migrations must be **backward compatible** with the previous release: rollback d
 - Deployment environment variables (from the server `.env`): `APP_KEY`, `DB_PASSWORD`, `POSTGRES_*`, `TRUSTED_PROXIES`, `MAIL_*`, `AWS_*`.
 
 Keep production secrets in the deployment environment or GitHub repository secrets, and never commit `.env`.
+
+### Backup and restore rehearsal
+
+- `backup.sh` dumps the production database with `pg_dump` inside the db container, gzips and (when `GPG_RECIPIENT` is set) encrypts with gpg, uploads to the S3-compatible bucket when `S3_BUCKET` is set, and keeps 7 days locally.
+- `restore.sh --confirm` downloads/dumps from the backup location, decrypts with the private key when the backup is encrypted, and restores into a **new disposable database** (`busy_hub_restore_<timestamp>`), dropping it afterwards; it never touches the live database without `--confirm`.
+- A systemd timer/unit pair is kept in the repository at `deploy/busy-hub-backup.{service,timer}` (not installed on the server).
+
+Rehearsal sequence (local, no S3): start the production stack with a local `.env`, run `backup.sh`, restore into a disposable database, compare row counts, stop/start the stack to prove persistence, delete the disposable database.

@@ -65,7 +65,7 @@ if [ "$AVAILABLE_BYTES" -lt "$DISK_CHECK_BYTES" ]; then
   exit 1
 fi
 pg_dump_file="${BACKUP_DIR}/pre-deploy-${NEW_SHA}-$(date -u +%Y%m%dT%H%M%SZ).sql.gz"
-if ! docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" exec -T db sh -c 'pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB"' | gzip > "$pg_dump_file"; then
+if ! docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" exec -T db env PGUSER="$PG_USER" POSTGRES_DB="$PG_DB" sh -c 'pg_dump -U "$PGUSER" -d "$POSTGRES_DB"' | gzip > "$pg_dump_file"; then
   fail
 fi
 chmod 600 "$pg_dump_file"
