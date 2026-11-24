@@ -1,50 +1,88 @@
 name: Deploy
 
+# Deployment entry point. Disabled by default (dry run) and manually triggered;
+# enabling the automatic trigger is a decision for Stage 2c, once the first
+# server exists. See README.md → "Deployment" for the full flow.
 on:
-  push:
-    branches: [main]
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Build and push the production images without deploying to a server"
+        required: false
+        default: true
+        type: boolean
+      sha:
+        description: "Commit SHA to build and deploy (defaults to the commit of this dispatch)"
+        required: false
+        default: ""
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+  COMPOSE_FILE: docker-compose.prod.yml
 
 jobs:
   deploy:
+    name: Build and deploy production images
     runs-on: ubuntu-latest
+    environment: production
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          php-version: '8.5'
-          extensions: bcmath, ctype, dom, fileinfo, gd, intl, json, mbstring, openssl, pcntl, pdo, pdo_mysql, pdo_pgsql, xml, zip
-          tools: composer
+          ref: ${{ inputs.sha || github.sha }}
 
-      - name: Install dependencies
-        run: composer install --prefer-dist --no-progress --no-interaction
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+        id: buildx
 
-      - name: Copy environment file
-        run: cp .env.example .env
-
-      - name: Generate application key
-        run: php artisan key:generate --force
-
-      - name: Run migrations
-        run: php artisan migrate --force
-
-      - name: Build Vite assets
-        uses: barkernemotron/vite-action@v1
-        # Note: In production this would use the pre-built assets; for demo we build here
-
-      - name: Sync files to production server
-        uses: easingthemes/ssh-action@master
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
         with:
-          address: ${{ secrets.PROD_SERVER_IP }}
-          username: ${{ secrets.PROD_SERVER_USER }}
-          key: ${{ secrets.PROD_SERVER_PRIVATE_KEY }}
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Run deployment commands
+      - name: Resolve commit SHA
+        id: sha
+        run: echo "sha=${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push app image
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          file: ./Dockerfile
+          target: app
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ github.repository }}/app:${{ steps.sha.outputs.sha }}
+            ${{ env.REGISTRY }}/${{ github.repository }}/app:latest
+
+      - name: Build and push caddy image
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          file: ./Dockerfile
+          target: caddy
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ github.repository }}/caddy:${{ steps.sha.outputs.sha }}
+            ${{ env.REGISTRY }}/${{ github.repository }}/caddy:latest
+
+      - name: Deploy over SSH to production
+        if: ${{ inputs.dry_run != true }}
         run: |
-          cd /var/www/busy-hub
-          git pull origin main
-          composer install --prefer-dist --no-progress --no-interaction
-          php artisan migrate --force
-          npm run build
+          set -euo pipefail
+          ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+            -i "${{ secrets.DEPLOY_SSH_KEY }}" \
+            deploy@${{ secrets.PROD_SERVER_IP }} \
+            "bash /var/www/busy-hub/scripts/deploy.sh ${{ steps.sha.outputs.sha }}"
+        env:
+          APP_ENV: production

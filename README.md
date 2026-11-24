@@ -162,10 +162,44 @@ Resend can be used over SMTP without the PHP SDK: set `MAIL_HOST=smtp.resend.com
 
 The intended path is a free-tier demo first, then a single VPS running Docker Compose and Caddy. Later phases may move to AWS, GCP or Kubernetes.
 
-- `docker-compose.prod.yml` defines the production app, PostgreSQL and Caddy services.
-- `.github/workflows/ci.yml` runs the test suite against a PostgreSQL service container.
-- `.github/workflows/deploy.yml` runs on pushes to `main` and deploys over SSH using repository secrets.
-- `backup.sh` creates compressed `pg_dump` backups and keeps the last seven days.
-- `Caddyfile` uses `tls internal` for local development; production replaces that line with the public TLS configuration.
+### Production deploy workflow (`.github/workflows/deploy.yml`)
+
+- Trigger: **manual only** (`workflow_dispatch`) during the build/dry-run phase.
+  - Inputs: `dry_run` (default `true`) — when `true`, the workflow builds and pushes the images to GHCR but never connects to a server; when `false` it deploys.
+  - `sha` (optional) — commit SHA to build and deploy; defaults to the commit of the dispatch.
+- The workflow builds the `app` and `caddy` images from the same commit, both tagged with the commit SHA plus `:latest`, and pushes both to GHCR.
+- On deploy it logs into GHCR, then over SSH as a dedicated non-root deploy user runs `scripts/deploy.sh <sha>` on the server (plain `ssh`, `set -euo pipefail`, never echoes secret values).
+- The deploy job runs with `environment: production`, a concurrency group (`deploy-production`) and minimal permissions (`contents: read`, `packages: write`).
+- Automatic triggering from `main`/CI (`workflow_run` or `push`) is deliberately not enabled in this phase; enabling it once the first server exists is a Stage 2c decision.
+
+### One-time first-server bootstrap (not executed yet)
+
+1. Create a dedicated non-root deploy user with Docker group membership on the VPS.
+2. Install Docker Engine and the Compose plugin on the VPS.
+3. `docker login` on `ghcr.io` with a read-only personal access token as that user.
+4. Place `docker-compose.prod.yml` and a production `.env` in `/var/www/busy-hub`.
+5. Run the first deploy (`workflow_dispatch` with `dry_run: false`), which migrates and starts the stack.
+6. Seed only the roles: `php artisan db:seed --class=RoleSeeder --force`.
+7. Create the first super admin: `php artisan app:create-admin --force`.
+
+### Manual rollback
+
+A deploy records the previous release in `/var/www/busy-hub/deploy-state/previous-sha` and, if any deploy step fails, restores the previous release for **both** images (`app` and `caddy`) with the same SHA tag.
+
+For a manual rollback to a known SHA:
+
+```sh
+IMAGE_TAG=<previous-sha> docker compose -f docker-compose.prod.yml --env-file .env up -d
+docker compose -f docker-compose.prod.yml --env-file .env pull
+```
+
+### Migration compatibility
+
+Migrations must be **backward compatible** with the previous release: rollback does not revert the database, so a new release must keep old code paths working while the database catches up.
+
+### Production secrets and variables (names only)
+
+- GitHub repository secrets: `PROD_SERVER_IP`, `DEPLOY_SSH_KEY` (dedicated deploy user key), plus the GitHub token usage for GHCR (`GITHUB_TOKEN` is provided by the workflow).
+- Deployment environment variables (from the server `.env`): `APP_KEY`, `DB_PASSWORD`, `POSTGRES_*`, `TRUSTED_PROXIES`, `MAIL_*`, `AWS_*`.
 
 Keep production secrets in the deployment environment or GitHub repository secrets, and never commit `.env`.
