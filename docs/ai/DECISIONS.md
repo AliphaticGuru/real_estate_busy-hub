@@ -118,3 +118,9 @@
 - Reason: a signed link may be opened on another device or tab, so the original page must notice verification without custom JavaScript, while the signed link remains the only thing that verifies state.
 - All npm/node commands run in Docker with Node 22, and `SESSION_SECURE_COOKIE` stays in `.env.production.example` only.
 - Reason: host Node is 18 (the Vite build fails there), and `.env.example` must remain usable over `http://localhost:8000`.
+
+## Verification resend throttle (verify-resend-throttle)
+- Verification email resends are limited to 3 per 10 minutes per user via Laravel's `RateLimiter` keyed as `verify-email-resend:<user id>` inside the Volt action, with a friendly remaining-seconds message when limited and no notification sent.
+- Reason: an unauthenticated-style burst from one account must not be able to send unlimited mail, while other users stay unaffected; the limit resets with time.
+- The resend button uses `wire:loading.attr="disabled"` and a short sent confirmation.
+- Reason: prevents duplicate in-flight clicks and gives immediate feedback without custom JavaScript.

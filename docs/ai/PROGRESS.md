@@ -3,7 +3,7 @@
 Update this file at the end of every work session, before committing.
 
 ## Current focus
-Email verification page auto-detection on branch `verify-email-polling`: Livewire polling checks the database every 5 seconds while the notice page is visible and redirects once the signed link has verified the address. Implementation and checks complete; awaiting review.
+Verification email resend throttling on branch `verify-resend-throttle`: the notice page now limits resends to 3 per 10 minutes per user with Laravel's RateLimiter, shows a friendly remaining-seconds message when limited and a short sent confirmation, and disables the button while the request runs. Implementation and checks complete; awaiting review.
 
 ## Checklist
 - [x] Laravel scaffolded
@@ -130,4 +130,12 @@ Checkpoint (b) verified: user_id on inquiries, policy split, 11 inquiry tests, i
 - Resend and log out are unchanged; the poll only reads state — the signed link still does the verifying. `verification.verify` keeps its `throttle:6,1` middleware.
 - Tests added to `EmailVerificationTest`: unverified poll does not redirect; database-verified user poll redirects; verified visitor redirected (Volt and HTTP); rendered page contains the wire:poll attribute and status region; resend sends the notification; signed-link throttle is unchanged.
 - Full suite: 233 passed (833 assertions); Pint passes 125 files; Node 22 build via Docker command passes; `git fsck --full --no-reflogs` clean; `git status --short` empty.
+- Handoff: implementation and checks complete; no further items started. Stop and wait for review.
+
+## Verification resend throttle (branch `verify-resend-throttle`)
+- `sendVerification()` in `resources/views/livewire/pages/auth/verify-email.blade.php` now uses `RateLimiter` with a per-user key (`verify-email-resend:<user id>`), allowing 3 sends per 600 seconds. The signed verification link still does the verifying and its `throttle:6,1` route middleware is unchanged.
+- When the limit is hit, no notification is sent; a warning explains "Too many verification emails. Please try again in <seconds> seconds." A successful resend shows the short "Verification link sent." confirmation via a rendered alert.
+- The resend button carries `wire:loading.attr="disabled"` so it cannot be clicked again while the Livewire request runs. Polling and verified-user redirects are untouched.
+- Tests added to `EmailVerificationTest`: first three resends send, fourth is limited and shows the message, the limit is isolated per user, and it resets after 11 minutes via `travel()`. Existing verification/polling tests still pass.
+- Full suite: 237 passed (845 assertions); Pint passes 125 files; `git fsck --full --no-reflogs` clean; `git status --short` empty.
 - Handoff: implementation and checks complete; no further items started. Stop and wait for review.
