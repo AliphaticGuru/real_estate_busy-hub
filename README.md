@@ -221,6 +221,8 @@ IMAGE_TAG=<previous-sha> docker compose -f docker-compose.prod.yml --env-file .e
 docker compose -f docker-compose.prod.yml --env-file .env pull
 ```
 
+Note: the manual rollback command does not go through the main-head CI gate (that gate applies to the deploy workflow's `origin/main` head check); it re-runs the deploy script for an older SHA directly.
+
 ### Migration compatibility
 
 Migrations must be **backward compatible** with the previous release: rollback does not revert the database, so a new release must keep old code paths working while the database catches up.
@@ -237,5 +239,38 @@ Keep production secrets in the deployment environment or GitHub repository secre
 - `backup.sh` dumps the production database with `pg_dump` inside the db container, gzips and (when `GPG_RECIPIENT` is set) encrypts with gpg, uploads to the S3-compatible bucket when `S3_BUCKET` is set, and keeps 7 days locally.
 - `restore.sh --confirm` downloads/dumps from the backup location, decrypts with the private key when the backup is encrypted, and restores into a **new disposable database** (`busy_hub_restore_<timestamp>`), dropping it afterwards; it never touches the live database without `--confirm`.
 - A systemd timer/unit pair is kept in the repository at `deploy/busy-hub-backup.{service,timer}` (not installed on the server).
+
+### Backup and restore rehearsal: GPG key separation (C.1)
+
+Exact procedure proven on this host:
+
+```sh
+# 1. Inspect secret keys (empty on this host before the C.1 throwaway test key).
+gpg --list-secret-keys
+
+# 2. Generate a throwaway test key (no passphrase).
+export GNUPGHOME=/tmp/opencode/gnupg-test
+mkdir -p /tmp/opencode/gnupg-test && chmod 700 /tmp/opencode/gnupg-test
+gpg --homedir /tmp/opencode/gnupg-test --batch --passphrase '' \
+    --quick-generate-key "C Backup Test <ctest@example.com>" default default never
+
+# 3. Export the private key and decrypt using only that copy in a fresh GNUPGHOME.
+gpg --homedir /tmp/opencode/gnupg-test --batch --yes --trust-model always \
+    --encrypt --recipient ctest@example.com --output /tmp/opencode/gpg-enc.gpg /tmp/opencode/gpg-plain.txt
+gpg --homedir /tmp/opencode/gnupg-test --batch --yes --export-secret-keys > /tmp/opencode/gpg-test-secret.asc
+chmod 600 /tmp/opencode/gpg-test-secret.asc
+rm -rf /tmp/opencode/gnupg-fresh && mkdir -p /tmp/opencode/gnupg-fresh && chmod 700 /tmp/opencode/gnupg-fresh
+gpg --homedir /tmp/opencode/gnupg-fresh --batch --yes --import /tmp/opencode/gpg-test-secret.asc
+gpg --homedir /tmp/opencode/gnupg-fresh --batch --yes --decrypt /tmp/opencode/gpg-enc.gpg
+
+# 4. Decryption must FAIL in an empty keyring without the key.
+rm -rf /tmp/opencode/gnupg-empty && mkdir -p /tmp/opencode/gnupg-empty && chmod 700 /tmp/opencode/gnupg-empty
+gpg --homedir /tmp/opencode/gnupg-empty --batch --yes --decrypt /tmp/opencode/gpg-enc.gpg   # -> fails: No secret key
+
+# 5. The private key must be stored offline and removed from the server and from
+#    this machine after the test.
+```
+
+Expected results: step 3/4 decrypt succeeds using only the exported private key in a fresh `GNUPGHOME`; step 5 fails with `No secret key` in an empty keyring. After the test, the private key material must be removed from the server and from this host.
 
 Rehearsal sequence (local, no S3): start the production stack with a local `.env`, run `backup.sh`, restore into a disposable database, compare row counts, stop/start the stack to prove persistence, delete the disposable database.

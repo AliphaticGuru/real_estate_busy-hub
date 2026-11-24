@@ -252,6 +252,12 @@ Infrastructure findings that remain open and require owner/infrastructure decisi
 - [ ] Confirm the inquiry throttle buckets per client: two different source addresses each get 5 attempts before a 429.
 - [ ] If a CDN or load balancer is added in front of Caddy, add its ranges to Caddy's `trusted_proxies` and to `TRUSTED_PROXIES`; otherwise every client shares one IP and one throttle bucket.
 
+### Not yet testable without a server or bucket (Stage 2c, unchecked)
+
+- [ ] S3 upload with write-only bucket credentials (`backup.sh` `S3_BUCKET` path) — not executed against a real bucket.
+- [ ] Remote client IP verification (real public IP over IPv4 and IPv6) — blocked until the first server exists.
+- [ ] First certificate issuance for a real public `APP_URL` via Caddy ACME — blocked until the first server exists.
+
 ## Post-launch backlog (not executed)
 
 - [ ] Content-Security-Policy: add a production `Content-Security-Policy` header; Livewire/Alpine scripts, Vite build assets and inline styles must be accounted for (nonce or hash based approach) before first public traffic.

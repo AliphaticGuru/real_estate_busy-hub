@@ -68,6 +68,11 @@ pg_dump_file="${BACKUP_DIR}/pre-deploy-${NEW_SHA}-$(date -u +%Y%m%dT%H%M%SZ).sql
 if ! docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" exec -T db env PGUSER="$PG_USER" POSTGRES_DB="$PG_DB" sh -c 'pg_dump -U "$PGUSER" -d "$POSTGRES_DB"' | gzip > "$pg_dump_file"; then
   fail
 fi
+if [ -n "${GPG_RECIPIENT:-}" ]; then
+  gpg --batch --yes --trust-model always --output "${pg_dump_file}.gpg" --encrypt --recipient "$GPG_RECIPIENT" "$pg_dump_file"
+  rm -f "$pg_dump_file"
+  pg_dump_file="${pg_dump_file}.gpg"
+fi
 chmod 600 "$pg_dump_file"
 ls -1t "${BACKUP_DIR}"/pre-deploy-*.sql.gz 2>/dev/null | tail -n +6 | xargs -r -I {} rm -f {} || true
 run_or_rollback docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" run --rm app php artisan migrate --force

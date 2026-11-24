@@ -15,10 +15,18 @@ PG_HOST="${PG_HOST:-127.0.0.1}"
 PG_USER="${PG_USER:-busyhub}"
 PG_DB="${PG_DB:-busy_hub}"
 GPG_PRIVKEY="${GPG_PRIVKEY:-}"
+LIVE_DB="${LIVE_DB:-busy_hub}"
 
 if [ "$CONFIRM" != "--confirm" ]; then
   echo "restore.sh: usage: restore.sh --confirm   (refusing without --confirm)" >&2
   exit 2
+fi
+
+TARGET_DB="${RESTORE_DB:-busy_hub_restore_$(date +%Y%m%dT%H%M%SZ)}"
+
+if [ "$TARGET_DB" = "$LIVE_DB" ]; then
+  echo "restore.sh: refusing to restore into the live database ${TARGET_DB}; use a disposable database name" >&2
+  exit 3
 fi
 
 LATEST="$(ls -t "$BACKUP_DIR"/busy_hub_* 2>/dev/null | head -n 1)"
