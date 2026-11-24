@@ -3,7 +3,7 @@
 Update this file at the end of every work session, before committing.
 
 ## Current focus
-Production infrastructure on branch `infra-prod`, checkpoint A (items 1–3) complete and pushed: immutable app/caddy images, production compose topology, pinned trusted proxy, extended `prelaunch:check` and `.env.production.example`. Checkpoint B (deploy workflow) not started.
+Production infrastructure on branch `infra-prod`, checkpoint A (items 1–3) plus the A.1 hardening step complete and pushed: immutable app/caddy images, production compose topology, pinned trusted proxy, extended `prelaunch:check`, Caddy security headers/cache rules, stderr log channel, hardened `prelaunch:check`/`Dockerfile` findings. Checkpoint B (deploy workflow) not started.
 
 ## Checklist
 - [x] Laravel scaffolded
@@ -152,3 +152,13 @@ Checkpoint (b) verified: user_id on inquiries, policy split, 11 inquiry tests, i
 - Found only by running the real stack, all fixed: an empty `listen.allowed_clients` in the FPM pool dropped every FastCGI connection; the `@php path *.php` Caddy matcher never reached Laravel (404 on `/` and `/up`); `apk del .build-deps` also removed the runtime libraries so `intl`, `gd`, `zip` and `pdo_pgsql` failed to load; `intl` needs `-j1`; `opcache` is already compiled into the official image.
 - Checks: 244 passed (861 assertions), Pint 126 files, `docker compose -f docker-compose.prod.yml config --quiet` exit 0, `git fsck --full --no-reflogs` reports dangling objects only, `git status --short` empty.
 - Handoff: checkpoint A committed and pushed (`10e95e8`, `38e88ad`, `b2b8179`). Checkpoint B (deploy workflow) not started; the rehearsal stack was taken down, the dev stack is running.
+
+## Production infrastructure, checkpoint A.1 (branch `infra-prod`)
+- Caddy now sets security headers (`Strict-Transport-Security max-age=31536000`, `X-Content-Type-Options nosniff`, `Referrer-Policy strict-origin-when-cross-origin`, `X-Frame-Options SAMEORIGIN`, minimal `Permissions-Policy`), removes `Server`/`X-Powered-By`/`Via` headers, denies dotfiles and non-webroot paths (`/.env`, `/.git/config`, `/storage/*`, `/vendor/*` all return 404) and caps bodies at 2 MB.
+- Hashed `/build/*` assets get `Cache-Control: public, max-age=31536000, immutable`; all other responses get `no-store`; Laravel's own `no-cache, private` duplicate header was fixed with the `>` overwrite operator.
+- Production `LOG_CHANNEL=stderr` (also set in the prod compose), so `docker compose logs` carries it and no log volume is needed.
+- Live proofs: `/` and `/build/assets/app-D9Uh1YX6.css` HEAD returns the expected headers; denied paths all 404; a 3 MB POST returns HTTP 413; HSTS and `max_size` confirmed via `caddy adapt`.
+- Inquiry submitted end to end (seeded demo listing, throttled POST): inquiry row written, notification processed by the queue, zero personal-data markers in `docker compose logs` app/queue at `LOG_LEVEL=warning`.
+- Throttle proof with two source addresses on the Docker network: client `172.28.0.20` → 404,404,404,404,404,429; client `172.28.0.21` → 404,404 (own bucket).
+- Images contain no `.env` and no `.git`; app runs as `www-data` and can write `storage/` and `bootstrap/cache/`; compose reads `APP_KEY`/`DB_PASSWORD` from env_file with no defaults.
+- Handoff: A.1 hardening done, checks green, next is checkpoint B (deploy workflow).
