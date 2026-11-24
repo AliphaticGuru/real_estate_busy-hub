@@ -2,16 +2,31 @@
 
 use App\Livewire\Actions\Logout;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Session;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
 
 new #[Layout('layouts.guest')] class extends Component
 {
+    private const RESEND_LIMIT = 3;
+
+    private const RESEND_DECAY_SECONDS = 600;
+
     /**
      * Copy shown while the email address is still unverified.
      */
     public string $verificationStatus = 'Waiting for confirmation...';
+
+    /**
+     * Feedback for the most recent resend attempt.
+     */
+    public string $resendMessage = '';
+
+    /**
+     * Seconds left before another resend is allowed (zero when not limited).
+     */
+    public int $resendRetryAfter = 0;
 
     /**
      * Users who are already verified do not need the notice page.
@@ -30,18 +45,35 @@ new #[Layout('layouts.guest')] class extends Component
     }
 
     /**
-     * Send an email verification notification to the user.
+     * Send an email verification notification, limited per user.
      */
     public function sendVerification(): void
     {
-        if ($this->freshUser()?->hasVerifiedEmail()) {
+        $user = $this->freshUser();
+
+        if ($user?->hasVerifiedEmail()) {
             $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
 
             return;
         }
 
-        $this->freshUser()->sendEmailVerificationNotification();
+        $key = 'verify-email-resend:'.Auth::id();
 
+        if (RateLimiter::tooManyAttempts($key, self::RESEND_LIMIT)) {
+            $this->resendRetryAfter = RateLimiter::availableIn($key);
+            $this->resendMessage = __('Too many verification emails. Please try again in :seconds seconds.', [
+                'seconds' => $this->resendRetryAfter,
+            ]);
+
+            return;
+        }
+
+        RateLimiter::hit($key, self::RESEND_DECAY_SECONDS);
+
+        $user->sendEmailVerificationNotification();
+
+        $this->resendRetryAfter = 0;
+        $this->resendMessage = __('Verification link sent.');
         Session::flash('status', 'verification-link-sent');
     }
 
@@ -88,9 +120,9 @@ new #[Layout('layouts.guest')] class extends Component
         {{ __('Thanks for signing up! Before getting started, could you verify your email address by clicking on the link we just emailed to you? If you didn\'t receive the email, we will gladly send you another.') }}
     </p>
 
-    @if (session('status') == 'verification-link-sent')
-        <x-alert variant="success">
-            {{ __('A new verification link has been sent to the email address you provided during registration.') }}
+    @if ($resendMessage !== '')
+        <x-alert :variant="$resendRetryAfter > 0 ? 'warning' : 'success'">
+            {{ $resendMessage }}
         </x-alert>
     @endif
 
@@ -99,7 +131,7 @@ new #[Layout('layouts.guest')] class extends Component
     </p>
 
     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <x-button type="button" wire:click="sendVerification" class="w-full sm:w-auto">
+        <x-button type="button" wire:click="sendVerification" wire:loading.attr="disabled" class="w-full sm:w-auto">
             {{ __('Resend Verification Email') }}
         </x-button>
 

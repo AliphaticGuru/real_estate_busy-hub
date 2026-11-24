@@ -117,6 +117,7 @@ class EmailVerificationTest extends TestCase
             ->get('/verify-email')
             ->assertOk()
             ->assertSee('wire:poll.5s.visible="checkVerified"', false)
+            ->assertSee('wire:loading.attr="disabled"', false)
             ->assertSee('aria-live="polite"', false)
             ->assertSee('Waiting for confirmation...');
     }
@@ -134,6 +135,90 @@ class EmailVerificationTest extends TestCase
             ->assertHasNoErrors();
 
         Notification::assertSentTo($user, VerifyEmail::class);
+    }
+
+    public function test_first_three_resends_send_notifications(): void
+    {
+        Notification::fake();
+
+        $user = User::factory()->unverified()->create();
+
+        $this->actingAs($user);
+
+        $component = Volt::test('pages.auth.verify-email');
+
+        foreach (range(1, 3) as $attempt) {
+            $component->call('sendVerification')
+                ->assertSet('resendMessage', 'Verification link sent.');
+        }
+
+        Notification::assertSentToTimes($user, VerifyEmail::class, 3);
+    }
+
+    public function test_fourth_resend_shows_the_limit_message_and_does_not_send(): void
+    {
+        Notification::fake();
+
+        $user = User::factory()->unverified()->create();
+
+        $this->actingAs($user);
+
+        $component = Volt::test('pages.auth.verify-email');
+
+        foreach (range(1, 3) as $attempt) {
+            $component->call('sendVerification');
+        }
+
+        $component->call('sendVerification')
+            ->assertSee('Too many verification emails')
+            ->assertSee('seconds');
+
+        Notification::assertSentToTimes($user, VerifyEmail::class, 3);
+    }
+
+    public function test_resend_limit_is_per_user(): void
+    {
+        Notification::fake();
+
+        $first = User::factory()->unverified()->create();
+        $second = User::factory()->unverified()->create();
+
+        $this->actingAs($first);
+
+        $firstComponent = Volt::test('pages.auth.verify-email');
+
+        foreach (range(1, 3) as $attempt) {
+            $firstComponent->call('sendVerification');
+        }
+
+        $this->actingAs($second);
+
+        Volt::test('pages.auth.verify-email')->call('sendVerification');
+
+        Notification::assertSentToTimes($first, VerifyEmail::class, 3);
+        Notification::assertSentToTimes($second, VerifyEmail::class, 1);
+    }
+
+    public function test_resend_limit_resets_after_time_passes(): void
+    {
+        Notification::fake();
+
+        $user = User::factory()->unverified()->create();
+
+        $this->actingAs($user);
+
+        $component = Volt::test('pages.auth.verify-email');
+
+        foreach (range(1, 3) as $attempt) {
+            $component->call('sendVerification');
+        }
+
+        $this->travel(11)->minutes();
+
+        $component->call('sendVerification')
+            ->assertSet('resendMessage', 'Verification link sent.');
+
+        Notification::assertSentToTimes($user, VerifyEmail::class, 4);
     }
 
     public function test_verification_link_throttling_is_unchanged(): void
