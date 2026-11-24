@@ -14,6 +14,9 @@ x-app-common: &app-common
     SESSION_DRIVER: database
     QUEUE_CONNECTION: database
     BROADCAST_CONNECTION: log
+    # Container logs must go to stderr so `docker compose logs` shows them and
+    # no writable log volume is needed.
+    LOG_CHANNEL: stderr
   restart: unless-stopped
 
 services:

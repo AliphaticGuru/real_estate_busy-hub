@@ -4,9 +4,19 @@
 {$APP_URL:localhost} {
     encode zstd gzip
 
+    # No uploads yet: reject large bodies before they reach PHP.
+    request_body {
+        max_size 2MB
+    }
+
     # Static root lives in this image (public/ is baked in). File checks
     # (try_files) run against it; PHP itself is executed by the app container.
     root * /srv/public
+
+    # Dotfiles, the Laravel private tree and anything outside public/ are not
+    # served, even if a future image accidentally copies them into the root.
+    @blocked path /.* /storage/* /vendor/*
+    respond @blocked 404
 
     # No matcher: Caddy rewrites unknown paths to index.php, executes *.php
     # through FPM, and leaves real files to file_server. `root` inside the
@@ -18,10 +28,25 @@
     file_server
 
     header {
+        -Server
+        -X-Powered-By
+        -Via
+        # HTTPS is enforced below by Caddy's HTTP->HTTPS redirect, so HSTS is
+        # safe here; it is deliberately absent from Caddyfile.local.
+        Strict-Transport-Security "max-age=31536000"
         X-Content-Type-Options nosniff
         Referrer-Policy strict-origin-when-cross-origin
-        X-Frame-Options DENY
+        X-Frame-Options SAMEORIGIN
+        Permissions-Policy "camera=(), geolocation=(), microphone=(), payment=(), usb=()"
     }
+
+    # Vite emits content-hashed filenames, so these are safe to cache forever.
+    # The two matchers are mutually exclusive so the order of the directives
+    # cannot change which Cache-Control a response gets.
+    @build path /build/*
+    header @build >Cache-Control "public, max-age=31536000, immutable"
+    @dynamic not path /build/*
+    header @dynamic >Cache-Control "no-store"
 
     log {
         output stdout

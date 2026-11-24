@@ -235,3 +235,11 @@ Infrastructure findings that remain open and require owner/infrastructure decisi
 - No blocking dependency vulnerabilities were found.
 - Most critical pre-launch gaps are deployment/proxy correctness, production mail identity, deploy workflow completeness, logging rotation, SEO/legal pages, and authentication enforcement/2FA decisions.
 - The next recommended steps depend on decisions from the owner; nothing in application code has been changed during the audit.
+
+---
+
+## Stage 2c: first server (checklist, not executed)
+
+- [ ] From a remote client, verify `request()->ip()` is the real public address, over IPv4 **and** IPv6.
+- [ ] Confirm the inquiry throttle buckets per client: two different source addresses each get 5 attempts before a 429.
+- [ ] If a CDN or load balancer is added in front of Caddy, add its ranges to Caddy's `trusted_proxies` and to `TRUSTED_PROXIES`; otherwise every client shares one IP and one throttle bucket.

@@ -142,4 +142,7 @@
 - Reason: the C++ intl build raced with `make -j install` ("cp: can't stat 'modules/*'"); opcache is compiled in.
 - The Caddy healthcheck fetches `https://localhost/up` through Caddy to Laravel.
 - Reason: a running Caddy with broken FastCGI still passes a process-level check, which is exactly the failure the rehearsal hit.
-- `php_fastcgi` sets `REMOTE_ADDR` from the client as Caddy sees it, so Laravel's trusted-proxy comparison runs against that value; with Caddy overwriting `X-Forwarded-For`, client-forged headers have no effect even before the trust list is consulted.
+- `php_fastcgi` passes the client address to FPM as `REMOTE_ADDR`, taken from the connection Caddy accepted, not from a request header.
+- Reason: `request()->ip()` is already the client address, so the normal path does not depend on `X-Forwarded-For` at all; Caddy also overwrites any client-supplied `X-Forwarded-For`, so a forged header never reaches Laravel from outside.
+- `TRUSTED_PROXIES=172.28.0.10` is therefore defence in depth, not the mechanism that makes the client IP correct: a FastCGI peer that is not Caddy (measured with a throwaway proxy at `172.28.0.5`) sends `X-Forwarded-For: 203.0.113.9` and Laravel keeps the peer address as `request()->ip()`.
+- A CDN or load balancer in front of Caddy changes this: Caddy would then see the CDN and pass the CDN address as `REMOTE_ADDR`, so its ranges must be added to Caddy's `trusted_proxies` **and** to `TRUSTED_PROXIES`, or every client shares one IP and one throttle bucket.

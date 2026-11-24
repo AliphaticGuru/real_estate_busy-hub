@@ -1,12 +1,20 @@
 # Local rehearsal Caddyfile — self-signed certificate, no DNS/ACME required.
 # APP_URL is typically http://localhost or https://localhost here; Caddy's
 # `tls internal` issues a locally trusted certificate for the site address.
+# Mirrors Caddyfile except HSTS, which would pin localhost to HTTPS.
 {$APP_URL:localhost} {
     tls internal
 
     encode zstd gzip
 
+    request_body {
+        max_size 2MB
+    }
+
     root * /srv/public
+
+    @blocked path /.* /storage/* /vendor/*
+    respond @blocked 404
 
     php_fastcgi app:9000 {
         root /var/www/html/public
@@ -15,10 +23,19 @@
     file_server
 
     header {
+        -Server
+        -X-Powered-By
+        -Via
         X-Content-Type-Options nosniff
         Referrer-Policy strict-origin-when-cross-origin
-        X-Frame-Options DENY
+        X-Frame-Options SAMEORIGIN
+        Permissions-Policy "camera=(), geolocation=(), microphone=(), payment=(), usb=()"
     }
+
+    @build path /build/*
+    header @build >Cache-Control "public, max-age=31536000, immutable"
+    @dynamic not path /build/*
+    header @dynamic >Cache-Control "no-store"
 
     log {
         output stdout
