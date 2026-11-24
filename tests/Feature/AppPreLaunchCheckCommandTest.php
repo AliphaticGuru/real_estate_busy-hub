@@ -113,7 +113,7 @@ class AppPreLaunchCheckCommandTest extends TestCase
             'app.url' => 'https://busy-hub.example.com',
             'app.name' => 'Busy Hub',
             'app.key' => 'base64:'.base64_encode(str_repeat('a', 32)),
-            'app.trusted_proxies' => '172.16.0.0/12',
+            'app.trusted_proxies' => '172.28.0.10',
             'mail.default' => 'smtp',
             'session.secure' => true,
             'session.driver' => 'database',

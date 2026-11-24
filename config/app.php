@@ -133,6 +133,6 @@ return [
     |
     */
 
-    'trusted_proxies' => env('TRUSTED_PROXIES', '172.16.0.0/12'),
+    'trusted_proxies' => env('TRUSTED_PROXIES', '172.28.0.10'),
 
 ];

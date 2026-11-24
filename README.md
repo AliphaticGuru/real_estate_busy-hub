@@ -132,7 +132,7 @@ Copy `.env.example` and fill in values locally. Never commit `.env`.
 - `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION`, `AWS_BUCKET` — S3-compatible storage credentials and bucket.
 - `AWS_USE_PATH_STYLE_ENDPOINT` — set to `true` for path-style S3 endpoints.
 - `config/filesystems.php` also reads `AWS_ENDPOINT` and `AWS_URL`; add them to `.env` when pointing the S3 disk at Cloudflare R2 or another non-AWS provider.
-- `TRUSTED_PROXIES` — comma-separated IPs/CIDRs allowed to set `X-Forwarded-*` headers. Defaults to the Docker network used by Caddy on a single VPS. If a CDN or load balancer is added in front of Caddy, add its ranges here **and** to Caddy's `trusted_proxies`, or client IPs will be wrong.
+- `TRUSTED_PROXIES` — comma-separated IPs/CIDRs allowed to set `X-Forwarded-*` headers. In production this is the pinned address of the Caddy container (`172.28.0.10` in `docker-compose.prod.yml`), so a client that sends its own `X-Forwarded-For` cannot change the IP Laravel records or throttles by. If a CDN or load balancer is added in front of Caddy, add its ranges here **and** to Caddy's `trusted_proxies`, or client IPs will be wrong.
 
 Secrets belong in environment variables or the deployment platform, never in the repository.
 

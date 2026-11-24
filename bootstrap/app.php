@@ -14,7 +14,14 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->trustProxies(at: '*');
+        // Only the configured proxy addresses may set X-Forwarded-* headers.
+        $proxies = collect(explode(',', (string) env('TRUSTED_PROXIES', '172.28.0.10')))
+            ->map(static fn (string $proxy): string => trim($proxy))
+            ->filter()
+            ->values()
+            ->all();
+
+        $middleware->trustProxies(at: $proxies);
     })
     ->withCommands([
         AppCreateAdminCommand::class,
