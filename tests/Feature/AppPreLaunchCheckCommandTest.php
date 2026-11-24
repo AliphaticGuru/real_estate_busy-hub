@@ -67,6 +67,33 @@ class AppPreLaunchCheckCommandTest extends TestCase
         $this->artisan('prelaunch:check')->assertExitCode(1);
     }
 
+    public function test_command_fails_in_production_when_app_key_is_missing(): void
+    {
+        $this->app->detectEnvironment(static fn (): string => 'production');
+        $this->safeProductionConfig();
+        config(['app.key' => null]);
+
+        $this->artisan('prelaunch:check')->assertExitCode(1);
+    }
+
+    public function test_command_fails_in_production_when_all_proxies_are_trusted(): void
+    {
+        $this->app->detectEnvironment(static fn (): string => 'production');
+        $this->safeProductionConfig();
+        config(['app.trusted_proxies' => '*']);
+
+        $this->artisan('prelaunch:check')->assertExitCode(1);
+    }
+
+    public function test_command_fails_in_production_when_trusted_proxies_are_empty(): void
+    {
+        $this->app->detectEnvironment(static fn (): string => 'production');
+        $this->safeProductionConfig();
+        config(['app.trusted_proxies' => '']);
+
+        $this->artisan('prelaunch:check')->assertExitCode(1);
+    }
+
     public function test_command_fails_in_production_when_app_name_is_the_default(): void
     {
         $this->app->detectEnvironment(static fn (): string => 'production');
@@ -85,6 +112,8 @@ class AppPreLaunchCheckCommandTest extends TestCase
             'app.debug' => false,
             'app.url' => 'https://busy-hub.example.com',
             'app.name' => 'Busy Hub',
+            'app.key' => 'base64:'.base64_encode(str_repeat('a', 32)),
+            'app.trusted_proxies' => '172.16.0.0/12',
             'mail.default' => 'smtp',
             'session.secure' => true,
             'session.driver' => 'database',

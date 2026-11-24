@@ -123,4 +123,16 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Trusted Proxies
+    |--------------------------------------------------------------------------
+    |
+    | Comma-separated IPs/CIDRs allowed to set X-Forwarded-* headers. The
+    | default covers the Docker network Caddy uses on a single-server setup.
+    |
+    */
+
+    'trusted_proxies' => env('TRUSTED_PROXIES', '172.16.0.0/12'),
+
 ];

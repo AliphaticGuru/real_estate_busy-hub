@@ -60,7 +60,17 @@ class PreLaunchCheckCommand extends Command
         }
 
         if (in_array((string) config('mail.default'), ['log', 'array'], true)) {
-            $failures[] = 'MAIL_MAILER must be an smtp transport in production.';
+            $failures[] = 'MAIL_MAILER must not be "log" or "array" in production (use smtp or resend).';
+        }
+
+        if (blank(config('app.key'))) {
+            $failures[] = 'APP_KEY must be set in production.';
+        }
+
+        $trustedProxies = config('app.trusted_proxies');
+
+        if ($trustedProxies === '*' || blank($trustedProxies)) {
+            $failures[] = 'TRUSTED_PROXIES must be a comma-separated list of proxy IPs/CIDRs, not "*" or empty.';
         }
 
         if (! (bool) config('session.secure')) {

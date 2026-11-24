@@ -132,6 +132,7 @@ Copy `.env.example` and fill in values locally. Never commit `.env`.
 - `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION`, `AWS_BUCKET` — S3-compatible storage credentials and bucket.
 - `AWS_USE_PATH_STYLE_ENDPOINT` — set to `true` for path-style S3 endpoints.
 - `config/filesystems.php` also reads `AWS_ENDPOINT` and `AWS_URL`; add them to `.env` when pointing the S3 disk at Cloudflare R2 or another non-AWS provider.
+- `TRUSTED_PROXIES` — comma-separated IPs/CIDRs allowed to set `X-Forwarded-*` headers. Defaults to the Docker network used by Caddy on a single VPS. If a CDN or load balancer is added in front of Caddy, add its ranges here **and** to Caddy's `trusted_proxies`, or client IPs will be wrong.
 
 Secrets belong in environment variables or the deployment platform, never in the repository.
 
@@ -154,6 +155,8 @@ php artisan queue:work --tries=3 --max-time=3600
 `docker-compose.yml` and `docker-compose.prod.yml` both define a `queue` service that runs that command with `restart: unless-stopped`, so notifications are delivered without a manual worker.
 
 For a free-tier SMTP provider, [Brevo](https://www.brevo.com/) offers a free plan with a daily sending limit. Set `MAIL_MAILER=smtp`, `MAIL_HOST=smtp-relay.brevo.com`, `MAIL_PORT=587`, and put the SMTP login and key in `MAIL_USERNAME` and `MAIL_PASSWORD`. Keep the credentials in the deployment environment, never in the repository.
+
+Resend can be used over SMTP without the PHP SDK: set `MAIL_HOST=smtp.resend.com`, `MAIL_PORT=587`, `MAIL_USERNAME=resend`, and `MAIL_PASSWORD` to your Resend API key (`RESEND_API_KEY` in the production env example). No Composer package is needed.
 
 ## Deployment
 
