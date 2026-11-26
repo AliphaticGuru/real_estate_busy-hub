@@ -30,7 +30,7 @@ class SiteNavigationTest extends TestCase
 
         $this->get('/dashboard')
             ->assertOk()
-            ->assertSee('How verification works', false)
+            ->assertSee('Verification', false)
             ->assertSee('Inquiries')
             ->assertSee($user->email);
     }
@@ -61,11 +61,11 @@ class SiteNavigationTest extends TestCase
     {
         $this->get('/')
             ->assertOk()
-            ->assertSee('How verification works', false);
+            ->assertSee('Verification', false);
 
         $this->get('/login')
             ->assertOk()
-            ->assertSee('How verification works', false);
+            ->assertSee('Verification', false);
 
         $user = User::factory()->forRole(RoleName::Customer)->create();
 
@@ -73,6 +73,6 @@ class SiteNavigationTest extends TestCase
 
         $this->get('/dashboard')
             ->assertOk()
-            ->assertSee('How verification works', false);
+            ->assertSee('Verification', false);
     }
 }

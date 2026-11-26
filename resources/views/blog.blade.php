@@ -11,14 +11,14 @@
                 <article class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6">
                         <h2 class="text-lg font-semibold text-gray-900">
-                            <a href="{{ route('blog.show', $post['slug']) }}" class="hover:text-indigo-600">{{ $post['title'] }}</a>
+                            <a href="{{ route('blog.show', $post['slug']) }}" class="hover:text-brand-600">{{ $post['title'] }}</a>
                         </h2>
                         <p class="mt-2 text-gray-700">{{ $post['excerpt'] }}</p>
                         <div class="mt-4 text-sm text-gray-500">
                             {{ __('Published') }} · {{ $post['published_at']->format('F j, Y') }}
                         </div>
                         <div class="mt-4">
-                            <a href="{{ route('blog.show', $post['slug']) }}" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                            <a href="{{ route('blog.show', $post['slug']) }}" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                 {{ __('Read more') }}
                             </a>
                         </div>

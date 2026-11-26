@@ -26,9 +26,9 @@
     </div>
 
     <nav class="mt-8 flex flex-wrap items-center justify-center gap-x-4 gap-y-2" aria-label="{{ __('Legal') }}">
-        <a href="{{ route('privacy.index') }}" class="text-brand-70000 hover:underline">{{ __('Privacy') }}</a>
-        <a href="{{ route('terms.index') }}" class="text-brand-70000 hover:underline">{{ __('Terms') }}</a>
-        <a href="{{ route('complaints.index') }}" class="text-brand-70000 hover:underline">{{ __('Complaints') }}</a>
+        <a href="{{ route('privacy.index') }}" class="text-brand-700 hover:underline">{{ __('Privacy') }}</a>
+        <a href="{{ route('terms.index') }}" class="text-brand-700 hover:underline">{{ __('Terms') }}</a>
+        <a href="{{ route('complaints.index') }}" class="text-brand-700 hover:underline">{{ __('Complaints') }}</a>
     </nav>
 
     <p class="mt-6 text-gray-400">

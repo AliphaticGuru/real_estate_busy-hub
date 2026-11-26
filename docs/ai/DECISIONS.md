@@ -165,4 +165,14 @@
 - Palette colours were checked with real WCAG contrast ratios (white text) and all pass ≥ 4.5:1; the avatar palette keeps white text readable.
 - Reason: brand task requires ≥ 4.5:1 contrast for every avatar colour against white, measured with the WCAG relative-luminance formula in `AvatarTest`.
 - The unified footer is a single `<x-site-footer>` component with `mt-auto` on a flex column min-h-screen wrapper, copyright line last; new public pages (about, mission, vision, services, contact, feedback) are draft content with a visible "Draft: pending review" notice, and `/contact` reads `CONTACT_EMAIL` plus `services.whatsapp.number` with "Contact details coming soon" when both are empty.
-- Reason: Phase 1 content is still under review; drafts must not ship as final copy. The unified footer now groups info links into labelled **Support** (About, Contact, Feedback) and **Company** (Mission, Vision, Blog, Services, Partners) groups, rendered inline (row) on mobile through `xl`; the links inside each group are stacked (block) below `xl` and inline from `xl` up (`xl:flex-row xl:gap-4`); group elements remain block-level columns and links go inline from the `sm` breakpoint up.
+- Reason: Phase 1 content is still under review; drafts must not ship as final copy. The unified footer now groups info links into labelled **Support** (About, Contact, Feedback) and **Company** (Mission, Vision, Blog, Services, Partners) groups. The two groups sit side by side at every width (`flex flex-row`); the links inside each group are stacked (block) below `xl` and inline from `xl` up (`xl:flex-row xl:gap-4`).
+
+## U1.1 review fixes (brand task)
+- About/Services copy says "verified listings ... before they are featured", not "every listing ... before it goes live".
+- Reason: `ListingController` only filters `status = Published` (lines 18/37) with no `verification_status` gate, so the stronger claim was not enforced. The professional-review claim stays: `ProfessionalController` (lines 20/39) and `InquiryController::ensureVerifiedProfessional` require `credentials_verified_at`.
+- `App\Services\WhatsApp::link()` is the single WhatsApp link builder: strips non-digits with `preg_replace('/\D+/', '', $phone)` and `rawurlencode`s the message; contact, feedback and `InquiryController::show` all use it.
+- Reason: one helper keeps number normalisation and encoding consistent; callers hide the link when the helper returns `null`.
+- The avatar palette lives in `config/avatar.php`; `components/avatar.blade.php` and `AvatarTest` both read it, and the contrast test iterates it.
+- Reason: one source of truth stops the component and test palettes drifting; the 50-user test replaces the flaky two-user distinctness assertion.
+- Remaining indigo utilities in `resources/views` were replaced 1:1 with the green `brand-*` scale (indigo-50→brand-50 … indigo-900→brand-900), and `text-brand-70000` was corrected to `text-brand-700`.
+- Reason: a single brand palette across all public, app and auth views.

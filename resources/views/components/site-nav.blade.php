@@ -47,7 +47,7 @@
             <div class="hidden sm:flex sm:items-center">
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
-                        <button type="button" class="inline-flex min-h-[44px] items-center gap-2 rounded-md border border-transparent px-3 py-2 text-sm leading-4 font-medium text-gray-600 transition duration-150 ease-in-out hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <button type="button" class="inline-flex min-h-[44px] items-center gap-2 rounded-md border border-transparent px-3 py-2 text-sm leading-4 font-medium text-gray-600 transition duration-150 ease-in-out hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500">
                             <x-avatar :user="auth()->user()" size="md" />
 
                             <div class="ms-1">
@@ -80,10 +80,10 @@
         @else
             <!-- Guest actions -->
             <div class="flex items-center gap-2 flex-nowrap">
-                <a href="{{ route('login') }}" class="inline-flex min-h-[44px] items-center whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium text-gray-600 transition duration-150 ease-in-out hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <a href="{{ route('login') }}" class="inline-flex min-h-[44px] items-center whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium text-gray-600 transition duration-150 ease-in-out hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500">
                     {{ __('Log in') }}
                 </a>
-                <a href="{{ route('register') }}" class="inline-flex min-h-[44px] items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white transition duration-150 ease-in-out hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <a href="{{ route('register') }}" class="inline-flex min-h-[44px] items-center rounded-md bg-brand-600 px-3 py-2 text-sm font-medium text-white transition duration-150 ease-in-out hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500">
                     {{ __('Register') }}
                 </a>
             </div>
@@ -93,7 +93,7 @@
         <button
             type="button"
             @click="open = !open"
-            class="inline-flex h-11 w-11 items-center justify-center rounded-md text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:hidden"
+            class="inline-flex h-11 w-11 items-center justify-center rounded-md text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-brand-500 sm:hidden"
             aria-expanded="false"
             x-bind:aria-expanded="open ? 'true' : 'false'"
             aria-controls="site-mobile-menu"

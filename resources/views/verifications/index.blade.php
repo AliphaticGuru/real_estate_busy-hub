@@ -26,7 +26,7 @@
                                 <li class="p-6">
                                     <div class="flex justify-between">
                                         <div>
-                                            <a href="{{ route('listings.show', $listing->slug) }}" class="text-lg font-medium text-gray-900 hover:text-indigo-600">
+                                            <a href="{{ route('listings.show', $listing->slug) }}" class="text-lg font-medium text-gray-900 hover:text-brand-600">
                                                 {{ $listing->title }}
                                             </a>
                                             <div class="text-sm text-gray-500">
@@ -42,7 +42,7 @@
                                         <div class="text-right">
                                             <form method="POST" action="{{ route('verify.checks.update', $listing->id) }}">
                                                 @csrf
-                                                <select name="check_key" class="border-gray-300 focus:border-indigo-500 rounded-md shadow-sm block w-full">
+                                                <select name="check_key" class="border-gray-300 focus:border-brand-500 rounded-md shadow-sm block w-full">
                                                     @foreach (\App\Enums\CheckKey::values() as $checkKey)
                                                         <option value="{{ $checkKey }}" @selected(old('check_key', ($checksByKey[$checkKey] ?? null)?->check_key?->value) === $checkKey)>
                                                             {{ $checkKey }}
@@ -50,13 +50,13 @@
                                                     @endforeach
                                                 </select>
 
-                                                <select name="status" class="mt-2 border-gray-300 focus:border-indigo-500 rounded-md shadow-sm block w-full">
+                                                <select name="status" class="mt-2 border-gray-300 focus:border-brand-500 rounded-md shadow-sm block w-full">
                                                     <option value="">Status</option>
                                                     <option value="passed">Passed</option>
                                                     <option value="failed">Failed</option>
                                                 </select>
 
-                                                <button type="submit" class="mt-3 inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                                <button type="submit" class="mt-3 inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                                     {{ __('Update') }}
                                                 </button>
                                             </form>
