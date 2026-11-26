@@ -10,19 +10,6 @@ class AvatarTest extends TestCase
 {
     use RefreshDatabase;
 
-    private const PALETTE = [
-        '#1E3A8A',
-        '#7C2D12',
-        '#14532D',
-        '#78350F',
-        '#831843',
-        '#4C1D95',
-        '#0F172A',
-        '#7F1D1D',
-        '#155E75',
-        '#1E293B',
-    ];
-
     public function test_avatar_renders_the_uppercase_initial_from_the_users_name(): void
     {
         $user = User::factory()->create(['name' => 'John Doe']);
@@ -54,20 +41,32 @@ class AvatarTest extends TestCase
         );
     }
 
-    public function test_avatar_uses_a_distinct_deterministic_color_per_user(): void
+    public function test_avatar_uses_a_deterministic_color_from_the_shared_palette_per_user(): void
     {
-        $userA = User::factory()->create();
-        $userB = User::factory()->create();
+        $palette = config('avatar.palette');
+        $colors = [];
 
-        $this->assertNotSame(
-            $this->backgroundColor($this->renderAvatar($userA)),
-            $this->backgroundColor($this->renderAvatar($userB)),
+        foreach (User::factory()->count(50)->create() as $user) {
+            $color = $this->backgroundColor($this->renderAvatar($user));
+
+            $this->assertContains($color, $palette);
+            $colors[$color] = true;
+        }
+
+        $this->assertGreaterThan(
+            1,
+            count($colors),
+            'Avatars for 50 users must use more than one colour from the palette.',
         );
     }
 
     public function test_avatar_palette_colors_keep_a_minimum_contrast_of_4_5_to_white(): void
     {
-        foreach (self::PALETTE as $color) {
+        $palette = config('avatar.palette');
+
+        $this->assertNotEmpty($palette);
+
+        foreach ($palette as $color) {
             $this->assertGreaterThanOrEqual(
                 4.5,
                 $this->contrastRatioAgainstWhite($color),

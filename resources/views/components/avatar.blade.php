@@ -14,18 +14,7 @@
 
     $label = $user->name ?: $user->email;
 
-    $palette = [
-        '#1E3A8A',
-        '#7C2D12',
-        '#14532D',
-        '#78350F',
-        '#831843',
-        '#4C1D95',
-        '#0F172A',
-        '#7F1D1D',
-        '#155E75',
-        '#1E293B',
-    ];
+    $palette = config('avatar.palette');
     $index = hexdec(hash('crc32b', (string) $user->id)) % count($palette);
     $backgroundColor = $palette[$index];
 @endphp
