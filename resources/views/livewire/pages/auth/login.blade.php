@@ -67,12 +67,12 @@ new #[Layout('layouts.guest')] class extends Component
         <!-- Remember Me -->
         <div class="flex flex-wrap items-center justify-between gap-3">
             <label for="remember" class="inline-flex min-h-[44px] items-center">
-                <input wire:model="form.remember" id="remember" type="checkbox" class="h-5 w-5 rounded border-gray-300 text-brand-600 shadow-sm focus:ring-brand-500" name="remember">
-                <span class="ms-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
+                <input wire:model="form.remember" id="remember" type="checkbox" class="h-5 w-5 rounded border-border text-brand shadow-sm focus:ring-brand" name="remember">
+                <span class="ms-2 text-sm text-text-muted">{{ __('Remember me') }}</span>
             </label>
 
             @if (Route::has('password.request'))
-                <a class="rounded-md text-sm font-medium text-brand-700 underline-offset-4 hover:underline focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2" href="{{ route('password.request') }}" wire:navigate>
+                <a class="rounded-md text-sm font-medium text-brand underline-offset-4 hover:underline focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2" href="{{ route('password.request') }}" wire:navigate>
                     {{ __('Forgot your password?') }}
                 </a>
             @endif
@@ -83,9 +83,9 @@ new #[Layout('layouts.guest')] class extends Component
         </x-button>
     </form>
 
-    <p class="text-center text-sm text-gray-600">
+    <p class="text-center text-sm text-text-muted">
         {{ __('New here?') }}
-        <a href="{{ route('register') }}" wire:navigate class="font-medium text-brand-700 underline-offset-4 hover:underline focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2">
+        <a href="{{ route('register') }}" wire:navigate class="font-medium text-brand underline-offset-4 hover:underline focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2">
             {{ __('Create an account') }}
         </a>
     </p>

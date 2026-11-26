@@ -15,17 +15,17 @@
 
         @livewireStyles
     </head>
-    <body class="antialiased font-sans bg-gray-50 text-gray-900">
+    <body class="antialiased font-sans bg-surface-muted text-text">
         <div class="flex min-h-screen flex-col pt-16">
             <x-site-nav />
 
             <main class="flex flex-1 items-center justify-center px-4 py-10">
                 <div class="w-full max-w-md">
                     <div class="mb-6 text-center">
-                        <a href="{{ route('listings.index') }}" wire:navigate class="text-lg font-semibold text-gray-900">
+                        <a href="{{ route('listings.index') }}" wire:navigate class="text-lg font-semibold text-text">
                             {{ config('app.name') }}
                         </a>
-                        <p class="mt-1 text-sm text-gray-500">
+                        <p class="mt-1 text-sm text-text-muted">
                             {{ __('Find verified real estate & construction partners in Abuja') }}
                         </p>
                     </div>

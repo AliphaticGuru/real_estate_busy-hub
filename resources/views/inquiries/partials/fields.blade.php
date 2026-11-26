@@ -8,12 +8,12 @@
 
 @if ($showType)
     <div>
-        <label for="type" class="block text-sm font-medium text-gray-700">{{ __('Type') }}</label>
+        <label for="type" class="block text-sm font-medium text-text">{{ __('Type') }}</label>
         <select
             name="type"
             id="type"
             required
-            class="mt-1 block w-full min-h-[44px] rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500"
+            class="mt-1 block w-full min-h-[44px] rounded-md border-border bg-surface text-text shadow-sm placeholder:text-text-muted focus:border-brand focus:ring-brand"
         >
             <option value="consultation" @selected(old('type', 'consultation') === 'consultation')>
                 {{ __('Consultation') }}
@@ -73,13 +73,13 @@
 </div>
 
 <div>
-    <label for="message" class="block text-sm font-medium text-gray-700">{{ __('Message') }}</label>
+    <label for="message" class="block text-sm font-medium text-text">{{ __('Message') }}</label>
     <textarea
         name="message"
         id="message"
         rows="4"
         required
-        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500"
+        class="mt-1 block w-full rounded-md border-border bg-surface text-text shadow-sm placeholder:text-text-muted focus:border-brand focus:ring-brand"
     >{{ old('message') }}</textarea>
     <x-input-error :messages="$errors->get('message')" class="mt-2" />
 </div>

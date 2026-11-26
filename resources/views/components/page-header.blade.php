@@ -4,11 +4,11 @@
 ])
 
 <div {{ $attributes->merge(['class' => 'space-y-1']) }}>
-    <h1 class="text-xl font-semibold leading-tight text-gray-900">
+    <h1 class="text-xl font-semibold leading-tight text-text">
         {{ $title ?? $slot }}
     </h1>
 
     @if ($subtitle)
-        <p class="text-sm text-gray-600">{{ $subtitle }}</p>
+        <p class="text-sm text-text-muted">{{ $subtitle }}</p>
     @endif
 </div>

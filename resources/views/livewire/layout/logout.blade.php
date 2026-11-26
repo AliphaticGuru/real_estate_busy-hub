@@ -17,6 +17,6 @@ new class extends Component
 };
 ?>
 
-<button type="button" wire:click="logout" class="block w-full px-3 py-2 text-start text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 focus:outline-none">
+<button type="button" wire:click="logout" class="block w-full px-3 py-2 text-start text-sm font-medium text-text hover:bg-surface-muted hover:text-text focus:outline-none">
     {{ __('Log Out') }}
 </button>

@@ -68,8 +68,8 @@ new #[Layout('layouts.guest')] class extends Component
         </x-button>
     </form>
 
-    <p class="text-center text-sm text-gray-600">
-        <a href="{{ route('login') }}" wire:navigate class="font-medium text-brand-700 underline-offset-4 hover:underline focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2">
+    <p class="text-center text-sm text-text-muted">
+        <a href="{{ route('login') }}" wire:navigate class="font-medium text-brand underline-offset-4 hover:underline focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2">
             {{ __('Back to log in') }}
         </a>
     </p>

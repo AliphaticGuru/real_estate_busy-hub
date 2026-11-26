@@ -6,10 +6,10 @@
 
 @php
     $variants = [
-        'primary' => 'border border-transparent bg-brand-600 text-white hover:bg-brand-700 focus:ring-brand-500 active:bg-brand-800',
-        'secondary' => 'border border-gray-300 bg-white text-gray-700 shadow-sm hover:bg-gray-50 focus:ring-brand-500',
+        'primary' => 'border border-transparent bg-brand-700 text-white hover:bg-brand-800 focus:ring-brand active:bg-brand-800',
+        'secondary' => 'border border-border bg-surface text-text shadow-sm hover:bg-surface-muted focus:ring-brand',
         'danger' => 'border border-transparent bg-red-600 text-white hover:bg-red-500 focus:ring-red-500 active:bg-red-700',
-        'ghost' => 'border border-transparent bg-transparent text-gray-700 hover:bg-gray-100 focus:ring-brand-500',
+        'ghost' => 'border border-transparent bg-transparent text-text hover:bg-surface-muted focus:ring-brand',
     ];
 
     $classes = $variants[$variant] ?? $variants['primary'];

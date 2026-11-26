@@ -7,11 +7,11 @@
 
 @php
     $fieldId = $id ?? $name;
-    $inputClasses = 'mt-1 block w-full min-h-[44px] rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500';
+    $inputClasses = 'mt-1 block w-full min-h-[44px] rounded-md border-border bg-surface text-text shadow-sm placeholder:text-text-muted focus:border-brand focus:ring-brand';
 @endphp
 
 @if ($label)
-    <label @if ($fieldId) for="{{ $fieldId }}" @endif class="block text-sm font-medium text-gray-700">
+    <label @if ($fieldId) for="{{ $fieldId }}" @endif class="block text-sm font-medium text-text">
         {{ $label }}
     </label>
 @endif

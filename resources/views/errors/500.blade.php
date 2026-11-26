@@ -6,6 +6,10 @@
         <meta name="robots" content="noindex, nofollow">
         <title>{{ __('Service unavailable') }} · {{ config('app.name') }}</title>
         <style>
+            :root {
+                color-scheme: light;
+            }
+
             body {
                 margin: 0;
                 min-height: 100vh;
@@ -47,7 +51,7 @@
                 padding: 0.5rem 1.25rem;
                 border: 1px solid transparent;
                 border-radius: 0.375rem;
-                background-color: #4f46e5;
+                background-color: #047857;
                 color: #ffffff;
                 font-size: 0.875rem;
                 font-weight: 600;
@@ -55,7 +59,35 @@
             }
 
             a:hover {
-                background-color: #4338ca;
+                background-color: #065f46;
+            }
+
+            @media (prefers-color-scheme: dark) {
+                :root {
+                    color-scheme: dark;
+                }
+
+                body {
+                    background-color: #0f172a;
+                    color: #f8fafc;
+                }
+
+                .card {
+                    background-color: #1e293b;
+                    border-color: #334155;
+                }
+
+                h1 {
+                    color: #f8fafc;
+                }
+
+                p {
+                    color: #cbd5e1;
+                }
+
+                a {
+                    background-color: #047857;
+                }
             }
         </style>
     </head>

@@ -1,6 +1,6 @@
 <x-public-layout :title="$listing->title">
 <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-    <a href="{{ route('listings.index') }}" class="block mb-6 text-sm text-gray-600 hover:text-gray-900">
+    <a href="{{ route('listings.index') }}" class="block mb-6 text-sm text-text-muted hover:text-text">
         &larr; {{ __('Back to listings') }}
     </a>
 
@@ -8,24 +8,24 @@
         <x-alert variant="success" class="mb-6">{{ session('status') }}</x-alert>
     @endif
 
-    <div class="mt-6 bg-white overflow-hidden shadow-sm sm:rounded-lg">
+    <div class="mt-6 bg-surface overflow-hidden shadow-sm sm:rounded-lg">
         <div class="p-6">
             <div class="flex justify-between">
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-900">{{ $listing->title }}</h1>
-                    <p class="text-gray-600">
+                    <h1 class="text-2xl font-bold text-text">{{ $listing->title }}</h1>
+                    <p class="text-text-muted">
                         {{ $listing->city }}{{ $listing->district ? ', ' . $listing->district : '' }}
                     </p>
                 </div>
 
                 <div class="text-right">
-                    <div class="text-2xl font-bold text-gray-900">
+                    <div class="text-2xl font-bold text-text">
                         ₦{{ number_format($listing->price / 100) }}
                     </div>
                 </div>
             </div>
 
-            <p class="mt-4 text-gray-700">{{ $listing->description }}</p>
+            <p class="mt-4 text-text">{{ $listing->description }}</p>
 
             @if ($listing->images->isNotEmpty())
                 <div class="mt-6">
@@ -37,8 +37,8 @@
 
             <div class="mt-6 border-t pt-6">
                 <div>
-                    <p class="text-sm text-gray-500">{{ __('Listed by') }}</p>
-                    <p class="font-medium text-gray-900">{{ $listing->company?->name ?? config('app.name') }}</p>
+                    <p class="text-sm text-text-muted">{{ __('Listed by') }}</p>
+                    <p class="font-medium text-text">{{ $listing->company?->name ?? config('app.name') }}</p>
                 </div>
 
                 @php

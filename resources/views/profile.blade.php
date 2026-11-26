@@ -13,12 +13,12 @@
                     <x-avatar :user="auth()->user()" size="lg" />
 
                     <div class="min-w-0">
-                        <p class="text-base font-semibold text-gray-900">{{ auth()->user()->name }}</p>
-                        <p class="mt-1 text-sm text-gray-600">
+                        <p class="text-base font-semibold text-text">{{ auth()->user()->name }}</p>
+                        <p class="mt-1 text-sm text-text-muted">
                             <span class="font-medium">{{ __('Role') }}:</span>
                             {{ auth()->user()->role?->name?->label() ?? __('Unassigned') }}
                         </p>
-                        <p class="mt-1 text-xs text-gray-500">
+                        <p class="mt-1 text-xs text-text-muted">
                             {{ __('Avatar colour') }}:
                             <span class="font-mono">{{ \App\Services\AvatarPalette::colorFor(auth()->user()) }}</span>
                         </p>

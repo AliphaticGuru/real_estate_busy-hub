@@ -20,7 +20,7 @@
             <div class="p-6">
                 <dl class="space-y-4">
                     <div>
-                        <dt class="text-sm font-medium text-gray-500">{{ __('Type') }}</dt>
+                        <dt class="text-sm font-medium text-text-muted">{{ __('Type') }}</dt>
                         <dd class="mt-1">
                             <x-badge :variant="$inquiry->type === 'consultation' ? 'brand' : 'info'">
                                 {{ Str::headline($inquiry->type->value) }}
@@ -29,60 +29,60 @@
                     </div>
 
                     <div>
-                        <dt class="text-sm font-medium text-gray-500">{{ __('Listing / Professional') }}</dt>
+                        <dt class="text-sm font-medium text-text-muted">{{ __('Listing / Professional') }}</dt>
                         <dd class="mt-1">
                             @if ($inquiry->listing)
                                 <a href="{{ route('listings.show', $inquiry->listing->slug) }}"
-                                    class="text-brand-700 hover:underline">
+                                    class="text-brand hover:underline">
                                     {{ $inquiry->listing->title }}
                                 </a>
                             @elseif ($inquiry->professional)
-                                <span class="text-gray-900">
+                                <span class="text-text">
                                     {{ Str::headline($inquiry->professional->type?->value ?? '') }}
                                     @if ($inquiry->professional->registration_number)
                                         ({{ $inquiry->professional->registration_number }})
                                     @endif
                                 </span>
                             @else
-                                <span class="text-gray-500">{{ __('General inquiry') }}</span>
+                                <span class="text-text-muted">{{ __('General inquiry') }}</span>
                             @endif
                         </dd>
                     </div>
 
                     <div>
-                        <dt class="text-sm font-medium text-gray-500">{{ __('Submitted by') }}</dt>
-                        <dd class="mt-1 text-gray-900">{{ $inquiry->name }}</dd>
+                        <dt class="text-sm font-medium text-text-muted">{{ __('Submitted by') }}</dt>
+                        <dd class="mt-1 text-text">{{ $inquiry->name }}</dd>
                     </div>
 
                     @if ($isRecipient)
                         <div>
-                            <dt class="text-sm font-medium text-gray-500">{{ __('Phone') }}</dt>
-                            <dd class="mt-1 text-gray-900">{{ $inquiry->phone }}</dd>
+                            <dt class="text-sm font-medium text-text-muted">{{ __('Phone') }}</dt>
+                            <dd class="mt-1 text-text">{{ $inquiry->phone }}</dd>
                         </div>
 
                         <div>
-                            <dt class="text-sm font-medium text-gray-500">{{ __('Email') }}</dt>
-                            <dd class="mt-1 text-gray-900">{{ $inquiry->email }}</dd>
+                            <dt class="text-sm font-medium text-text-muted">{{ __('Email') }}</dt>
+                            <dd class="mt-1 text-text">{{ $inquiry->email }}</dd>
                         </div>
                     @endif
 
                     @if ($inquiry->preferred_date)
                         <div>
-                            <dt class="text-sm font-medium text-gray-500">{{ __('Preferred date') }}</dt>
-                            <dd class="mt-1 text-gray-900">
+                            <dt class="text-sm font-medium text-text-muted">{{ __('Preferred date') }}</dt>
+                            <dd class="mt-1 text-text">
                                 {{ $inquiry->preferred_date->format('j F Y') }}
                             </dd>
                         </div>
                     @endif
 
                     <div>
-                        <dt class="text-sm font-medium text-gray-500">{{ __('Message') }}</dt>
-                        <dd class="mt-1 text-gray-900 whitespace-pre-wrap">{{ $inquiry->message }}</dd>
+                        <dt class="text-sm font-medium text-text-muted">{{ __('Message') }}</dt>
+                        <dd class="mt-1 text-text whitespace-pre-wrap">{{ $inquiry->message }}</dd>
                     </div>
 
                     <div>
-                        <dt class="text-sm font-medium text-gray-500">{{ __('Submitted') }}</dt>
-                        <dd class="mt-1 text-gray-500">
+                        <dt class="text-sm font-medium text-text-muted">{{ __('Submitted') }}</dt>
+                        <dd class="mt-1 text-text-muted">
                             {{ $inquiry->created_at?->format('j F Y, g:i A') }}
                         </dd>
                     </div>
@@ -131,7 +131,7 @@
         @endif
 
         <a href="{{ route('inquiries.index') }}"
-            class="inline-flex min-h-[44px] items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-semibold text-gray-700 hover:bg-gray-50">
+            class="inline-flex min-h-[44px] items-center px-4 py-2 border border-border rounded-md text-sm font-semibold text-text hover:bg-surface-muted">
             {{ __('Back to inquiries') }}
         </a>
     </div>

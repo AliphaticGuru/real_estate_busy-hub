@@ -2,12 +2,12 @@
 
 @php
     $variants = [
-        'neutral' => 'bg-gray-100 text-gray-700 ring-gray-200',
-        'brand' => 'bg-brand-50 text-brand-700 ring-brand-200',
-        'success' => 'bg-green-50 text-green-700 ring-green-200',
-        'warning' => 'bg-amber-50 text-amber-800 ring-amber-200',
-        'danger' => 'bg-red-50 text-red-700 ring-red-200',
-        'placeholder' => 'border border-dashed border-amber-300 bg-amber-50 text-amber-800',
+        'neutral' => 'bg-surface-muted text-text ring-border dark:bg-slate-700 dark:text-slate-100 dark:ring-slate-600',
+        'brand' => 'bg-brand-50 text-brand-800 ring-brand-200 dark:bg-brand-950 dark:text-brand-200 dark:ring-brand-800',
+        'success' => 'bg-green-50 text-green-700 ring-green-200 dark:bg-green-950 dark:text-green-200 dark:ring-green-800',
+        'warning' => 'bg-amber-50 text-amber-800 ring-amber-200 dark:bg-amber-950 dark:text-amber-200 dark:ring-amber-800',
+        'danger' => 'bg-red-50 text-red-700 ring-red-200 dark:bg-red-950 dark:text-red-200 dark:ring-red-800',
+        'placeholder' => 'border border-dashed border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-200',
     ];
 
     $classes = $variants[$variant] ?? $variants['neutral'];

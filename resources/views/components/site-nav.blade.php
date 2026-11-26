@@ -1,8 +1,8 @@
-<nav x-data="{ open: false }" @click.outside="open = false" class="fixed inset-x-0 top-0 z-50 border-b border-gray-100 bg-white shadow-sm">
+<nav x-data="{ open: false }" @click.outside="open = false" class="fixed inset-x-0 top-0 z-50 border-b border-border bg-surface shadow-sm">
     <div class="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-3 sm:gap-4 sm:px-6 lg:px-8">
         <div class="flex min-w-0 items-center gap-6">
             <!-- Brand -->
-            <a href="{{ url('/') }}" class="truncate text-lg font-semibold text-gray-900">
+            <a href="{{ url('/') }}" class="truncate text-lg font-semibold text-text">
                 {{ config('app.name') }}
             </a>
 
@@ -11,31 +11,31 @@
                 
                 @auth
                     @if (auth()->user()->hasVerifiedEmail())
-                        <a href="{{ route('dashboard') }}" class="text-gray-600 hover:text-gray-900 {{ request()->routeIs('dashboard') ? 'font-semibold text-gray-900' : '' }}">
+                        <a href="{{ route('dashboard') }}" class="text-text-muted hover:text-text {{ request()->routeIs('dashboard') ? 'font-semibold text-text' : '' }}">
                             {{ __('Dashboard') }}
                         </a>
 
                         @if (auth()->user()->hasRole(\App\Enums\RoleName::SuperAdmin, \App\Enums\RoleName::Company, \App\Enums\RoleName::Professional, \App\Enums\RoleName::Customer))
-                            <a href="{{ route('inquiries.index') }}" class="text-gray-600 hover:text-gray-900 {{ request()->routeIs('inquiries.*') ? 'font-semibold text-gray-900' : '' }}">
+                            <a href="{{ route('inquiries.index') }}" class="text-text-muted hover:text-text {{ request()->routeIs('inquiries.*') ? 'font-semibold text-text' : '' }}">
                                 {{ __('Inquiries') }}
                             </a>
                         @endif
                     @endif
                 @endauth
 
-                <a href="{{ route('listings.index') }}" class="text-gray-600 hover:text-gray-900 {{ request()->routeIs('listings.*') ? 'font-semibold text-gray-900' : '' }}">
+                <a href="{{ route('listings.index') }}" class="text-text-muted hover:text-text {{ request()->routeIs('listings.*') ? 'font-semibold text-text' : '' }}">
                     {{ __('Listings') }}
                 </a>
-                <a href="{{ route('professionals.index') }}" class="text-gray-600 hover:text-gray-900 {{ request()->routeIs('professionals.*') ? 'font-semibold text-gray-900' : '' }}">
+                <a href="{{ route('professionals.index') }}" class="text-text-muted hover:text-text {{ request()->routeIs('professionals.*') ? 'font-semibold text-text' : '' }}">
                     {{ __('Partners') }}
                 </a>
-                <a href="{{ route('fees') }}" class="text-gray-600 hover:text-gray-900 {{ request()->routeIs('fees') ? 'font-semibold text-gray-900' : '' }}">
+                <a href="{{ route('fees') }}" class="text-text-muted hover:text-text {{ request()->routeIs('fees') ? 'font-semibold text-text' : '' }}">
                     {{ __('Fees') }}
                 </a>
-                <a href="{{ route('verification') }}" class="text-gray-600 hover:text-gray-900 {{ request()->routeIs('verification') ? 'font-semibold text-gray-900' : '' }}">
+                <a href="{{ route('verification') }}" class="text-text-muted hover:text-text {{ request()->routeIs('verification') ? 'font-semibold text-text' : '' }}">
                     {{ __('Verification') }}
                 </a>
-                <a href="{{ route('blog.index') }}" class="text-gray-600 hover:text-gray-900 {{ request()->routeIs('blog.*') ? 'font-semibold text-gray-900' : '' }}">
+                <a href="{{ route('blog.index') }}" class="text-text-muted hover:text-text {{ request()->routeIs('blog.*') ? 'font-semibold text-text' : '' }}">
                     {{ __('Blog') }}
                 </a>
 
@@ -47,7 +47,7 @@
             <div class="hidden sm:flex sm:items-center">
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
-                        <button type="button" class="inline-flex min-h-[44px] items-center gap-2 rounded-md border border-transparent px-3 py-2 text-sm leading-4 font-medium text-gray-600 transition duration-150 ease-in-out hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                        <button type="button" class="inline-flex min-h-[44px] items-center gap-2 rounded-md border border-transparent px-3 py-2 text-sm leading-4 font-medium text-text-muted transition duration-150 ease-in-out hover:bg-surface-muted hover:text-text focus:outline-none focus:ring-2 focus:ring-brand">
                             <x-avatar :user="auth()->user()" size="md" />
 
                             <div class="ms-1">
@@ -59,8 +59,8 @@
                     </x-slot>
 
                     <x-slot name="content">
-                        <div class="truncate text-sm font-medium text-gray-900" x-data="{{ json_encode(['name' => auth()->user()->name]) }}" x-text="name" x-on:profile-updated.window="name = $event.detail.name"></div>
-                        <div class="truncate text-sm text-gray-500">{{ auth()->user()->email }}</div>
+                        <div class="truncate text-sm font-medium text-text" x-data="{{ json_encode(['name' => auth()->user()->name]) }}" x-text="name" x-on:profile-updated.window="name = $event.detail.name"></div>
+                        <div class="truncate text-sm text-text-muted">{{ auth()->user()->email }}</div>
 
                         <div class="mt-3">
                             <x-dropdown-link :href="route('profile')" wire:navigate>
@@ -72,7 +72,7 @@
                             </x-dropdown-link>
 
                             <div class="px-4 py-2">
-                                <p class="mb-2 text-xs font-semibold uppercase tracking-widest text-gray-400">{{ __('Theme') }}</p>
+                                <p class="mb-2 text-xs font-semibold uppercase tracking-widest text-text-muted">{{ __('Theme') }}</p>
                                 <x-theme-toggle variant="menu" />
                             </div>
 
@@ -84,10 +84,10 @@
         @else
             <!-- Guest actions -->
             <div class="flex items-center gap-2 flex-nowrap">
-                <a href="{{ route('login') }}" class="inline-flex min-h-[44px] items-center whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium text-gray-600 transition duration-150 ease-in-out hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                <a href="{{ route('login') }}" class="inline-flex min-h-[44px] items-center whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium text-text-muted transition duration-150 ease-in-out hover:bg-surface-muted hover:text-text focus:outline-none focus:ring-2 focus:ring-brand">
                     {{ __('Log in') }}
                 </a>
-                <a href="{{ route('register') }}" class="inline-flex min-h-[44px] items-center rounded-md bg-brand-600 px-3 py-2 text-sm font-medium text-white transition duration-150 ease-in-out hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                <a href="{{ route('register') }}" class="inline-flex min-h-[44px] items-center rounded-md bg-brand-700 px-3 py-2 text-sm font-medium text-white transition duration-150 ease-in-out hover:bg-brand-800 focus:outline-none focus:ring-2 focus:ring-brand">
                     {{ __('Register') }}
                 </a>
             </div>
@@ -97,7 +97,7 @@
         <button
             type="button"
             @click="open = !open"
-            class="inline-flex h-11 w-11 items-center justify-center rounded-md text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-brand-500 sm:hidden"
+            class="inline-flex h-11 w-11 items-center justify-center rounded-md text-text hover:bg-surface-muted focus:outline-none focus:ring-2 focus:ring-brand sm:hidden"
             aria-expanded="false"
             x-bind:aria-expanded="open ? 'true' : 'false'"
             aria-controls="site-mobile-menu"
@@ -120,7 +120,7 @@
         x-transition:leave="transition ease-in duration-150"
         x-transition:leave-start="opacity-100 translate-y-0"
         x-transition:leave-end="opacity-0 -translate-y-1"
-        class="sm:hidden absolute inset-x-0 top-full z-50 border-t border-gray-100 bg-white shadow-lg"
+        class="sm:hidden absolute inset-x-0 top-full z-50 border-t border-border bg-surface shadow-lg"
         aria-label="{{ __('Mobile navigation') }}"
     >
         <div class="mx-auto flex max-w-7xl flex-col gap-1 px-4 py-3 text-sm">
@@ -141,7 +141,7 @@
             </x-responsive-nav-link>
 
             <div class="px-4 pb-2 pt-1">
-                <p class="mb-2 text-xs font-semibold uppercase tracking-widest text-gray-400">{{ __('Theme') }}</p>
+                <p class="mb-2 text-xs font-semibold uppercase tracking-widest text-text-muted">{{ __('Theme') }}</p>
                 <x-theme-toggle variant="mobile" />
             </div>
 

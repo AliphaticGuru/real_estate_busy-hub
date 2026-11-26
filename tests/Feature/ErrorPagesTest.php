@@ -57,6 +57,19 @@ class ErrorPagesTest extends TestCase
             ->assertDontSee('Find verified real estate');
     }
 
+    public function test_server_error_pages_follow_the_system_colour_scheme(): void
+    {
+        foreach ([500, 503] as $status) {
+            $this->app['router']->get("/test/error/{$status}", fn () => abort($status));
+
+            $this->get("/test/error/{$status}")
+                ->assertStatus($status)
+                ->assertSee('prefers-color-scheme: dark', false)
+                ->assertSee('color-scheme: dark', false)
+                ->assertDontSee('#4f46e5', false);
+        }
+    }
+
     public function test_client_error_pages_render_within_the_public_layout(): void
     {
         $this->get('/this-page-does-not-exist')

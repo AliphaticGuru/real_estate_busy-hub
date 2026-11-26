@@ -39,7 +39,7 @@ new #[Layout('layouts.guest')] class extends Component
         :subtitle="__('This is a secure area of the application.')"
     />
 
-    <p class="text-sm text-gray-600">
+    <p class="text-sm text-text-muted">
         {{ __('Please confirm your password before continuing.') }}
     </p>
 

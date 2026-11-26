@@ -15,7 +15,7 @@
 
         @livewireStyles
     </head>
-    <body class="antialiased font-sans bg-gray-50 text-gray-900">
+    <body class="antialiased font-sans bg-surface-muted text-text">
         <div class="min-h-screen flex flex-col pt-16">
             <x-site-nav />
 

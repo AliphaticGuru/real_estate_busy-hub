@@ -1,5 +1,7 @@
 @import 'tailwindcss';
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @plugin '@tailwindcss/forms';
 
 @theme {
@@ -14,6 +16,22 @@
     --color-brand-800: #065f46;
     --color-brand-900: #064e3b;
     --color-brand-950: #022c22;
+
+    --color-surface: #ffffff;
+    --color-surface-muted: #f9fafb;
+    --color-text: #111827;
+    --color-text-muted: #4b5563;
+    --color-border: #d1d5db;
+    --color-brand: #047857;
+}
+
+.dark {
+    --color-surface: #0f172a;
+    --color-surface-muted: #1e293b;
+    --color-text: #f8fafc;
+    --color-text-muted: #cbd5e1;
+    --color-border: #334155;
+    --color-brand: #6ee7b7;
 }
 
 [x-cloak] {

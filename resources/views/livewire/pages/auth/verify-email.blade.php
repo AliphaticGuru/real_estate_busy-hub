@@ -116,7 +116,7 @@ new #[Layout('layouts.guest')] class extends Component
         :subtitle="__('One more step before you can use your account.')"
     />
 
-    <p class="text-sm text-gray-600">
+    <p class="text-sm text-text-muted">
         {{ __('Thanks for signing up! Before getting started, could you verify your email address by clicking on the link we just emailed to you? If you didn\'t receive the email, we will gladly send you another.') }}
     </p>
 
@@ -126,7 +126,7 @@ new #[Layout('layouts.guest')] class extends Component
         </x-alert>
     @endif
 
-    <p aria-live="polite" class="text-sm font-medium text-gray-700">
+    <p aria-live="polite" class="text-sm font-medium text-text">
         {{ $verificationStatus }}
     </p>
 
@@ -135,7 +135,7 @@ new #[Layout('layouts.guest')] class extends Component
             {{ __('Resend Verification Email') }}
         </x-button>
 
-        <button type="submit" wire:click="logout" class="inline-flex min-h-[44px] items-center justify-center rounded-md px-3 text-sm font-medium text-gray-600 underline-offset-4 hover:text-gray-900 hover:underline focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2">
+        <button type="submit" wire:click="logout" class="inline-flex min-h-[44px] items-center justify-center rounded-md px-3 text-sm font-medium text-text-muted underline-offset-4 hover:text-text hover:underline focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2">
             {{ __('Log Out') }}
         </button>
     </div>

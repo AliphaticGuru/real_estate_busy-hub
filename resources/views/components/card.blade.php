@@ -2,8 +2,8 @@
 
 @php
     $variants = [
-        'default' => 'border border-gray-100 bg-white shadow-sm',
-        'muted' => 'border border-gray-200 bg-gray-50',
+        'default' => 'border border-border bg-surface shadow-sm',
+        'muted' => 'border border-border bg-surface-muted',
     ];
 
     $classes = $variants[$variant] ?? $variants['default'];

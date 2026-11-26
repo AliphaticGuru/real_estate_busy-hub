@@ -1,6 +1,6 @@
 <x-public-layout :title="$professional->user?->name ?? __('Professional')">
     <div class="max-w-3xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        <a href="{{ route('professionals.index') }}" class="block mb-6 text-sm text-gray-600 hover:text-gray-900">
+        <a href="{{ route('professionals.index') }}" class="block mb-6 text-sm text-text-muted hover:text-text">
             &larr; {{ __('Back to partners') }}
         </a>
 
@@ -8,12 +8,12 @@
             <x-alert variant="success" class="mb-6">{{ session('status') }}</x-alert>
         @endif
 
-        <div class="mt-6 bg-white overflow-hidden shadow-sm sm:rounded-lg">
+        <div class="mt-6 bg-surface overflow-hidden shadow-sm sm:rounded-lg">
             <div class="p-6">
                 <div class="flex flex-wrap items-start justify-between gap-3">
                     <div>
-                        <h1 class="text-2xl font-bold text-gray-900">{{ $professional->user?->name ?? __('Professional') }}</h1>
-                        <p class="text-gray-600">{{ $professional->type?->label() }}</p>
+                        <h1 class="text-2xl font-bold text-text">{{ $professional->user?->name ?? __('Professional') }}</h1>
+                        <p class="text-text-muted">{{ $professional->type?->label() }}</p>
                     </div>
 
                     <x-badge variant="success">{{ __('Verified credentials') }}</x-badge>
@@ -21,19 +21,19 @@
 
                 <dl class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
-                        <dt class="text-sm text-gray-500">{{ __('Registration body') }}</dt>
-                        <dd class="font-medium text-gray-900">{{ $professional->registration_body ?: '—' }}</dd>
+                        <dt class="text-sm text-text-muted">{{ __('Registration body') }}</dt>
+                        <dd class="font-medium text-text">{{ $professional->registration_body ?: '—' }}</dd>
                     </div>
                     <div>
-                        <dt class="text-sm text-gray-500">{{ __('Registration number') }}</dt>
-                        <dd class="font-medium text-gray-900">{{ $professional->registration_number ?: '—' }}</dd>
+                        <dt class="text-sm text-text-muted">{{ __('Registration number') }}</dt>
+                        <dd class="font-medium text-text">{{ $professional->registration_number ?: '—' }}</dd>
                     </div>
 
                     @if ($professional->company)
                         <div class="sm:col-span-2">
-                            <dt class="text-sm text-gray-500">{{ __('Company') }}</dt>
-                            <dd class="font-medium text-gray-900">
-                                <a href="{{ route('companies.show', $professional->company->slug) }}" class="text-brand-700 hover:underline">
+                            <dt class="text-sm text-text-muted">{{ __('Company') }}</dt>
+                            <dd class="font-medium text-text">
+                                <a href="{{ route('companies.show', $professional->company->slug) }}" class="text-brand hover:underline">
                                     {{ $professional->company->name }}
                                 </a>
                             </dd>
@@ -42,9 +42,9 @@
                 </dl>
 
                 @if ($professional->bio)
-                    <div class="mt-6 border-t border-gray-100 pt-6">
-                        <h2 class="text-lg font-semibold text-gray-900">{{ __('About') }}</h2>
-                        <p class="mt-2 whitespace-pre-line text-gray-700">{{ $professional->bio }}</p>
+                    <div class="mt-6 border-t border-border pt-6">
+                        <h2 class="text-lg font-semibold text-text">{{ __('About') }}</h2>
+                        <p class="mt-2 whitespace-pre-line text-text">{{ $professional->bio }}</p>
                     </div>
                 @endif
             </div>
