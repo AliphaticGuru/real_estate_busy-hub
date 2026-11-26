@@ -69,6 +69,18 @@
         </div>
     </section>
 
+    <!-- Short intro -->
+    <section class="bg-gray-50">
+        <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+            <div class="max-w-2xl">
+                <h2 class="text-xl font-bold tracking-tight text-gray-900">{{ __('Our aim') }}</h2>
+                <p class="mt-3 text-base leading-relaxed text-gray-600">
+                    {{ __('Verifyhaus Afrika exists to make verified real estate and construction in Abuja transparent: verified listings, vetted professionals and published fees, so buyers, renters and builders can act with confidence.') }}
+                </p>
+            </div>
+        </div>
+    </section>
+
     <!-- How verification works -->
     <section class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div class="max-w-2xl">

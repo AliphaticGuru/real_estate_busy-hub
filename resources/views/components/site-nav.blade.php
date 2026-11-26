@@ -1,13 +1,13 @@
-<nav x-data="{ open: false }" class="fixed inset-x-0 top-0 z-50 border-b border-gray-100 bg-white shadow-sm">
-    <div class="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+<nav x-data="{ open: false }" @click.outside="open = false" class="fixed inset-x-0 top-0 z-50 border-b border-gray-100 bg-white shadow-sm">
+    <div class="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-3 sm:gap-4 sm:px-6 lg:px-8">
         <div class="flex min-w-0 items-center gap-6">
             <!-- Brand -->
-            <a href="{{ auth()->check() ? route('dashboard') : route('listings.index') }}" class="truncate text-lg font-semibold text-gray-900">
+            <a href="{{ url('/') }}" class="truncate text-lg font-semibold text-gray-900">
                 {{ config('app.name') }}
             </a>
 
             <!-- Navigation Links -->
-            <div class="hidden items-center gap-6 text-sm sm:flex" aria-label="{{ __('Primary navigation') }}">
+            <div class="hidden items-center gap-4 text-sm sm:flex" aria-label="{{ __('Primary navigation') }}">
                 <a href="{{ route('listings.index') }}" class="text-gray-600 hover:text-gray-900 {{ request()->routeIs('listings.*') ? 'font-semibold text-gray-900' : '' }}">
                     {{ __('Listings') }}
                 </a>
@@ -46,7 +46,7 @@
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button type="button" class="inline-flex min-h-[44px] items-center gap-2 rounded-md border border-transparent px-3 py-2 text-sm leading-4 font-medium text-gray-600 transition duration-150 ease-in-out hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                            <div x-data="{{ json_encode(['name' => auth()->user()->name]) }}" x-text="name" x-on:profile-updated.window="name = $event.detail.name" class="max-w-[12rem] truncate"></div>
+                            <x-avatar :user="auth()->user()" size="md" />
 
                             <div class="ms-1">
                                 <svg class="h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" aria-hidden="true">
@@ -77,7 +77,7 @@
             </div>
         @else
             <!-- Guest actions -->
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 flex-nowrap">
                 <a href="{{ route('login') }}" class="inline-flex min-h-[44px] items-center rounded-md px-3 py-2 text-sm font-medium text-gray-600 transition duration-150 ease-in-out hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     {{ __('Log in') }}
                 </a>

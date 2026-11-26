@@ -93,7 +93,7 @@ class ListingPublicTest extends TestCase
             ->assertSee('aria-label="Toggle navigation menu"', false)
             ->assertDontSee('aria-label="Toggle auto-hide navigation"', false)
             ->assertSee('id="site-mobile-menu"', false)
-            ->assertSee('hidden items-center gap-6 text-sm sm:flex', false)
+            ->assertSee('hidden items-center gap-4 text-sm sm:flex', false)
             ->assertSee('sm:hidden', false)
             ->assertSee('fixed inset-x-0 top-0', false)
             ->assertSee('absolute inset-x-0 top-full', false)
