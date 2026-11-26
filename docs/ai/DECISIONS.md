@@ -176,3 +176,17 @@
 - Reason: one source of truth stops the component and test palettes drifting; the 50-user test replaces the flaky two-user distinctness assertion.
 - Remaining indigo utilities in `resources/views` were replaced 1:1 with the green `brand-*` scale (indigo-50→brand-50 … indigo-900→brand-900), and `text-brand-70000` was corrected to `text-brand-700`.
 - Reason: a single brand palette across all public, app and auth views.
+
+## Stage U2: profile, settings and theme (branch `profile-theme`)
+- The avatar colour is resolved by `App\Services\AvatarPalette::colorFor()` from `config/avatar.php`; the component and the profile preview both call it.
+- Reason: one source of truth for the deterministic colour, so the preview can show the exact hex the avatar uses.
+- `users.notify_inquiries` is the single opt-out flag (default true). Company inquiry emails are gated by the earliest user linked to the company (the owner); companies with no linked user keep the previous behaviour.
+- Reason: the notification recipient is `companies.email`, not a user email, so a single user column needs an account owner to consult; this avoids adding a second column while still letting the company account opt out.
+- Semantic tokens (surface, surface-muted, text, text-muted, border, brand) live in `@theme` with `.dark` overrides, and `@custom-variant dark (&:where(.dark, .dark *))` makes `.dark` work for utilities. Most views use tokens with no `dark:` variants; badges, alerts, form inputs and placeholder cards carry dark variants centrally.
+- Reason: theming stays in one CSS/source-of-truth layer and component markup remains readable; status colours need explicit dark backgrounds to keep AA contrast.
+- The theme preference is **per device** in `localStorage` under `theme` (light/dark/system, default system), applied by an inline head script in every layout before first paint; it follows the OS while in system mode and re-applies on `livewire:navigated`.
+- Reason: guests need a working theme too, with no flash; syncing a preference across devices would need a `users.theme` column later.
+- The inline head script is a known CSP consideration for the post-launch CSP backlog (nonce/hash needed).
+- Reason: an external script would paint light mode first and cause a flash, which is the problem this script exists to prevent.
+- Migration rollback tests use `RefreshDatabase` so schema changes stay inside the test transaction.
+- Reason: an untransactional `migrate:fresh`/rollback cycle left migration batches uneven and broke a later slug migration test.

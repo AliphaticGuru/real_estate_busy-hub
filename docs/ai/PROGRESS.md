@@ -184,3 +184,15 @@ Checkpoint 2 (task 3) checks: full suite **264 passed (962 assertions)** (0 fail
 U1.1 checks: full suite **267 passed (1048 assertions)**, Pint PASS 131 files, Node 22 build OK, `docker compose -f docker-compose.prod.yml config --quiet` exit 0, `git fsck --full --no-reflogs` exit 0 (dangling objects only), `git status --short` empty.
 
 - Handoff: U1.1 fixes complete and pushed; stop for the browser check; U2 not started.
+
+## Stage U2: profile, settings and theme (branch `profile-theme`)
+- Branch base: `main` was fast-forwarded to `brand-ui` (U1 + U1.1, `a992cd5..002c90d`) and pushed, then `profile-theme` was created from `main`.
+- Profile: identity card shows the `<x-avatar>` preview, read-only role label and the deterministic palette colour; colour selection moved to `App\Services\AvatarPalette::colorFor()`; existing Volt name/email, password and delete forms kept (changed email still clears `email_verified_at`).
+- Settings: new authenticated + verified `/settings` page with Appearance (theme control), Notifications and Account sections, linked from the avatar menu; robots disallows it.
+- Notifications: `users.notify_inquiries` boolean defaults true, with a rollback test. `InquiryNotifier` skips email for professionals whose user opted out and for company inquiries whose company owner (earliest linked user) opted out; no preference means notify as before. `Notification::fake()` tests cover both roles.
+- Theme: Tailwind v4 `@custom-variant dark`, semantic tokens (surface, surface-muted, text, text-muted, border, brand) with `.dark` overrides; 412 hardcoded white/gray utilities replaced across views; status badges, alerts, placeholder cards and form inputs have dark variants. Standalone 500/503 pages use plain `@media (prefers-color-scheme: dark)` CSS.
+- Theme script: `localStorage.theme` (light/dark/system, default system) applied in the `<head>` of all three layouts before paint, follows OS changes in system mode, sets `color-scheme`, re-applies on `livewire:navigated`. Three-way controls with `aria-pressed` appear in the avatar menu, Settings, the guest footer and the mobile menu.
+
+U2 checks: full suite **283 passed (1155 assertions)**, Pint PASS 135 files, Node 22 build OK (CSS 41.89 kB), `docker compose -f docker-compose.prod.yml config --quiet` exit 0, `git fsck --full --no-reflogs` exit 0, `git status --short` empty.
+
+- Handoff: U2 implementation and checks complete; stop for the 360px light/dark/system browser check; U3 (forms) not started.
