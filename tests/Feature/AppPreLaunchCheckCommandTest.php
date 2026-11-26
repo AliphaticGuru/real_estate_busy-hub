@@ -111,7 +111,7 @@ class AppPreLaunchCheckCommandTest extends TestCase
         config([
             'app.debug' => false,
             'app.url' => 'https://busy-hub.example.com',
-            'app.name' => 'Busy Hub',
+            'app.name' => 'Verifyhaus Afrika',
             'app.key' => 'base64:'.base64_encode(str_repeat('a', 32)),
             'app.trusted_proxies' => '172.28.0.10',
             'mail.default' => 'smtp',

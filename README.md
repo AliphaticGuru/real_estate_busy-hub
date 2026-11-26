@@ -1,6 +1,6 @@
-# Busy Hub
+# Verifyhaus Afrika
 
-Busy Hub is a verified real estate and construction hub for Nigeria, starting in Abuja. Phase 1 covers the verified property marketplace, company and professional profiles, consultation and inspection requests, the fees, verification-process and blog pages, the per-listing verification workflow, and role-specific dashboards. Phase 1 is implemented and covered by the test suite; payments, chat, rentals and a mobile app are not included.
+Verifyhaus Afrika is a verified real estate and construction hub for Nigeria, starting in Abuja. Phase 1 covers the verified property marketplace, company and professional profiles, consultation and inspection requests, the fees, verification-process and blog pages, the per-listing verification workflow, and role-specific dashboards. Phase 1 is implemented and covered by the test suite; payments, chat, rentals and a mobile app are not included.
 
 ## Stack
 

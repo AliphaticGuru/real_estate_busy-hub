@@ -119,7 +119,7 @@ Checkpoint (b) verified: user_id on inquiries, policy split, 11 inquiry tests, i
 - Password policy: `AppServiceProvider` sets `Password::defaults()` (min 10, letters, mixed case, numbers, `uncompromised()` only in production).
 - Error pages and crawling: styled `errors/403|404|419|500|503` views, server errors standalone HTML, `noindex, nofollow` in app/guest layouts, `GET /robots.txt` and `GET /sitemap.xml` (cached 1 hour).
 - Legal pages and consent: `/privacy`, `/terms`, `/complaints` with draft notices, footer links, inquiry consent lines linking to `/privacy`.
-- Environment hygiene: `.env.example` (`APP_NAME="Busy Hub"`, placeholder `MAIL_FROM_ADDRESS`, http-friendly defaults), added `.env.production.example`, added `php artisan prelaunch:check`.
+- Environment hygiene: `.env.example` (`APP_NAME="Verifyhaus Afrika"`, placeholder `MAIL_FROM_ADDRESS`, http-friendly defaults), added `.env.production.example`, added `php artisan prelaunch:check`.
 - Full suite: 226 passed (816 assertions); Pint passes 125 files; Node 22 build passes; `git fsck --full --no-reflogs` clean (no errors); `git status --short` empty.
 - Commits on `prelaunch-app-fixes`: `f9c208f`, `db85ed1`, `5b89dab`, `635747d`, `5ff3fd1`, `3601814`.
 - Handoff: infrastructure items stay open (proxy topology, trusted proxies, deploy workflow, backups, 2FA, retention); owner decisions required before launch. Stop here and wait for decisions.
