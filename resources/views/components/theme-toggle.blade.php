@@ -22,6 +22,7 @@
         }
     }"
     x-on:theme-applied.window="theme = $event.detail.theme"
+    @click.stop
     role="group"
     aria-label="{{ __('Theme') }}"
     class="{{ $compact ? 'inline-flex flex-wrap items-center gap-1 rounded-md border border-border bg-surface p-1' : 'inline-flex flex-wrap gap-2' }}"
