@@ -15,6 +15,9 @@
             @php
                 $email = config('services.contact.email');
                 $whatsapp = config('services.whatsapp.number');
+                $whatsappLink = $whatsapp
+                    ? \App\Services\WhatsApp::link($whatsapp, __('Hello Verifyhaus Afrika, I would like to share feedback.'))
+                    : null;
             @endphp
 
             @if ($email)
@@ -23,9 +26,9 @@
                 </p>
             @endif
 
-            @if ($whatsapp)
+            @if ($whatsappLink)
                 <p class="mt-2">
-                    <a href="https://wa.me/{{ $whatsapp }}?text={{ urlencode(__('Hello Verifyhaus Afrika, I would like to share feedback.')) }}" class="text-brand-700 hover:underline">{{ __('Chat on WhatsApp') }}</a>
+                    <a href="{{ $whatsappLink }}" class="text-brand-700 hover:underline">{{ __('Chat on WhatsApp') }}</a>
                 </p>
             @endif
 

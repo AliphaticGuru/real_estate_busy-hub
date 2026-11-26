@@ -100,4 +100,43 @@ class StaticContentTest extends TestCase
             ->assertSee(config('app.name'))
             ->assertSee('Draft: pending review');
     }
+
+    public function test_contact_page_links_to_whatsapp_with_a_digits_only_number(): void
+    {
+        config(['services.whatsapp.number' => '+234 800 000 0001']);
+
+        $message = __('Hello Verifyhaus Afrika, I would like to know more about a verified listing or professional.');
+
+        $this->get(route('contact'))
+            ->assertOk()
+            ->assertSee('https://wa.me/2348000000001?text='.rawurlencode($message), false)
+            ->assertDontSee('Contact details coming soon');
+    }
+
+    public function test_feedback_page_links_to_whatsapp_with_a_digits_only_number(): void
+    {
+        config(['services.whatsapp.number' => '+234 800 000 0001']);
+
+        $message = __('Hello Verifyhaus Afrika, I would like to share feedback.');
+
+        $this->get(route('feedback'))
+            ->assertOk()
+            ->assertSee('https://wa.me/2348000000001?text='.rawurlencode($message), false)
+            ->assertDontSee('Contact details coming soon');
+    }
+
+    public function test_contact_and_feedback_hide_the_whatsapp_link_when_no_number_is_set(): void
+    {
+        config([
+            'services.whatsapp.number' => null,
+            'services.contact.email' => null,
+        ]);
+
+        foreach ([route('contact'), route('feedback')] as $url) {
+            $this->get($url)
+                ->assertOk()
+                ->assertDontSee('wa.me', false)
+                ->assertSee('Contact details coming soon');
+        }
+    }
 }

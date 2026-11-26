@@ -10,6 +10,7 @@ use App\Models\Inquiry;
 use App\Models\Listing;
 use App\Models\Professional;
 use App\Services\InquiryNotifier;
+use App\Services\WhatsApp;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -136,14 +137,10 @@ class InquiryController extends Controller
 
         $whatsappLink = null;
         if ($isRecipient && $inquiry->phone) {
-            $phone = preg_replace('/\D+/', '', $inquiry->phone);
-            if ($phone !== '') {
-                $message = rawurlencode(
-                    'Hello '.$inquiry->name.'! Regarding your inquiry about '.
-                    ($inquiry->listing?->title ?? 'our listing').'. '
-                );
-                $whatsappLink = "https://wa.me/{$phone}?text={$message}";
-            }
+            $message = 'Hello '.$inquiry->name.'! Regarding your inquiry about '.
+                ($inquiry->listing?->title ?? 'our listing').'. ';
+
+            $whatsappLink = WhatsApp::link($inquiry->phone, $message);
         }
 
         return view('inquiries.show', [
