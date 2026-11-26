@@ -3,10 +3,10 @@
         {{ config('app.name') }} · {{ __('Find verified real estate & construction partners in Abuja') }}
     </p>
 
-    <div class="mt-8 flex flex-row flex-wrap items-center justify-center gap-8">
+    <div class="mt-8 flex flex-row items-center justify-center gap-8">
         <nav class="flex flex-col items-center gap-2" aria-label="{{ __('Company') }}">
             <p class="text-xs font-semibold uppercase tracking-widest text-gray-400">{{ __('Company') }}</p>
-            <div class="flex flex-col items-center gap-2 sm:flex-row sm:gap-4">
+            <div class="flex flex-col items-center gap-2 xl:flex-row xl:gap-4">
                 <a href="{{ route('mission') }}" class="text-brand-700 hover:underline">{{ __('Mission') }}</a>
                 <a href="{{ route('vision') }}" class="text-brand-700 hover:underline">{{ __('Vision') }}</a>
                 <a href="{{ route('blog.index') }}" class="text-brand-700 hover:underline">{{ __('Blog') }}</a>
@@ -17,7 +17,7 @@
 
         <nav class="flex flex-col items-center gap-2" aria-label="{{ __('Support') }}">
             <p class="text-xs font-semibold uppercase tracking-widest text-gray-400">{{ __('Support') }}</p>
-            <div class="flex flex-col items-center gap-2 sm:flex-row sm:gap-4">
+            <div class="flex flex-col items-center gap-2 xl:flex-row xl:gap-4">
                 <a href="{{ route('about') }}" class="text-brand-700 hover:underline">{{ __('About') }}</a>
                 <a href="{{ route('contact') }}" class="text-brand-700 hover:underline">{{ __('Contact') }}</a>
                 <a href="{{ route('feedback') }}" class="text-brand-700 hover:underline">{{ __('Feedback') }}</a>

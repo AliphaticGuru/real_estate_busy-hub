@@ -26,6 +26,11 @@ class SiteFooterTest extends TestCase
         $copyrightPosition = strpos($content, 'All rights reserved');
 
         $this->assertGreaterThan($footerPosition, $copyrightPosition);
+
+        // Only closing tags may follow the copyright line before the footer closes.
+        $afterCopyright = substr($content, $copyrightPosition);
+        $this->assertStringContainsString('</footer>', $afterCopyright);
+        $this->assertStringNotContainsString('<a ', $afterCopyright);
     }
 
     public function test_footer_is_shown_on_short_pages_and_stacks_on_small_screens(): void
@@ -57,9 +62,22 @@ class SiteFooterTest extends TestCase
 
     public function test_footer_groups_info_links_under_company_and_support(): void
     {
-        $this->get('/')
-            ->assertOk()
+        $response = $this->get('/');
+
+        $response->assertOk()
             ->assertSee('Company', false)
             ->assertSee('Support', false);
+
+        $content = $response->getContent();
+
+        // The group links are stacked (block) below xl and inline from xl up.
+        $this->assertStringContainsString('xl:flex-row', $content);
+        $this->assertStringContainsString('xl:gap-4', $content);
+
+        // The Company group renders before the Support group.
+        $this->assertLessThan(
+            strpos($content, 'Support'),
+            strpos($content, 'Company')
+        );
     }
 }
