@@ -24,6 +24,7 @@ Production infrastructure on branch `infra-prod`, checkpoint A (items 1–3) plu
 - [x] Inquiry email notifications: queued recipient mail, spam protection
 - [x] Professional consultations: public verified profiles and consultation requests
 - [x] Pre-launch hardening: seeders, email verification, passwords, error pages, legal, env hygiene (stage 2 fixes applied; infra items open)
+- [ ] Brand and UI shell (U1-U3)
 
 Checkpoint (b) verified: user_id on inquiries, policy split, 11 inquiry tests, isolated test database.
 
