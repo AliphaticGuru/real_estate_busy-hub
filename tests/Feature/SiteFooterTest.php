@@ -22,15 +22,17 @@ class SiteFooterTest extends TestCase
         $this->assertStringContainsString('mt-auto', $content);
         $this->assertStringContainsString('All rights reserved', $content);
 
+        $footer = $this->footerHtml($content);
+
         $footerPosition = strpos($content, '<footer');
         $copyrightPosition = strpos($content, 'All rights reserved');
 
         $this->assertGreaterThan($footerPosition, $copyrightPosition);
 
-        // Only closing tags may follow the copyright line before the footer closes.
-        $afterCopyright = substr($content, $copyrightPosition);
-        $this->assertStringContainsString('</footer>', $afterCopyright);
-        $this->assertStringNotContainsString('<a ', $afterCopyright);
+        // After the copyright line only closing tags remain before </footer>.
+        $tail = substr($footer, strpos($footer, 'All rights reserved.') + strlen('All rights reserved.'));
+
+        $this->assertMatchesRegularExpression('/^\s*(?:<\/p>\s*)?<\/footer>\s*$/', $tail);
     }
 
     public function test_footer_is_shown_on_short_pages_and_stacks_on_small_screens(): void
@@ -65,19 +67,54 @@ class SiteFooterTest extends TestCase
         $response = $this->get('/');
 
         $response->assertOk()
-            ->assertSee('Company', false)
-            ->assertSee('Support', false);
+            ->assertSee('aria-label="Company"', false)
+            ->assertSee('aria-label="Support"', false);
 
-        $content = $response->getContent();
+        $footer = $this->footerHtml($response->getContent());
 
-        // The group links are stacked (block) below xl and inline from xl up.
-        $this->assertStringContainsString('xl:flex-row', $content);
-        $this->assertStringContainsString('xl:gap-4', $content);
+        // The links inside each group are stacked (block) below xl and inline from xl up.
+        $this->assertSame(
+            2,
+            substr_count($footer, 'flex flex-col items-center gap-2 xl:flex-row xl:gap-4'),
+        );
 
         // The Company group renders before the Support group.
-        $this->assertLessThan(
-            strpos($content, 'Support'),
-            strpos($content, 'Company')
-        );
+        $companyPosition = strpos($footer, 'aria-label="Company"');
+        $supportPosition = strpos($footer, 'aria-label="Support"');
+
+        $this->assertLessThan($supportPosition, $companyPosition);
+
+        $company = substr($footer, $companyPosition, $supportPosition - $companyPosition);
+        $support = substr($footer, $supportPosition);
+
+        $this->assertLinksInOrder($company, ['Mission', 'Vision', 'Blog', 'Services', 'Partners']);
+        $this->assertLinksInOrder($support, ['About', 'Contact', 'Feedback']);
+    }
+
+    /**
+     * @param  list<string>  $labels
+     */
+    private function assertLinksInOrder(string $group, array $labels): void
+    {
+        $previous = -1;
+
+        foreach ($labels as $label) {
+            $position = strpos($group, '>'.$label.'</a>');
+
+            $this->assertNotFalse($position, "The {$label} link is missing from its footer group.");
+            $this->assertGreaterThan($previous, $position, "The {$label} link is out of order.");
+            $previous = $position;
+        }
+    }
+
+    private function footerHtml(string $content): string
+    {
+        $start = strpos($content, '<footer');
+        $end = strpos($content, '</footer>', $start);
+
+        $this->assertNotFalse($start);
+        $this->assertNotFalse($end);
+
+        return substr($content, $start, $end - $start + strlen('</footer>'));
     }
 }
