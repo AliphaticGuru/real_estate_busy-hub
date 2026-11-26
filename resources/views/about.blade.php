@@ -13,7 +13,7 @@
             </p>
 
             <p class="mt-4 text-base leading-relaxed text-gray-600">
-                {{ __('Every listing on the hub is checked by a verifier before it goes live, and partner professionals such as lawyers, architects and engineers are reviewed before they can be contacted.') }}
+                {{ __('Verified listings on the hub are checked by a verifier before they are featured, and partner professionals such as lawyers, architects and engineers are reviewed before they can be contacted.') }}
             </p>
 
             <div class="mt-8 flex flex-wrap gap-4">

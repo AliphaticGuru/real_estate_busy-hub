@@ -10,7 +10,7 @@
         <section class="mt-8">
             <h2 class="text-xl font-semibold text-gray-900">{{ __('Verified property marketplace') }}</h2>
             <p class="mt-2 text-gray-600 leading-relaxed">
-                {{ __('Verified listings with a full offline and online due diligence trail: title document, survey plan, ownership proof, site inspection and no-encumbrance checks before a listing goes live.') }}
+                {{ __('Verified listings with a full offline and online due diligence trail: title document, survey plan, ownership proof, site inspection and no-encumbrance checks before a listing is marked verified.') }}
             </p>
         </section>
 
