@@ -54,4 +54,12 @@ class SiteFooterTest extends TestCase
             ->assertSee(route('contact'), false)
             ->assertSee(route('feedback'), false);
     }
+
+    public function test_footer_groups_info_links_under_company_and_support(): void
+    {
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('Company', false)
+            ->assertSee('Support', false);
+    }
 }
