@@ -21,6 +21,13 @@ Route::view('verification', 'verification')->name('verification');
 Route::get('blog', [BlogController::class, 'index'])->name('blog.index');
 Route::get('blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 
+Route::view('about', 'about')->name('about');
+Route::view('mission', 'mission')->name('mission');
+Route::view('vision', 'vision')->name('vision');
+Route::view('services', 'services')->name('services');
+Route::view('contact', 'contact')->name('contact');
+Route::view('feedback', 'feedback')->name('feedback');
+
 Route::get('dashboard', DashboardController::class)
     ->middleware(['auth', 'verified'])
     ->name('dashboard');

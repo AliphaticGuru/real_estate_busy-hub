@@ -42,4 +42,62 @@ class StaticContentTest extends TestCase
     {
         $this->get(route('blog.show', 'not-a-real-post'))->assertNotFound();
     }
+
+    public function test_guests_can_view_the_about_page(): void
+    {
+        $this->get(route('about'))
+            ->assertOk()
+            ->assertSee('About')
+            ->assertSee(config('app.name'))
+            ->assertSee('Draft: pending review');
+    }
+
+    public function test_guests_can_view_the_mission_page(): void
+    {
+        $this->get(route('mission'))
+            ->assertOk()
+            ->assertSee('Mission')
+            ->assertSee('safe and transparent')
+            ->assertSee(config('app.name'))
+            ->assertSee('Draft: pending review');
+    }
+
+    public function test_guests_can_view_the_vision_page(): void
+    {
+        $this->get(route('vision'))
+            ->assertOk()
+            ->assertSee('Vision')
+            ->assertSee('To be written by the founders')
+            ->assertSee(config('app.name'))
+            ->assertSee('Draft: pending review');
+    }
+
+    public function test_guests_can_view_the_services_page(): void
+    {
+        $this->get(route('services'))
+            ->assertOk()
+            ->assertSee('Services')
+            ->assertSee('Coming soon, Phase 2')
+            ->assertSee(config('app.name'))
+            ->assertSee('Draft: pending review');
+    }
+
+    public function test_guests_can_view_the_contact_page(): void
+    {
+        $this->get(route('contact'))
+            ->assertOk()
+            ->assertSee('Contact')
+            ->assertSee(config('app.name'))
+            ->assertSee('Draft: pending review')
+            ->assertSee('Contact details coming soon');
+    }
+
+    public function test_guests_can_view_the_feedback_page(): void
+    {
+        $this->get(route('feedback'))
+            ->assertOk()
+            ->assertSee('Feedback')
+            ->assertSee(config('app.name'))
+            ->assertSee('Draft: pending review');
+    }
 }

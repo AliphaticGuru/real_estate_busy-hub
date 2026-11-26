@@ -32,6 +32,12 @@ class SitemapController extends Controller
             ['loc' => url('/verification'), 'lastmod' => now()],
             ['loc' => url('/blog'), 'lastmod' => now()],
             ['loc' => url('/professionals'), 'lastmod' => now()],
+            ['loc' => url('/about'), 'lastmod' => now()],
+            ['loc' => url('/mission'), 'lastmod' => now()],
+            ['loc' => url('/vision'), 'lastmod' => now()],
+            ['loc' => url('/services'), 'lastmod' => now()],
+            ['loc' => url('/contact'), 'lastmod' => now()],
+            ['loc' => url('/feedback'), 'lastmod' => now()],
         ];
 
         foreach ((new BlogController)->posts() as $post) {
