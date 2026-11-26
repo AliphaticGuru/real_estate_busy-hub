@@ -3,7 +3,7 @@
         {{ config('app.name') }} · {{ __('Find verified real estate & construction partners in Abuja') }}
     </p>
 
-    <div class="mt-8 flex flex-col items-center gap-8 sm:flex-row sm:justify-center">
+    <div class="mt-8 flex flex-row flex-wrap items-center justify-center gap-8">
         <nav class="flex flex-col items-center gap-2" aria-label="{{ __('Company') }}">
             <p class="text-xs font-semibold uppercase tracking-widest text-gray-400">{{ __('Company') }}</p>
             <div class="flex flex-col items-center gap-2 sm:flex-row sm:gap-4">
