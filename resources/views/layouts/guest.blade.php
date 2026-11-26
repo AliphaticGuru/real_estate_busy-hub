@@ -14,7 +14,9 @@
         @livewireStyles
     </head>
     <body class="antialiased font-sans bg-gray-50 text-gray-900">
-        <div class="flex min-h-screen flex-col">
+        <div class="flex min-h-screen flex-col pt-16">
+            <x-site-nav />
+
             <main class="flex flex-1 items-center justify-center px-4 py-10">
                 <div class="w-full max-w-md">
                     <div class="mb-6 text-center">

@@ -91,16 +91,12 @@ class ListingPublicTest extends TestCase
             ->assertOk()
             ->assertSee('<footer', false)
             ->assertSee('aria-label="Toggle navigation menu"', false)
-            ->assertSee('aria-label="Toggle auto-hide navigation"', false)
-            ->assertSee('autoHide: false', false)
-            ->assertSee('scrolled: false', false)
-            ->assertSee('2250', false)
-            ->assertSee('hidden sm:flex', false)
+            ->assertDontSee('aria-label="Toggle auto-hide navigation"', false)
+            ->assertSee('id="site-mobile-menu"', false)
+            ->assertSee('hidden items-center gap-6 text-sm sm:flex', false)
             ->assertSee('sm:hidden', false)
             ->assertSee('fixed inset-x-0 top-0', false)
-            ->assertSee('translate-y-0 opacity-100', false)
-            ->assertSee('-translate-y-full', false)
             ->assertSee('absolute inset-x-0 top-full', false)
-            ->assertSee('transition-all duration-300', false);
+            ->assertSee('x-cloak', false);
     }
 }

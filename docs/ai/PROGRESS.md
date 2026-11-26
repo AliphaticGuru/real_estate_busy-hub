@@ -3,7 +3,7 @@
 Update this file at the end of every work session, before committing.
 
 ## Current focus
-Production infrastructure on branch `infra-prod`, checkpoint A (items 1–3) plus the A.1 hardening step complete and pushed: immutable app/caddy images, production compose topology, pinned trusted proxy, extended `prelaunch:check`, Caddy security headers/cache rules, stderr log channel, hardened `prelaunch:check`/`Dockerfile` findings. Checkpoint B (deploy workflow) not started.
+Brand and UI shell on branch `brand-ui`, tasks 1–2 complete (brand rename + unified navbar); task 3 (avatar, footer, new public pages) pending. Checkpoint 1 of the brand task passed all checks and stopped before push; push pending, stop for the browser check.
 
 ## Checklist
 - [x] Laravel scaffolded
@@ -163,3 +163,9 @@ Checkpoint (b) verified: user_id on inquiries, policy split, 11 inquiry tests, i
 - Throttle proof with two source addresses on the Docker network: client `172.28.0.20` → 404,404,404,404,404,429; client `172.28.0.21` → 404,404 (own bucket).
 - Images contain no `.env` and no `.git`; app runs as `www-data` and can write `storage/` and `bootstrap/cache/`; compose reads `APP_KEY`/`DB_PASSWORD` from env_file with no defaults.
 - Handoff: A.1 hardening done, checks green, next is checkpoint B (deploy workflow).
+
+## Brand and UI shell, tasks 1-2 (branch `brand-ui`)
+- Task 1 (brand rename): `APP_NAME="Verifyhaus Afrika"` in `.env.example` and `.env.production.example` (local `.env` updated likewise); README, `docs/ai/PRELAUNCH.md` and this file updated; the prelaunch check production config now uses `Verifyhaus Afrika`. Views, mail, meta/OG tags and titles already sourced the name from `config('app.name')`, so no hardcoded brand strings remain in tracked files; kept identifiers (`busy-hub` paths, `busyhub` user/database, `@busyhub.test` seeded emails).
+- Task 2 (unified navbar): one `<x-site-nav>` anonymous Blade component renders the fixed header used by `layouts/public`, `layouts/app` and `layouts/guest`; shared links for everyone (Listings, Partners, Fees, How verification works, Blog), auth-aware Dashboard (verified only) + Inquiries (allowed roles), avatar menu with logout via the new `layout.logout` Volt component mounted only in the `@auth` branch; the public auto-hide header (toggle + `public-nav-autohide`) was removed.
+- Checks after task 2: full suite 249 passed (877 assertions), Pint PASS 127 files, Node 22 build OK, `docker compose -f docker-compose.prod.yml config --quiet` exit 0, `git fsck --full --no-reflogs` exit 0, `git status --short` empty; task 1 commit `0f8476d`, task 2 commit `c7e097f`.
+- Handoff: checkpoint 1 done — stop for the browser check; task 3 (avatar, footer, new public pages) next.

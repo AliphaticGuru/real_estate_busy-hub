@@ -154,3 +154,7 @@
 - Reason: one week is the standard safe default to recover from a bad cert/key while limiting exposure; raise it after launch stability is confirmed.
 - Cache-Control `no-store` on all responses except the hashed `/build/*` assets (`public, max-age=31536000, immutable`).
 - Reason: authenticated pages, forms and personalized pages are cacheable by path alone is not enough to be safe; no-store-everywhere keeps the privacy posture simple and lets a future split (no-store for authed/form, no-cache for public) happen without a second image build.
+
+## Unified navigation (brand task, U1 task 2)
+- One `<x-site-nav>` anonymous Blade component renders the fixed header used by the public, app and guest layouts; shared links for everyone (Listings, Partners, Fees, How verification works, Blog), auth-aware Dashboard (verified only) + Inquiries (allowed roles), avatar menu with logout via the new `layout.logout` Volt component mounted only inside the authenticated branch; the public auto-hide header and its `public-nav-autohide` key were removed.
+- Reason: one navbar for every page, plain server-side Blade with Alpine for the mobile menu, and no Livewire payload for guests; logout reuses the existing `App\Livewire\Actions\Logout` action.

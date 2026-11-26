@@ -99,7 +99,7 @@ class AuthenticationTest extends TestCase
             ->assertOk()
             ->assertSee(config('app.name'))
             ->assertSee('aria-label="Toggle navigation menu"', false)
-            ->assertSeeVolt('layout.navigation');
+            ->assertSee('id="site-mobile-menu"', false);
     }
 
     public function test_users_can_logout(): void
@@ -108,7 +108,7 @@ class AuthenticationTest extends TestCase
 
         $this->actingAs($user);
 
-        $component = Volt::test('layout.navigation');
+        $component = Volt::test('layout.logout');
 
         $component->call('logout');
 
