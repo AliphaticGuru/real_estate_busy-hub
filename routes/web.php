@@ -36,6 +36,10 @@ Route::view('profile', 'profile')
     ->middleware(['auth', 'verified'])
     ->name('profile');
 
+Route::view('settings', 'settings')
+    ->middleware(['auth', 'verified'])
+    ->name('settings');
+
 Route::middleware('auth')->group(function () {
     Route::get('verify', [VerificationController::class, 'index'])->name('verify.index');
     Route::post('verify/listings/{listing}', [VerificationController::class, 'updateCheck'])->name('verify.checks.update');
@@ -63,7 +67,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 Route::get('robots.txt', function () {
-    $disallowed = ['dashboard', 'inquiries', 'profile', 'verify', 'login', 'register'];
+    $disallowed = ['dashboard', 'inquiries', 'profile', 'settings', 'verify', 'login', 'register'];
 
     $lines = ['User-agent: *'];
 

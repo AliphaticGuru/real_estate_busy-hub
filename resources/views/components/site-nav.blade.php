@@ -67,9 +67,13 @@
                                 {{ __('Profile') }}
                             </x-dropdown-link>
 
-                            {{-- Theme toggle slot: arrives with the later U2 phase. --}}
-                            <div class="px-4 py-2 text-sm text-gray-500">
-                                {{ __('Theme toggle (coming soon)') }}
+                            <x-dropdown-link :href="route('settings')" wire:navigate>
+                                {{ __('Settings') }}
+                            </x-dropdown-link>
+
+                            <div class="px-4 py-2">
+                                <p class="mb-2 text-xs font-semibold uppercase tracking-widest text-gray-400">{{ __('Theme') }}</p>
+                                <x-theme-toggle variant="menu" />
                             </div>
 
                             <livewire:layout.logout />
@@ -135,6 +139,11 @@
             <x-responsive-nav-link :href="route('blog.index')" :active="request()->routeIs('blog.*')" @click="open = false">
                 {{ __('Blog') }}
             </x-responsive-nav-link>
+
+            <div class="px-4 pb-2 pt-1">
+                <p class="mb-2 text-xs font-semibold uppercase tracking-widest text-gray-400">{{ __('Theme') }}</p>
+                <x-theme-toggle variant="mobile" />
+            </div>
 
             @auth
                 @if (auth()->user()->hasVerifiedEmail())
