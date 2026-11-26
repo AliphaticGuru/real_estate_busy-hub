@@ -37,18 +37,22 @@ class ThemeTest extends TestCase
             ->assertSee("var key = 'theme';", false);
     }
 
-    public function test_theme_control_renders_three_options_for_guests(): void
+    public function test_theme_button_renders_once_with_three_cycle_states_for_guests(): void
     {
-        $this->get('/')
+        $response = $this->get('/')
             ->assertOk()
-            ->assertSee('Light')
-            ->assertSee('Dark')
-            ->assertSee('System')
-            ->assertSee('aria-label="Theme"', false)
-            ->assertSee('aria-pressed', false);
+            ->assertSee('data-theme-button', false)
+            ->assertSee('Theme: System.', false)
+            ->assertSee("next: { light: 'dark', dark: 'system', system: 'light' }", false);
+
+        $this->assertSame(
+            1,
+            substr_count((string) $response->getContent(), 'data-theme-button'),
+            'The theme button belongs in the nav bar only, not the footer or mobile menu.',
+        );
     }
 
-    public function test_theme_control_renders_in_settings_and_the_avatar_menu(): void
+    public function test_theme_button_renders_in_settings_and_the_nav_bar(): void
     {
         $user = User::factory()->create();
 
@@ -56,18 +60,13 @@ class ThemeTest extends TestCase
 
         $this->get(route('settings'))
             ->assertOk()
-            ->assertSee('aria-label="Theme"', false)
-            ->assertSee('Light')
-            ->assertSee('Dark')
-            ->assertSee('System');
+            ->assertSee('data-theme-button', false)
+            ->assertSee('Appearance');
 
         $this->get('/dashboard')
             ->assertOk()
             ->assertSee(route('settings'), false)
-            ->assertSee('aria-label="Theme"', false)
-            ->assertSee('Light')
-            ->assertSee('Dark')
-            ->assertSee('System');
+            ->assertSee('data-theme-button', false);
     }
 
     public function test_theme_tokens_and_dark_variants_are_defined(): void

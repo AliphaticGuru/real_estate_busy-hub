@@ -44,7 +44,7 @@
 
         @auth
             <!-- Avatar menu for authenticated users -->
-            <div class="hidden sm:flex sm:items-center">
+            <div class="flex items-center">
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button type="button" class="inline-flex min-h-[44px] items-center gap-2 rounded-md border border-transparent px-3 py-2 text-sm leading-4 font-medium text-text-muted transition duration-150 ease-in-out hover:bg-surface-muted hover:text-text focus:outline-none focus:ring-2 focus:ring-brand">
@@ -71,11 +71,6 @@
                                 {{ __('Settings') }}
                             </x-dropdown-link>
 
-                            <div class="px-4 py-2">
-                                <p class="mb-2 text-xs font-semibold uppercase tracking-widest text-text-muted">{{ __('Theme') }}</p>
-                                <x-theme-toggle variant="menu" />
-                            </div>
-
                             <livewire:layout.logout />
                         </div>
                     </x-slot>
@@ -92,6 +87,9 @@
                 </a>
             </div>
         @endauth
+
+        <!-- Theme button: visible in the nav bar at every width. -->
+        <x-theme-toggle variant="nav" />
 
         <!-- Hamburger -->
         <button
@@ -139,11 +137,6 @@
             <x-responsive-nav-link :href="route('blog.index')" :active="request()->routeIs('blog.*')" @click="open = false">
                 {{ __('Blog') }}
             </x-responsive-nav-link>
-
-            <div class="px-4 pb-2 pt-1">
-                <p class="mb-2 text-xs font-semibold uppercase tracking-widest text-text-muted">{{ __('Theme') }}</p>
-                <x-theme-toggle variant="mobile" />
-            </div>
 
             @auth
                 @if (auth()->user()->hasVerifiedEmail())

@@ -25,10 +25,6 @@
         </nav>
     </div>
 
-    <div class="mt-8 flex justify-center">
-        <x-theme-toggle variant="footer" />
-    </div>
-
     <nav class="mt-8 flex flex-wrap items-center justify-center gap-x-4 gap-y-2" aria-label="{{ __('Legal') }}">
         <a href="{{ route('privacy.index') }}" class="text-brand hover:underline">{{ __('Privacy') }}</a>
         <a href="{{ route('terms.index') }}" class="text-brand hover:underline">{{ __('Terms') }}</a>

@@ -35,6 +35,26 @@ class SiteNavigationTest extends TestCase
             ->assertSee($user->email);
     }
 
+    public function test_the_avatar_and_theme_button_share_the_nav_bar_with_the_hamburger(): void
+    {
+        $user = User::factory()->create(['name' => 'Mobile Avatar']);
+
+        $content = $this->actingAs($user)
+            ->get('/dashboard')
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('aria-label="Mobile Avatar"', (string) $content);
+        $this->assertStringNotContainsString('class="hidden sm:flex sm:items-center"', (string) $content);
+        $this->assertStringContainsString('data-theme-button', (string) $content);
+        $this->assertStringContainsString('aria-controls="site-mobile-menu"', (string) $content);
+
+        $this->assertLessThan(
+            strpos((string) $content, 'aria-controls="site-mobile-menu"'),
+            strpos((string) $content, 'data-theme-button'),
+        );
+    }
+
     public function test_unverified_users_do_not_get_the_dashboard_link_in_the_unified_navigation(): void
     {
         $user = User::factory()->forRole(RoleName::Customer)->unverified()->create();

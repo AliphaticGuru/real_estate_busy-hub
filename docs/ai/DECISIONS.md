@@ -190,3 +190,7 @@
 - Reason: an external script would paint light mode first and cause a flash, which is the problem this script exists to prevent.
 - Migration rollback tests use `RefreshDatabase` so schema changes stay inside the test transaction.
 - Reason: an untransactional `migrate:fresh`/rollback cycle left migration batches uneven and broke a later slug migration test.
+- The theme control is one button that cycles light → dark → system, with a white, black or half-white/black swatch; it lives only in the nav bar (all widths, beside the avatar and hamburger) and in Settings.
+- Reason: the requested compact control avoids three separate buttons and keeps guest/mobile access in the top nav; footer, mobile menu and avatar dropdown duplicates were removed.
+- The avatar is rendered in the nav bar at every width, next to the theme button and hamburger, instead of being hidden below `sm`.
+- Reason: the mobile header must expose the account menu without opening the hamburger first.
