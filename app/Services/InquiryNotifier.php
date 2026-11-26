@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Inquiry;
+use App\Models\User;
 use App\Notifications\InquiryReceived;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
@@ -14,6 +15,16 @@ class InquiryNotifier
      */
     public function notify(Inquiry $inquiry): void
     {
+        $recipient = $this->recipientUser($inquiry);
+
+        if ($recipient !== null && ! $recipient->notify_inquiries) {
+            Log::info('Inquiry notification skipped: recipient opted out.', [
+                'inquiry_id' => $inquiry->id,
+            ]);
+
+            return;
+        }
+
         $email = $this->recipientEmail($inquiry);
 
         if ($email === null) {
@@ -25,6 +36,21 @@ class InquiryNotifier
         }
 
         Notification::route('mail', $email)->notify(new InquiryReceived($inquiry));
+    }
+
+    /**
+     * Resolve the account that controls the inquiry email preference.
+     * Professionals use their own user; company inquiries use the
+     * company's owner (the earliest linked user). Legacy companies with
+     * no linked user still notify their company email.
+     */
+    public function recipientUser(Inquiry $inquiry): ?User
+    {
+        if ($inquiry->professional_id !== null) {
+            return $inquiry->professional?->user;
+        }
+
+        return $inquiry->listing?->company?->users()->orderBy('id')->first();
     }
 
     /**

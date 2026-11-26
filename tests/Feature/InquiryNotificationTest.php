@@ -68,6 +68,53 @@ class InquiryNotificationTest extends TestCase
         );
     }
 
+    public function test_company_owner_opt_out_skips_inquiry_notification(): void
+    {
+        Notification::fake();
+
+        $company = Company::factory()->create(['email' => 'company@example.com']);
+        User::factory()->company()->create([
+            'company_id' => $company->id,
+            'notify_inquiries' => false,
+        ]);
+        $listing = Listing::factory()->published()->create(['company_id' => $company->id]);
+
+        $this->post(route('inquiries.store', $listing->slug), $this->payload())
+            ->assertRedirect(route('listings.show', $listing->slug));
+
+        Notification::assertNothingSent();
+    }
+
+    public function test_company_owner_opt_in_still_notifies_the_company_email(): void
+    {
+        Notification::fake();
+
+        $company = Company::factory()->create(['email' => 'company@example.com']);
+        User::factory()->company()->create([
+            'company_id' => $company->id,
+            'notify_inquiries' => true,
+        ]);
+        $listing = Listing::factory()->published()->create(['company_id' => $company->id]);
+
+        $this->post(route('inquiries.store', $listing->slug), $this->payload())
+            ->assertRedirect(route('listings.show', $listing->slug));
+
+        Notification::assertSentOnDemandTimes(InquiryReceived::class, 1);
+    }
+
+    public function test_professional_opt_out_skips_inquiry_notification(): void
+    {
+        Notification::fake();
+
+        $professionalUser = User::factory()->professional()->create(['notify_inquiries' => false]);
+        $professional = Professional::factory()->create(['user_id' => $professionalUser->id]);
+        $inquiry = Inquiry::factory()->create(['professional_id' => $professional->id]);
+
+        app(InquiryNotifier::class)->notify($inquiry);
+
+        Notification::assertNothingSent();
+    }
+
     public function test_notification_content_has_no_submitter_phone_or_email_and_limits_the_message(): void
     {
         Notification::fake();
