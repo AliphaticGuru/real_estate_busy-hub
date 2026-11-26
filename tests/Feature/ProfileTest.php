@@ -2,7 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Enums\RoleName;
 use App\Models\User;
+use App\Services\AvatarPalette;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Volt\Volt;
 use Tests\TestCase;
@@ -28,15 +30,15 @@ class ProfileTest extends TestCase
 
     public function test_profile_page_shows_the_avatar_preview_and_read_only_role_label(): void
     {
-        $user = User::factory()->forRole(\App\Enums\RoleName::Customer)->create(['name' => 'Preview User']);
+        $user = User::factory()->forRole(RoleName::Customer)->create(['name' => 'Preview User']);
 
         $this->actingAs($user)
             ->get('/profile')
             ->assertOk()
             ->assertSee('Preview User')
             ->assertSee('Customer')
-            ->assertSee(\App\Services\AvatarPalette::colorFor($user))
-            ->assertSee('background-color: '.\App\Services\AvatarPalette::colorFor($user), false)
+            ->assertSee(AvatarPalette::colorFor($user))
+            ->assertSee('background-color: '.AvatarPalette::colorFor($user), false)
             ->assertDontSee('wire:model="role"', false);
     }
 

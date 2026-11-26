@@ -3,7 +3,7 @@
 Update this file at the end of every work session, before committing.
 
 ## Current focus
-U1.1 review fixes on branch `brand-ui` (footer group layout, copy claims, WhatsApp links, avatar palette source, footer tests, indigo→brand tokens). Fix series complete; full checks green; stopping for the browser check before U2 (profile/settings/theme).
+Stage U2 (profile, settings and light/dark/system theme) on branch `profile-theme`, branched from `main` after U1+U1.1 were fast-forwarded to `main` and pushed. Implementation complete; final checks in progress; browser check at 360px pending.
 
 ## Checklist
 - [x] Laravel scaffolded
