@@ -14,9 +14,7 @@
 
     $label = $user->name ?: $user->email;
 
-    $palette = config('avatar.palette');
-    $index = hexdec(hash('crc32b', (string) $user->id)) % count($palette);
-    $backgroundColor = $palette[$index];
+    $backgroundColor = \App\Services\AvatarPalette::colorFor($user);
 @endphp
 
 <span

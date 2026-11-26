@@ -26,6 +26,20 @@ class ProfileTest extends TestCase
             ->assertSeeVolt('profile.delete-user-form');
     }
 
+    public function test_profile_page_shows_the_avatar_preview_and_read_only_role_label(): void
+    {
+        $user = User::factory()->forRole(\App\Enums\RoleName::Customer)->create(['name' => 'Preview User']);
+
+        $this->actingAs($user)
+            ->get('/profile')
+            ->assertOk()
+            ->assertSee('Preview User')
+            ->assertSee('Customer')
+            ->assertSee(\App\Services\AvatarPalette::colorFor($user))
+            ->assertSee('background-color: '.\App\Services\AvatarPalette::colorFor($user), false)
+            ->assertDontSee('wire:model="role"', false);
+    }
+
     public function test_profile_information_can_be_updated(): void
     {
         $user = User::factory()->create();
@@ -46,6 +60,26 @@ class ProfileTest extends TestCase
         $this->assertSame('Test User', $user->name);
         $this->assertSame('test@example.com', $user->email);
         $this->assertNull($user->email_verified_at);
+    }
+
+    public function test_invalid_profile_input_is_rejected_without_changing_the_user(): void
+    {
+        $user = User::factory()->create();
+        $originalEmail = $user->email;
+        $originalName = $user->name;
+
+        $this->actingAs($user);
+
+        Volt::test('profile.update-profile-information-form')
+            ->set('name', '')
+            ->set('email', 'not-an-email')
+            ->call('updateProfileInformation')
+            ->assertHasErrors(['name', 'email']);
+
+        $user->refresh();
+
+        $this->assertSame($originalName, $user->name);
+        $this->assertSame($originalEmail, $user->email);
     }
 
     public function test_email_verification_status_is_unchanged_when_the_email_address_is_unchanged(): void
