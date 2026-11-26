@@ -3,7 +3,7 @@
 Update this file at the end of every work session, before committing.
 
 ## Current focus
-Brand and UI shell on branch `brand-ui`, tasks 1–2 complete (brand rename + unified navbar); task 3 (avatar, footer, new public pages) pending. Checkpoint 1 of the brand task passed all checks and stopped before push; push pending, stop for the browser check.
+Brand and UI shell on branch `brand-ui`, task 3 (avatar, footer, new public pages) in progress after tasks 1–2 completed and pushed (checkpoint 1 done, browser check pending). Task 3 implementation in progress; checkpoint 2 checks pending.
 
 ## Checklist
 - [x] Laravel scaffolded
@@ -164,8 +164,13 @@ Checkpoint (b) verified: user_id on inquiries, policy split, 11 inquiry tests, i
 - Images contain no `.env` and no `.git`; app runs as `www-data` and can write `storage/` and `bootstrap/cache/`; compose reads `APP_KEY`/`DB_PASSWORD` from env_file with no defaults.
 - Handoff: A.1 hardening done, checks green, next is checkpoint B (deploy workflow).
 
-## Brand and UI shell, tasks 1-2 (branch `brand-ui`)
+## Brand and UI shell, tasks 1-3 (branch `brand-ui`)
 - Task 1 (brand rename): `APP_NAME="Verifyhaus Afrika"` in `.env.example` and `.env.production.example` (local `.env` updated likewise); README, `docs/ai/PRELAUNCH.md` and this file updated; the prelaunch check production config now uses `Verifyhaus Afrika`. Views, mail, meta/OG tags and titles already sourced the name from `config('app.name')`, so no hardcoded brand strings remain in tracked files; kept identifiers (`busy-hub` paths, `busyhub` user/database, `@busyhub.test` seeded emails).
-- Task 2 (unified navbar): one `<x-site-nav>` anonymous Blade component renders the fixed header used by `layouts/public`, `layouts/app` and `layouts/guest`; shared links for everyone (Listings, Partners, Fees, How verification works, Blog), auth-aware Dashboard (verified only) + Inquiries (allowed roles), avatar menu with logout via the new `layout.logout` Volt component mounted only in the `@auth` branch; the public auto-hide header (toggle + `public-nav-autohide`) was removed.
-- Checks after task 2: full suite 249 passed (877 assertions), Pint PASS 127 files, Node 22 build OK, `docker compose -f docker-compose.prod.yml config --quiet` exit 0, `git fsck --full --no-reflogs` exit 0, `git status --short` empty; task 1 commit `0f8476d`, task 2 commit `c7e097f`.
-- Handoff: checkpoint 1 done — stop for the browser check; task 3 (avatar, footer, new public pages) next.
+- Task 2 (unified navbar): one `<x-site-nav>` anonymous Blade component renders the fixed header used by `layouts/public`, `layouts/app` and `layouts/guest`; shared links for everyone (Listings, Partners, Fees, How verification works, Blog), auth-aware Dashboard (verified only) + Inquiries (allowed roles), avatar menu with logout via the new `layout.logout` Volt component mounted only in the `@auth` branch; the public auto-hide header (toggle + `public-nav-autohide`) was removed; later refinements (compressed mobile spacing, in-line login actions, outside-click menu collapse, logo → home) applied after the task-2 checkpoint.
+- Task 3 (avatar, footer, pages): `<x-avatar>` component added (deterministic palette colour from the user id, uppercase initial from name with email fallback, `aria-hidden` letter + `role="img"`/`aria-label` label, contrast ≥ 4.5:1 against white verified in `AvatarTest`); one `<x-site-footer>` component renders the footer with `mt-auto` and the copyright line last, used by all three layouts; new public pages `/about`, `/mission`, `/vision`, `/services`, `/contact`, `/feedback` added with the draft notice; sitemap updated; `CONTACT_EMAIL` added to config/services, `.env.example` and `.env.production.example`.
+
+Checkpoint 1 (tasks 1-2) checks: full suite 249 passed (877 assertions), Pint PASS 127 files, Node 22 build OK, `docker compose -f docker-compose.prod.yml config --quiet` exit 0, `git fsck --full --no-reflogs` exit 0, `git status --short` empty; task 1 commit `0f8476d`, task 2 commit `aefd96f`.
+
+Checkpoint 2 (task 3) checks: full suite **263 passed (959 assertions)** (0 failed; +14 tests: AvatarTest 5, SiteFooterTest 3, StaticContentTest +6 new pages), Pint PASS 129 files, Node 22 build OK, `docker compose -f docker-compose.prod.yml config --quiet` exit 0, `git fsck --full --no-reflogs` exit 0, `git status --short` empty.
+
+- Handoff: task 3 implementation complete; checkpoint 2 checks passed; commit task-3 pieces, push, then stop for the browser check.

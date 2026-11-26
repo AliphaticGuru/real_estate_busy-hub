@@ -158,3 +158,11 @@
 ## Unified navigation (brand task, U1 task 2)
 - One `<x-site-nav>` anonymous Blade component renders the fixed header used by the public, app and guest layouts; shared links for everyone (Listings, Partners, Fees, How verification works, Blog), auth-aware Dashboard (verified only) + Inquiries (allowed roles), avatar menu with logout via the new `layout.logout` Volt component mounted only inside the authenticated branch; the public auto-hide header and its `public-nav-autohide` key were removed.
 - Reason: one navbar for every page, plain server-side Blade with Alpine for the mobile menu, and no Livewire payload for guests; logout reuses the existing `App\Livewire\Actions\Logout` action.
+
+## Brand task U1 task 3 decisions (avatar, footer, new public pages)
+- `<x-avatar>` computes its background colour deterministically from the user id hash (`crc32b` % 10 palette) and never stores it; accessible name falls back to the email initial when the name is empty.
+- Reason: avatar colours must stay stable per user without a column, and the fallback keeps the accessible label meaningful for name-less accounts.
+- Palette colours were checked with real WCAG contrast ratios (white text) and all pass ≥ 4.5:1; the avatar palette keeps white text readable.
+- Reason: brand task requires ≥ 4.5:1 contrast for every avatar colour against white, measured with the WCAG relative-luminance formula in `AvatarTest`.
+- The unified footer is a single `<x-site-footer>` component with `mt-auto` on a flex column min-h-screen wrapper, copyright line last; new public pages (about, mission, vision, services, contact, feedback) are draft content with a visible "Draft: pending review" notice, and `/contact` reads `CONTACT_EMAIL` plus `services.whatsapp.number` with "Contact details coming soon" when both are empty.
+- Reason: Phase 1 content is still under review; drafts must not ship as final copy.
