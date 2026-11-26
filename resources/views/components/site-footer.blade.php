@@ -32,6 +32,6 @@
     </nav>
 
     <p class="mt-6 text-gray-400">
-        {{ __('Copyright') }} {{ now()->year }} {{ config('app.name') }}. {{ __('All rights reserved.') }}
+        {!! __('&copy;') !!} {{ now()->year }} {{ config('app.name') }}. {{ __('All rights reserved.') }}
     </p>
 </footer>

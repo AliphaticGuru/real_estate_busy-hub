@@ -8,22 +8,7 @@
 
             <!-- Navigation Links -->
             <div class="hidden items-center gap-4 text-sm sm:flex" aria-label="{{ __('Primary navigation') }}">
-                <a href="{{ route('listings.index') }}" class="text-gray-600 hover:text-gray-900 {{ request()->routeIs('listings.*') ? 'font-semibold text-gray-900' : '' }}">
-                    {{ __('Listings') }}
-                </a>
-                <a href="{{ route('professionals.index') }}" class="text-gray-600 hover:text-gray-900 {{ request()->routeIs('professionals.*') ? 'font-semibold text-gray-900' : '' }}">
-                    {{ __('Partners') }}
-                </a>
-                <a href="{{ route('fees') }}" class="text-gray-600 hover:text-gray-900 {{ request()->routeIs('fees') ? 'font-semibold text-gray-900' : '' }}">
-                    {{ __('Fees') }}
-                </a>
-                <a href="{{ route('verification') }}" class="text-gray-600 hover:text-gray-900 {{ request()->routeIs('verification') ? 'font-semibold text-gray-900' : '' }}">
-                    {{ __('How verification works') }}
-                </a>
-                <a href="{{ route('blog.index') }}" class="text-gray-600 hover:text-gray-900 {{ request()->routeIs('blog.*') ? 'font-semibold text-gray-900' : '' }}">
-                    {{ __('Blog') }}
-                </a>
-
+                
                 @auth
                     @if (auth()->user()->hasVerifiedEmail())
                         <a href="{{ route('dashboard') }}" class="text-gray-600 hover:text-gray-900 {{ request()->routeIs('dashboard') ? 'font-semibold text-gray-900' : '' }}">
@@ -37,6 +22,23 @@
                         @endif
                     @endif
                 @endauth
+
+                <a href="{{ route('listings.index') }}" class="text-gray-600 hover:text-gray-900 {{ request()->routeIs('listings.*') ? 'font-semibold text-gray-900' : '' }}">
+                    {{ __('Listings') }}
+                </a>
+                <a href="{{ route('professionals.index') }}" class="text-gray-600 hover:text-gray-900 {{ request()->routeIs('professionals.*') ? 'font-semibold text-gray-900' : '' }}">
+                    {{ __('Partners') }}
+                </a>
+                <a href="{{ route('fees') }}" class="text-gray-600 hover:text-gray-900 {{ request()->routeIs('fees') ? 'font-semibold text-gray-900' : '' }}">
+                    {{ __('Fees') }}
+                </a>
+                <a href="{{ route('verification') }}" class="text-gray-600 hover:text-gray-900 {{ request()->routeIs('verification') ? 'font-semibold text-gray-900' : '' }}">
+                    {{ __('Verification') }}
+                </a>
+                <a href="{{ route('blog.index') }}" class="text-gray-600 hover:text-gray-900 {{ request()->routeIs('blog.*') ? 'font-semibold text-gray-900' : '' }}">
+                    {{ __('Blog') }}
+                </a>
+
             </div>
         </div>
 
@@ -78,7 +80,7 @@
         @else
             <!-- Guest actions -->
             <div class="flex items-center gap-2 flex-nowrap">
-                <a href="{{ route('login') }}" class="inline-flex min-h-[44px] items-center rounded-md px-3 py-2 text-sm font-medium text-gray-600 transition duration-150 ease-in-out hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <a href="{{ route('login') }}" class="inline-flex min-h-[44px] items-center whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium text-gray-600 transition duration-150 ease-in-out hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     {{ __('Log in') }}
                 </a>
                 <a href="{{ route('register') }}" class="inline-flex min-h-[44px] items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white transition duration-150 ease-in-out hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
@@ -128,7 +130,7 @@
                 {{ __('Fees') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('verification')" :active="request()->routeIs('verification')" @click="open = false">
-                {{ __('How verification works') }}
+                {{ __('Verification') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('blog.index')" :active="request()->routeIs('blog.*')" @click="open = false">
                 {{ __('Blog') }}
