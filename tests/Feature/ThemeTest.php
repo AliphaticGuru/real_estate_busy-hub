@@ -69,6 +69,46 @@ class ThemeTest extends TestCase
             ->assertSee('data-theme-button', false);
     }
 
+    public function test_theme_script_guards_every_local_storage_access(): void
+    {
+        $script = (string) file_get_contents(resource_path('views/components/theme-script.blade.php'));
+
+        $this->assertSame(2, substr_count($script, 'try {'), 'Both the read and the write must be guarded.');
+        $this->assertStringContainsString('window.localStorage.getItem(key)', $script);
+        $this->assertStringContainsString('window.localStorage.setItem(key, next)', $script);
+        $this->assertStringContainsString("return 'system';", $script);
+
+        foreach (['/', '/login'] as $url) {
+            $this->get($url)
+                ->assertOk()
+                ->assertSee('try {', false)
+                ->assertSee('catch (error)', false)
+                ->assertSee('window.localStorage', false);
+        }
+
+        $this->actingAs(User::factory()->create())
+            ->get('/dashboard')
+            ->assertOk()
+            ->assertSee('catch (error)', false);
+    }
+
+    public function test_settings_profile_and_theme_controls_have_brand_focus_rings(): void
+    {
+        foreach ([
+            'components/input.blade.php',
+            'components/button.blade.php',
+            'components/theme-toggle.blade.php',
+            'livewire/settings/update-notifications.blade.php',
+            'livewire/profile/update-profile-information-form.blade.php',
+        ] as $view) {
+            $this->assertStringContainsString(
+                'focus:ring-brand',
+                (string) file_get_contents(resource_path('views/'.$view)),
+                "{$view} must use a brand-coloured focus ring.",
+            );
+        }
+    }
+
     public function test_theme_tokens_and_dark_variants_are_defined(): void
     {
         $css = (string) file_get_contents(resource_path('css/app.css'));

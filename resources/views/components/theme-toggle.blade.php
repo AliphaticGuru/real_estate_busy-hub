@@ -26,7 +26,7 @@
         x-bind:aria-label="'{{ __('Theme') }}: ' + label + '. ' + '{{ __('Activate to change') }}'"
         aria-label="{{ __('Theme') }}: {{ __('System') }}. {{ __('Activate to change') }}"
         x-on:click="cycle()"
-        class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md border border-border bg-surface text-text-muted transition hover:bg-surface-muted hover:text-text focus:outline-none focus:ring-2 focus:ring-brand-500"
+        class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md border border-border bg-surface text-text-muted transition hover:bg-surface-muted hover:text-text focus:outline-none focus:ring-2 focus:ring-brand"
     >
         <span x-show="theme === 'light'" x-cloak class="relative flex h-5 w-5 items-center justify-center" aria-hidden="true">
             <svg viewBox="0 0 24 24" class="h-5 w-5" aria-hidden="true">

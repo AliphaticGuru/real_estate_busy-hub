@@ -194,3 +194,10 @@
 - Reason: the requested compact control avoids three separate buttons and keeps guest/mobile access in the top nav; footer, mobile menu and avatar dropdown duplicates were removed.
 - The avatar is rendered in the nav bar at every width, next to the theme button and hamburger, instead of being hidden below `sm`.
 - Reason: the mobile header must expose the account menu without opening the hamburger first.
+
+## U2 review (branch `profile-theme`)
+- Exact company-recipient rule (unchanged): `InquiryNotifier::recipientUser()` returns `listing->company->users()->orderBy('id')->first()` — the user with the lowest database id linked to the company, called the company owner. `notify()` skips only when that user's `notify_inquiries` is false; `recipientEmail()` still returns `company.email`, so the mail always goes to the company contact address. A non-owner company user's toggle has no delivery effect; with no linked user, the company email is notified as before. Tests cover owner opt-in/out, non-owner, professional, and no-user.
+- Proposed smallest change (NOT applied; awaiting approval): notify each opted-in company user at their own email, and use the company contact address only when no user is linked. The professional path and the flag stay the same. Settings copy would then describe per-user delivery for companies.
+- Reason: the current copy could imply any company user's toggle changes delivery, which is untrue; the copy now states the owner rule while recipients stay untouched.
+- Both `localStorage.getItem` and `localStorage.setItem` in the head script are wrapped in `try/catch`; a blocked store returns `system` and never throws. The script is shared by all three layouts.
+- The single three-state theme button keeps a dynamic `aria-label` (Light/Dark/System) instead of `aria-pressed`, because pressed state is binary; its initial label is derived from the stored value on every reload. Native buttons give keyboard focus, and all settings/profile/theme controls use `focus:ring-brand`.

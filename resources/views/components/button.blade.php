@@ -8,7 +8,7 @@
     $variants = [
         'primary' => 'border border-transparent bg-brand-700 text-white hover:bg-brand-800 focus:ring-brand active:bg-brand-800',
         'secondary' => 'border border-border bg-surface text-text shadow-sm hover:bg-surface-muted focus:ring-brand',
-        'danger' => 'border border-transparent bg-red-600 text-white hover:bg-red-500 focus:ring-red-500 active:bg-red-700',
+        'danger' => 'border border-transparent bg-red-600 text-white hover:bg-red-500 focus:ring-red-500 active:bg-red-700 dark:bg-red-700 dark:hover:bg-red-600',
         'ghost' => 'border border-transparent bg-transparent text-text hover:bg-surface-muted focus:ring-brand',
     ];
 

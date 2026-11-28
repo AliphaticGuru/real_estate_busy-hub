@@ -3,7 +3,7 @@
 Update this file at the end of every work session, before committing.
 
 ## Current focus
-Stage U2 (profile, settings and light/dark/system theme) on branch `profile-theme`, branched from `main` after U1+U1.1 were fast-forwarded to `main` and pushed. Implementation complete; final checks in progress; browser check at 360px pending.
+Stage U2 review on branch `profile-theme`: notification recipient-copy clarified (recipient behaviour unchanged pending approval), theme-storage guards, intentional-colour audit and focus/state checks done. All checks green; push complete; stopping for the browser check. U3 not started.
 
 ## Checklist
 - [x] Laravel scaffolded
@@ -193,6 +193,16 @@ U1.1 checks: full suite **267 passed (1048 assertions)**, Pint PASS 131 files, N
 - Theme: Tailwind v4 `@custom-variant dark`, semantic tokens (surface, surface-muted, text, text-muted, border, brand) with `.dark` overrides; 412 hardcoded white/gray utilities replaced across views; status badges, alerts, placeholder cards and form inputs have dark variants. Standalone 500/503 pages use plain `@media (prefers-color-scheme: dark)` CSS.
 - Theme script: `localStorage.theme` (light/dark/system, default system) applied in the `<head>` of all three layouts before paint, follows OS changes in system mode, sets `color-scheme`, re-applies on `livewire:navigated`. A single three-state button (white = light, black = dark, half white/black = system) cycles light → dark → system in the nav bar at every width and in Settings; it was removed from the footer, the mobile menu and the avatar dropdown. The avatar is no longer hidden below `sm`: it renders beside the theme button and hamburger.
 
-U2 checks: full suite **284 passed (1155 assertions)**, Pint PASS 135 files, Node 22 build OK (CSS 41.77 kB), `docker compose -f docker-compose.prod.yml config --quiet` exit 0, `git fsck --full --no-reflogs` exit 0 (dangling objects only), `git status --short` empty.
+U2 checks: full suite **290 passed (1184 assertions)**, Pint PASS 135 files, Node 22 build OK (CSS 42.12 kB), `docker compose -f docker-compose.prod.yml config --quiet` exit 0, `git fsck --full --no-reflogs` exit 0 (dangling objects only), `git status --short` empty.
 
 - Handoff: U2 implementation and checks complete; stop for the 360px light/dark/system browser check; U3 (forms) not started.
+
+## U2 review (branch `profile-theme`)
+- Notification copy on `/settings` now states exactly who the toggle affects per role (professional: own email; company: only when the user is the earliest linked company user, i.e. owner; other roles: no inquiry emails). Recipient behaviour was **not** changed; it awaits approval. Tests cover the copy for all three cases and a non-owner company user whose preference does not change delivery.
+- Theme head script: both `localStorage.getItem` and `localStorage.setItem` are wrapped in `try/catch`; blocked storage falls back to `system` and never throws. Shared by all three layouts; a test asserts both guards and the system fallback.
+- Colour audit: `grep -rnE "indigo|gray-[0-9]|bg-white|text-black" resources/views` → 0 hits. Remaining colours are intentional brand/status colours, all with explicit dark variants or documented as mode-swatch/overlay/standalone CSS.
+- Focus states: settings/profile inputs and buttons and the single theme button use `focus:ring-brand`. The three-state theme button uses a dynamic `aria-label` (not `aria-pressed`, which is binary) computed from `localStorage` at load time, so its announced state reflects the stored value after reload.
+
+U2 review checks: full suite **290 passed (1184 assertions)**, Pint PASS 135 files, Node 22 build OK (CSS 42.12 kB), prod compose config exit 0, fsck exit 0 (dangling objects only), status empty.
+
+- Handoff: send the proposed recipient change for approval; no U3 work.

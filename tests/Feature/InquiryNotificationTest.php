@@ -102,6 +102,27 @@ class InquiryNotificationTest extends TestCase
         Notification::assertSentOnDemandTimes(InquiryReceived::class, 1);
     }
 
+    public function test_a_non_owner_company_users_preference_does_not_change_delivery(): void
+    {
+        Notification::fake();
+
+        $company = Company::factory()->create(['email' => 'company@example.com']);
+        User::factory()->company()->create([
+            'company_id' => $company->id,
+            'notify_inquiries' => true,
+        ]);
+        User::factory()->company()->create([
+            'company_id' => $company->id,
+            'notify_inquiries' => false,
+        ]);
+        $listing = Listing::factory()->published()->create(['company_id' => $company->id]);
+
+        $this->post(route('inquiries.store', $listing->slug), $this->payload())
+            ->assertRedirect(route('listings.show', $listing->slug));
+
+        Notification::assertSentOnDemandTimes(InquiryReceived::class, 1);
+    }
+
     public function test_professional_opt_out_skips_inquiry_notification(): void
     {
         Notification::fake();

@@ -5,14 +5,14 @@
         var media = window.matchMedia('(prefers-color-scheme: dark)');
 
         function get() {
-            var value;
             try {
-                value = window.localStorage.getItem(key);
-            } catch (error) {
-                value = null;
-            }
+                var value = window.localStorage.getItem(key);
 
-            return value === 'light' || value === 'dark' || value === 'system' ? value : 'system';
+                return value === 'light' || value === 'dark' || value === 'system' ? value : 'system';
+            } catch (error) {
+                // Blocked storage (private mode, policy, disabled cookies): fall back to system.
+                return 'system';
+            }
         }
 
         function apply() {
@@ -29,10 +29,12 @@
         window.theme = {
             get: get,
             set: function (value) {
+                var next = value === 'light' || value === 'dark' || value === 'system' ? value : 'system';
+
                 try {
-                    window.localStorage.setItem(key, value === 'light' || value === 'dark' || value === 'system' ? value : 'system');
+                    window.localStorage.setItem(key, next);
                 } catch (error) {
-                    // Storage can be unavailable in private browsing; the in-memory preference still applies.
+                    // The in-memory preference still applies even when storage is blocked.
                 }
 
                 apply();

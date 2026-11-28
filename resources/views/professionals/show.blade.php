@@ -73,7 +73,7 @@
             @if ($whatsappNumber !== '')
                 <a
                     href="https://wa.me/{{ $whatsappNumber }}?text={{ $whatsappMessage }}"
-                    class="inline-flex grow min-h-[44px] items-center justify-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 focus:bg-green-700 active:bg-green-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150"
+                    class="inline-flex grow min-h-[44px] items-center justify-center px-4 py-2 bg-green-600 border border-transparent rounded-md dark:bg-green-700 font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 focus:bg-green-700 dark:hover:bg-green-600 active:bg-green-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150"
                     target="_blank"
                     rel="noopener"
                 >
